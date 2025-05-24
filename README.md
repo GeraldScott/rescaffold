@@ -16,22 +16,9 @@ java -jar target/quarkus-app/quarkus-run.jar
 Notes:
 - The build uses the `%prod` profile
 - Runs the test suite
-- Builds a fast-jar by default, with indexed information about the dependency jars to speed it up
-- The fast-jar is slower to start than a native executable, but is preferred for long-running applications because the JVM optimises code paths
-- Also fewer complications in the build process
+- Builds a fast-jar by default, with indexed information about the dependency jars to speed it up (the fast-jar is slower to start than a native executable, but is preferred for long-running applications because the JVM optimises code paths)
 
-### GraalVM executable
-
-```bash
-quarkus build --native --clean
-./target/rescaffold-1.0.0-SNAPSHOT-runner
-```
-
-Notes:
-- The configuration properties in `application.properties` specify a container build with Podman, not Docker
-- The native executable is fast to start so it is preferred for serverless applications
-
-### Container image
+### Container image with fast-jar
 
 First build the JAR in the default fast-jar format:
 
@@ -47,7 +34,18 @@ podman run -i --rm -p 8080:8080 quarkus/rescaffold-jvm
 ```
 
 Notes:
-- Use the `Dockerfile.jvm` container definition to generate a container image that uses the fast-jar
+- Use the `Dockerfile.jvm` container definition to generate a container image with the fast-jar
+
+### GraalVM executable
+
+```bash
+quarkus build --native --clean
+./target/rescaffold-1.0.0-SNAPSHOT-runner
+```
+
+Notes:
+- The configuration properties in `application.properties` specify a container build with Podman, not Docker
+- The native executable is fast to start so it is preferred for serverless applications
 
 ## Developing the application
 
