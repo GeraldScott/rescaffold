@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 
 import java.util.List;
 
@@ -19,10 +20,13 @@ import java.util.List;
 @Tag(name = "Gender", description = "Gender management operations")
 public class GenderResource {
 
+    private static final Logger log = Logger.getLogger(GenderResource.class);
+
     @GET
     @Operation(summary = "Get all genders", description = "Retrieves a list of all genders")
     @APIResponse(responseCode = "200", description = "List of genders retrieved successfully")
     public List<Gender> getAllGenders() {
+        log.info("GET /api/genders - retrieve all entities");
         return Gender.listAll();
     }
 
@@ -32,6 +36,8 @@ public class GenderResource {
     @APIResponse(responseCode = "200", description = "Gender found")
     @APIResponse(responseCode = "404", description = "Gender not found")
     public Response getGenderById(@Parameter(description = "Gender ID") @PathParam("id") Long id) {
+        log.debugf("GET /api/genders/%d - retrieve by ID", id);
+
         Gender gender = Gender.findById(id);
         if (gender == null) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -47,6 +53,8 @@ public class GenderResource {
     @APIResponse(responseCode = "200", description = "Gender found")
     @APIResponse(responseCode = "404", description = "Gender not found")
     public Response getGenderByCode(@Parameter(description = "Gender code") @PathParam("code") String code) {
+        log.debugf("GET /api/genders/code/%s - retrieving by code", code);
+
         Gender gender = Gender.find("code", code).firstResult();
         if (gender == null) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -63,6 +71,8 @@ public class GenderResource {
     @APIResponse(responseCode = "400", description = "Invalid input data")
     @APIResponse(responseCode = "409", description = "Gender with this code or description already exists")
     public Response createGender(@Valid Gender gender) {
+        log.debugf("POST /api/genders - create with code: %s", gender.code);
+
         try {
             // Check if gender with same code already exists
             Gender existingByCode = Gender.find("code", gender.code).firstResult();
@@ -82,6 +92,7 @@ public class GenderResource {
 
             gender.persist();
             return Response.status(Response.Status.CREATED).entity(gender).build();
+
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{\"error\": \"Failed to create gender: " + e.getMessage() + "\"}")
@@ -98,6 +109,8 @@ public class GenderResource {
     @APIResponse(responseCode = "400", description = "Invalid input data")
     @APIResponse(responseCode = "409", description = "Gender with this code or description already exists")
     public Response updateGender(@Parameter(description = "Gender ID") @PathParam("id") Long id, @Valid Gender updatedGender) {
+        log.debugf("PUT /api/genders/%d - update with code: %s", id, updatedGender.code);
+
         try {
             Gender existingGender = Gender.findById(id);
             if (existingGender == null) {
@@ -127,6 +140,7 @@ public class GenderResource {
             existingGender.persist();
 
             return Response.ok(existingGender).build();
+
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{\"error\": \"Failed to update gender: " + e.getMessage() + "\"}")
@@ -141,6 +155,8 @@ public class GenderResource {
     @APIResponse(responseCode = "204", description = "Gender deleted successfully")
     @APIResponse(responseCode = "404", description = "Gender not found")
     public Response deleteGender(@Parameter(description = "Gender ID") @PathParam("id") Long id) {
+        log.debugf("DELETE /api/genders/%d - delete entity", id);
+
         Gender gender = Gender.findById(id);
         if (gender == null) {
             return Response.status(Response.Status.NOT_FOUND)
