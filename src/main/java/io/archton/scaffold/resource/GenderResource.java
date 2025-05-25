@@ -1,7 +1,6 @@
 package io.archton.scaffold.resource;
 
 import io.archton.scaffold.domain.Gender;
-import io.archton.scaffold.dto.ErrorResponse;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -34,14 +33,9 @@ public class GenderResource {
             List<Gender> genders = Gender.listAll();
             return Response.ok(genders).build();
         } catch (Exception e) {
-            log.error("GET /api/genders - Error retrieving genders", e);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Internal Server Error",
-                "Failed to retrieve genders",
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -57,25 +51,15 @@ public class GenderResource {
         try {
             Gender gender = Gender.findById(id);
             if (gender == null) {
-                ErrorResponse errorResponse = ErrorResponse.simple(
-                    "Not Found",
-                    "Gender not found with id: " + id
-                );
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponse)
+                        .entity("Entity not found with id: " + id)
                         .build();
             }
             return Response.ok(gender).build();
         } catch (Exception e) {
-            log.errorf(e, "GET /api/genders/%d - Error retrieving gender", id);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Internal Server Error",
-                "Failed to retrieve gender",
-                "with id: " + id,
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -91,25 +75,15 @@ public class GenderResource {
         try {
             Gender gender = Gender.find("code", code).firstResult();
             if (gender == null) {
-                ErrorResponse errorResponse = ErrorResponse.simple(
-                    "Not Found",
-                    "Gender not found with code: " + code
-                );
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponse)
+                        .entity("Entity not found with code: " + code)
                         .build();
             }
             return Response.ok(gender).build();
         } catch (Exception e) {
-            log.errorf(e, "GET /api/genders/code/%s - Error retrieving gender", code);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Internal Server Error",
-                "Failed to retrieve gender",
-                "with code: " + code,
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -119,47 +93,28 @@ public class GenderResource {
     @Operation(summary = "Create a new gender", description = "Creates a new gender record")
     @APIResponse(responseCode = "201", description = "Gender created successfully")
     @APIResponse(responseCode = "400", description = "Invalid input data")
-    @APIResponse(responseCode = "409", description = "Gender with this code or description already exists")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response createGender(@Valid Gender gender) {
         log.debugf("POST /api/genders - create with code: %s", gender.code);
 
         if (gender.id != null) {
-            log.debugf("POST /api/genders - ID provided in create request: %d", gender.id);
-            ErrorResponse errorResponse = ErrorResponse.simple(
-                "Bad Request",
-                "ID must not be provided in create request"
-            );
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponse)
+                    .entity("ID must not be included in PUT request")
                     .build();
         }
-
         try {
             gender.persist();
             return Response.status(Response.Status.CREATED).entity(gender).build();
 
         } catch (ConstraintViolationException e) {
-            log.errorf(e, "POST /api/genders - constraint violation for code: %s", gender.code);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Constraint Violation",
-                "Database constraint violation",
-                "for code: " + (gender.code != null ? gender.code : "null"),
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.CONFLICT)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         } catch (Exception e) {
-            log.errorf(e, "POST /api/genders - error creating gender with code: %s", gender.code);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Internal Server Error",
-                "Failed to create gender",
-                "with code: " + (gender.code != null ? gender.code : "null"),
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -170,8 +125,6 @@ public class GenderResource {
     @Operation(summary = "Update an existing gender", description = "Updates an existing gender record")
     @APIResponse(responseCode = "200", description = "Gender updated successfully")
     @APIResponse(responseCode = "404", description = "Gender not found")
-    @APIResponse(responseCode = "400", description = "Invalid input data")
-    @APIResponse(responseCode = "409", description = "Gender with this code or description already exists")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response updateGender(@Parameter(description = "Gender ID") @PathParam("id") Long id, @Valid Gender updatedGender) {
         log.debugf("PUT /api/genders/%d - update with code: %s", id, updatedGender.code);
@@ -179,12 +132,8 @@ public class GenderResource {
         try {
             Gender existingGender = Gender.findById(id);
             if (existingGender == null) {
-                ErrorResponse errorResponse = ErrorResponse.simple(
-                    "Not Found",
-                    "Gender not found with id: " + id
-                );
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponse)
+                        .entity("Entity not found with id: " + id)
                         .build();
             }
 
@@ -195,26 +144,14 @@ public class GenderResource {
             return Response.ok(existingGender).build();
 
         } catch (ConstraintViolationException e) {
-            log.errorf(e, "PUT /api/genders/%d - constraint violation for code: %s", id, updatedGender.code);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Constraint Violation",
-                "Database constraint violation",
-                "for id: " + id,
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.CONFLICT)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         } catch (Exception e) {
-            log.errorf(e, "PUT /api/genders/%d - error updating gender with code: %s", id, updatedGender.code);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Internal Server Error",
-                "Failed to update gender",
-                "with id: " + id,
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -232,27 +169,17 @@ public class GenderResource {
         try {
             Gender gender = Gender.findById(id);
             if (gender == null) {
-                ErrorResponse errorResponse = ErrorResponse.simple(
-                    "Not Found",
-                    "Gender not found with id: " + id
-                );
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponse)
+                        .entity("Entity not found with id: " + id)
                         .build();
             }
 
             gender.delete();
             return Response.noContent().build();
         } catch (Exception e) {
-            log.errorf(e, "DELETE /api/genders/%d - error deleting gender", id);
-            ErrorResponse errorResponse = ErrorResponse.withException(
-                "Internal Server Error",
-                "Failed to delete gender",
-                "with id: " + id,
-                e
-            );
+            log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponse)
+                    .entity(e.getMessage())
                     .build();
         }
     }
