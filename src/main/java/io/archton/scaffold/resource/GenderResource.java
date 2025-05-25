@@ -11,7 +11,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.postgresql.util.PSQLException;
 
 import java.util.List;
 
@@ -101,17 +100,16 @@ public class GenderResource {
     public Response createGender(@Valid Gender gender) {
         log.debugf("POST /api/genders - create with code: %s", gender.code);
         if (gender.id != null) {
-            log.debugf("POST /api/genders - Bad Request: ID provided in create request: %d", gender.id);
-            throw new WebApplicationException(
-                "ID should not be provided when creating a new gender. Use PUT to update existing records.",
-                Response.Status.BAD_REQUEST
-            );
+            log.debugf("POST /api/genders - ID provided in create request: %d", gender.id);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"ID provided in create request (must be null)\"}")
+                    .build();
         }
         try {
             // Check if gender with same code already exists
             Gender existingByCode = Gender.find("code", gender.code).firstResult();
             if (existingByCode != null) {
-                log.infof("Attempt to create gender with existing code: %s", gender.code);
+                log.debugf("Attempt to create gender with existing code: %s", gender.code);
                 return Response.status(Response.Status.CONFLICT)
                         .entity("{\"error\": \"Gender with code '" + gender.code + "' already exists\"}")
                         .build();
@@ -120,7 +118,7 @@ public class GenderResource {
             // Check if gender with same description already exists
             Gender existingByDescription = Gender.find("description", gender.description).firstResult();
             if (existingByDescription != null) {
-                log.infof("Attempt to create gender with existing description: %s", gender.description);
+                log.debugf("Attempt to create gender with existing description: %s", gender.description);
                 return Response.status(Response.Status.CONFLICT)
                         .entity("{\"error\": \"Gender with description '" + gender.description + "' already exists\"}")
                         .build();
