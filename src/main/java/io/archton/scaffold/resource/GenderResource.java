@@ -98,18 +98,28 @@ public class GenderResource {
     @Transactional
     @Operation(summary = "Create a new gender", description = "Creates a new gender record")
     @APIResponse(responseCode = "201", description = "Gender created successfully")
-    @APIResponse(responseCode = "400", description = "Invalid input data")
+    @APIResponse(responseCode = "400", description = "Bad request: invalid input data")
     @APIResponse(responseCode = "409", description = "Conflict")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response createGender(@Valid Gender gender) {
         log.debugf("POST /api/genders - create with code: %s", gender.code);
 
-        if (gender.id != null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(createErrorResponse("ID must not be included in POST request"))
-                    .build();
-        }
         try {
+            if (gender.id != null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(createErrorResponse("ID must not be included in POST request"))
+                        .build();
+            }
+            if (Gender.find("code", gender.code).firstResult() != null) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity(createErrorResponse("Gender with code '" + gender.code + "' already exists"))
+                        .build();
+            }
+            if (Gender.find("description", gender.description).firstResult() != null) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity(createErrorResponse("Gender with description '" + gender.description + "' already exists"))
+                        .build();
+            }
             gender.persist();
             return Response.status(Response.Status.CREATED).entity(gender).build();
 
@@ -142,11 +152,26 @@ public class GenderResource {
                         .entity(createErrorResponse("Entity not found with id: " + id))
                         .build();
             }
+            if (updatedGender.code != null){
+                if (Gender.find("code = ?1 and id != ?2", updatedGender.code, id).firstResult() != null) {
+                    return Response.status(Response.Status.CONFLICT)
+                            .entity(createErrorResponse("Another gender with code '" + updatedGender.code + "' already exists"))
+                            .build();
+                } else {
+                    existingGender.code = updatedGender.code;
+                }
+            }
+            if (updatedGender.description != null){
+                if (Gender.find("description = ?1 and id != ?2", updatedGender.description, id).firstResult() != null) {
+                    return Response.status(Response.Status.CONFLICT)
+                            .entity(createErrorResponse("Another gender with description '" + updatedGender.description + "' already exists"))
+                            .build();
+                } else {
+                    existingGender.description = updatedGender.description;
+                }
+            }
 
-            existingGender.code = updatedGender.code;
-            existingGender.description = updatedGender.description;
             existingGender.persist();
-
             return Response.ok(existingGender).build();
 
         } catch (DataException | ConstraintViolationException e) {
