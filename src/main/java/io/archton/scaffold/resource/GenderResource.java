@@ -11,9 +11,11 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.hibernate.exception.DataException;
 import org.jboss.logging.Logger;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/genders")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,6 +24,10 @@ import java.util.List;
 public class GenderResource {
 
     private static final Logger log = Logger.getLogger(GenderResource.class);
+
+    private Map<String, String> createErrorResponse(String message) {
+        return Map.of("error", message);
+    }
 
     @GET
     @Operation(summary = "Get all genders", description = "Retrieves an unsorted list of all genders")
@@ -35,7 +41,7 @@ public class GenderResource {
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         }
     }
@@ -52,14 +58,14 @@ public class GenderResource {
             Gender gender = Gender.findById(id);
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Entity not found with id: " + id)
+                        .entity(createErrorResponse("Entity not found with id: " + id))
                         .build();
             }
             return Response.ok(gender).build();
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         }
     }
@@ -76,14 +82,14 @@ public class GenderResource {
             Gender gender = Gender.find("code", code).firstResult();
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Entity not found with code: " + code)
+                        .entity(createErrorResponse("Entity not found with code: " + code))
                         .build();
             }
             return Response.ok(gender).build();
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         }
     }
@@ -93,28 +99,28 @@ public class GenderResource {
     @Operation(summary = "Create a new gender", description = "Creates a new gender record")
     @APIResponse(responseCode = "201", description = "Gender created successfully")
     @APIResponse(responseCode = "400", description = "Invalid input data")
+    @APIResponse(responseCode = "409", description = "Conflict")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response createGender(@Valid Gender gender) {
         log.debugf("POST /api/genders - create with code: %s", gender.code);
 
         if (gender.id != null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("ID must not be included in PUT request")
+                    .entity(createErrorResponse("ID must not be included in POST request"))
                     .build();
         }
         try {
             gender.persist();
             return Response.status(Response.Status.CREATED).entity(gender).build();
 
-        } catch (ConstraintViolationException e) {
-            log.error(e.getMessage());
+        } catch (DataException | ConstraintViolationException e) {
             return Response.status(Response.Status.CONFLICT)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         }
     }
@@ -133,7 +139,7 @@ public class GenderResource {
             Gender existingGender = Gender.findById(id);
             if (existingGender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Entity not found with id: " + id)
+                        .entity(createErrorResponse("Entity not found with id: " + id))
                         .build();
             }
 
@@ -143,15 +149,14 @@ public class GenderResource {
 
             return Response.ok(existingGender).build();
 
-        } catch (ConstraintViolationException e) {
-            log.error(e.getMessage());
+        } catch (DataException | ConstraintViolationException e) {
             return Response.status(Response.Status.CONFLICT)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         }
     }
@@ -170,7 +175,7 @@ public class GenderResource {
             Gender gender = Gender.findById(id);
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Entity not found with id: " + id)
+                        .entity(createErrorResponse("Entity not found with id: " + id))
                         .build();
             }
 
@@ -179,7 +184,7 @@ public class GenderResource {
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
+                    .entity(createErrorResponse(e.getMessage()))
                     .build();
         }
     }
