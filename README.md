@@ -4,11 +4,37 @@
 
 Scaffold application using QUARKUS+HTMX
 
+### Run development mode
+
+```bash
+sdk use java 21.0.2-graalce
+quarkus dev
+```
+
+Notes: 
+- Browse to http://localhost:8080/
+- DevUI is at http://localhost:8080/q/dev/
+- Swagger UI is at http://localhost:8080/q/swagger-ui/
+
+### Upgrade Quarkus
+
+Stop the application and upgrade to the latest version:
+
+```bash
+quarkus upgrade
+quarkus dev --clean
+```
+
+### Flyway database management
+
+Flyway migration scripts are in `src/main/resources/db/migration`
+
 ## Packaging
 
 ### Runnable JAR
 
 ```bash
+sdk use java 21.0.2-graalce
 quarkus build --clean
 java -jar target/quarkus-app/quarkus-run.jar
 ```
@@ -69,28 +95,4 @@ git add .
 git commit -m 'Initial commit'
 quarkus dev
 ```
-
-### Run development mode
-
-```bash
-quarkus dev
-```
-
-Notes: 
-- Browse to http://localhost:8080/
-- DevUI is at http://localhost:8080/q/dev/
-- Swagger UI is at http://localhost:8080/q/swagger-ui/
-
-### Upgrade Quarkus
-
-Stop the application and upgrade to the latest version:
-
-```bash
-quarkus upgrade
-quarkus dev --clean
-```
-
-### Flyway database management
-
-Flyway migration scripts are in `src/main/resources/db/migration`
 
