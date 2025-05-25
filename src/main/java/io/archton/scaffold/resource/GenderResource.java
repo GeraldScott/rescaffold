@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.hibernate.exception.ConstraintViolationException;
 import org.jboss.logging.Logger;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class GenderResource {
             log.error("GET /api/genders");
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \""+e.getMessage()+"\"}")
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -52,7 +53,7 @@ public class GenderResource {
             Gender gender = Gender.findById(id);
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"Entity not found with id: " + id + "\"}")
+                        .entity("Entity not found with id: " + id)
                         .build();
             }
             return Response.ok(gender).build();
@@ -60,7 +61,7 @@ public class GenderResource {
             log.errorf("GET /api/genders/%d", id);
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \""+e.getMessage()+"\"}")
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -77,7 +78,7 @@ public class GenderResource {
             Gender gender = Gender.find("code", code).firstResult();
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"Entity not found with code: " + code + "\"}")
+                        .entity("Entity not found with code: " + code)
                         .build();
             }
             return Response.ok(gender).build();
@@ -85,7 +86,7 @@ public class GenderResource {
             log.errorf("GET /api/genders/code/%s", code);
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \""+e.getMessage()+"\"}")
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -102,37 +103,24 @@ public class GenderResource {
         if (gender.id != null) {
             log.debugf("POST /api/genders - ID provided in create request: %d", gender.id);
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"ID provided in create request (must be null)\"}")
+                    .entity("ID provided in create request (must be null)")
                     .build();
         }
         try {
-            // Check if gender with same code already exists
-            Gender existingByCode = Gender.find("code", gender.code).firstResult();
-            if (existingByCode != null) {
-                log.debugf("Attempt to create gender with existing code: %s", gender.code);
-                return Response.status(Response.Status.CONFLICT)
-                        .entity("{\"error\": \"Gender with code '" + gender.code + "' already exists\"}")
-                        .build();
-            }
-
-            // Check if gender with same description already exists
-            Gender existingByDescription = Gender.find("description", gender.description).firstResult();
-            if (existingByDescription != null) {
-                log.debugf("Attempt to create gender with existing description: %s", gender.description);
-                return Response.status(Response.Status.CONFLICT)
-                        .entity("{\"error\": \"Gender with description '" + gender.description + "' already exists\"}")
-                        .build();
-            }
-
             gender.persist();
-            log.infof("Created new gender with code: %s, id: %d", gender.code, gender.id);
             return Response.status(Response.Status.CREATED).entity(gender).build();
 
+        } catch (ConstraintViolationException e) {
+            log.errorf("POST /api/genders - create with code: %s", gender.code);
+            log.error(e.getMessage());
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(e.getMessage())
+                    .build();
         } catch (Exception e) {
             log.errorf("POST /api/genders - create with code: %s", gender.code);
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \""+e.getMessage()+"\"}")
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -152,10 +140,9 @@ public class GenderResource {
             Gender existingGender = Gender.findById(id);
             if (existingGender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"Gender not found with id: " + id + "\"}")
+                        .entity("Entity not found with id: " + id)
                         .build();
             }
-
             existingGender.code = updatedGender.code;
             existingGender.description = updatedGender.description;
             existingGender.persist();
@@ -166,7 +153,7 @@ public class GenderResource {
             log.errorf("PUT /api/genders/%d - update with code: %s", id, updatedGender.code);
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \""+e.getMessage()+"\"}")
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -184,7 +171,7 @@ public class GenderResource {
             Gender gender = Gender.findById(id);
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"Gender not found with id: " + id + "\"}")
+                        .entity("Entity not found with id: " + id)
                         .build();
             }
 
@@ -194,7 +181,7 @@ public class GenderResource {
             log.errorf("DELETE /api/genders/%d", id);
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \""+e.getMessage()+"\"}")
+                    .entity(e.getMessage())
                     .build();
         }
     }
