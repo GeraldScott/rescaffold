@@ -1,30 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Genders</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-    <h1>Genders</h1>
-
-    <table border="1">
-        <thead>
+{#include base}
+    {#title}Genders{/title}
+    {#content}
+        <h1 class="mb-4">Genders</h1>
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
             <tr>
-                <th>ID</th>
-                <th>Code</th>
-                <th>Description</th>
+                <th scope="col">ID</th>
+                <th scope="col">Code</th>
+                <th scope="col">Description</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             {#for gender in genders}
-            <tr>
-                <td>{gender.id}</td>
-                <td>{gender.code}</td>
-                <td>{gender.description}</td>
-            </tr>
+                <tr>
+                    <td>{gender.id}</td>
+                    <td>{gender.code}</td>
+                    <td>{gender.description}</td>
+                </tr>
             {/for}
-        </tbody>
-    </table>
-</body>
-</html>
+            </tbody>
+        </table>
+    {/content}
+{/include}
