@@ -99,7 +99,7 @@ public class GenderResource {
     @Operation(summary = "Create a new gender", description = "Creates a new gender record")
     @APIResponse(responseCode = "201", description = "Gender created successfully")
     @APIResponse(responseCode = "400", description = "Bad request: invalid input data")
-    @APIResponse(responseCode = "409", description = "Conflict")
+    @APIResponse(responseCode = "409", description = "Conflicts with existing data")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response createGender(@Valid Gender gender) {
         log.debugf("POST /api/genders - create with code: %s", gender.code);
@@ -124,7 +124,7 @@ public class GenderResource {
             return Response.status(Response.Status.CREATED).entity(gender).build();
 
         } catch (DataException | ConstraintViolationException e) {
-            return Response.status(Response.Status.CONFLICT)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity(createErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
@@ -141,38 +141,39 @@ public class GenderResource {
     @Operation(summary = "Update an existing gender", description = "Updates an existing gender record")
     @APIResponse(responseCode = "200", description = "Gender updated successfully")
     @APIResponse(responseCode = "404", description = "Gender not found")
+    @APIResponse(responseCode = "409", description = "Conflicts with existing data")
     @APIResponse(responseCode = "500", description = "Internal server error")
-    public Response updateGender(@Parameter(description = "Gender ID") @PathParam("id") Long id, @Valid Gender updatedGender) {
-        log.debugf("PUT /api/genders/%d - update with code: %s", id, updatedGender.code);
+    public Response updateGender(@Parameter(description = "Gender ID") @PathParam("id") Long id, @Valid Gender newGender) {
+        log.debugf("PUT /api/genders/%d - update with code: %s", id, newGender.code);
 
         try {
-            Gender existingGender = Gender.findById(id);
-            if (existingGender == null) {
+            Gender gender = Gender.findById(id);
+            if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(createErrorResponse("Entity not found with id: " + id))
                         .build();
             }
-            if (updatedGender.code != null){
-                if (Gender.find("code = ?1 and id != ?2", updatedGender.code, id).firstResult() != null) {
+            if (newGender.code != null){
+                if (Gender.find("code = ?1 and id != ?2", newGender.code, id).firstResult() != null) {
                     return Response.status(Response.Status.CONFLICT)
-                            .entity(createErrorResponse("Another gender with code '" + updatedGender.code + "' already exists"))
+                            .entity(createErrorResponse("Another gender with code '" + newGender.code + "' already exists"))
                             .build();
                 } else {
-                    existingGender.code = updatedGender.code;
+                    gender.code = newGender.code;
                 }
             }
-            if (updatedGender.description != null){
-                if (Gender.find("description = ?1 and id != ?2", updatedGender.description, id).firstResult() != null) {
+            if (newGender.description != null){
+                if (Gender.find("description = ?1 and id != ?2", newGender.description, id).firstResult() != null) {
                     return Response.status(Response.Status.CONFLICT)
-                            .entity(createErrorResponse("Another gender with description '" + updatedGender.description + "' already exists"))
+                            .entity(createErrorResponse("Another gender with description '" + newGender.description + "' already exists"))
                             .build();
                 } else {
-                    existingGender.description = updatedGender.description;
+                    gender.description = newGender.description;
                 }
             }
 
-            existingGender.persist();
-            return Response.ok(existingGender).build();
+            gender.persist();
+            return Response.ok(gender).build();
 
         } catch (DataException | ConstraintViolationException e) {
             return Response.status(Response.Status.CONFLICT)
