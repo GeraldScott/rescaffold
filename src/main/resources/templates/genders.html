@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genders</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>Genders</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Code</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#for gender in genders}
+            <tr>
+                <td>{gender.id}</td>
+                <td>{gender.code}</td>
+                <td>{gender.description}</td>
+            </tr>
+            {/for}
+        </tbody>
+    </table>
+</body>
+</html>
