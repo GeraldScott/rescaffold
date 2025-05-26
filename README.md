@@ -49,6 +49,7 @@ Notes:
 First build the JAR in the default fast-jar format:
 
 ```bash
+sdk use java 21.0.2-graalce
 quarkus build --clean
 ```
 
@@ -65,6 +66,7 @@ Notes:
 ### GraalVM executable
 
 ```bash
+sdk use java 21.0.2-graalce
 quarkus build --native --clean
 ./target/rescaffold-1.0.0-SNAPSHOT-runner
 ```
@@ -81,6 +83,7 @@ Generate the application and start in dev mode:
 
 ```bash
 cd ~/quarkus
+sdk use java 21.0.2-graalce
 quarkus create app \
 --description='Scaffold Quarkus+HTMX application' \
 --extensions='rest, rest-jackson, jdbc-postgresql, hibernate-orm-panache, hibernate-validator, qute, smallrye-openapi, flyway' \
