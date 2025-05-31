@@ -16,7 +16,7 @@ Notes:
 - DevUI is at http://localhost:8080/q/dev/
 - Swagger UI is at http://localhost:8080/q/swagger-ui/
 
-### Upgrade Quarkus
+### Upgrade Quarkus (when necessary)
 
 Stop the application and upgrade to the latest version:
 
