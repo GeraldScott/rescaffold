@@ -1,0 +1,83 @@
+/* Space Age Theme CSS for Rescaffold
+ * Features a professional color palette with greys and metallic blue
+ */
+
+:root {
+  --space-dark: #1a1a2e;
+  --space-grey: #2d2d44;
+  --space-light-grey: #4a4a6a;
+  --space-metallic-blue: #4361ee;
+  --space-light-blue: #7289da;
+  --space-silver: #e0e0e0;
+  --space-white: #f8f9fa;
+  --space-metallic-blue-grey: #3d5a80;
+}
+
+/* Navbar styling */
+.navbar {
+  background-color: var(--space-metallic-blue-grey) !important;
+  padding: 0.8rem 1rem;
+}
+
+.navbar-brand {
+  color: var(--space-white) !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.navbar-brand img {
+  margin-right: 8px;
+  filter: drop-shadow(0 0 2px rgba(67, 97, 238, 0.5));
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: var(--space-silver) !important;
+  transition: color 0.2s ease;
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link.active {
+  color: var(--space-white) !important;
+  text-shadow: 0 0 5px rgba(67, 97, 238, 0.5);
+}
+
+.navbar-light .navbar-toggler {
+  border-color: var(--space-light-blue);
+  background-color: var(--space-light-grey);
+}
+
+.navbar-light .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+.dropdown-menu {
+  background-color: var(--space-grey);
+  border: 1px solid var(--space-light-grey);
+}
+
+.dropdown-item {
+  color: var(--space-silver);
+}
+
+.dropdown-item:hover {
+  background-color: var(--space-light-grey);
+  color: var(--space-white);
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--space-metallic-blue-grey) !important;
+  color: var(--space-silver);
+  padding: 1rem 0;
+}
+
+.footer a {
+  color: var(--space-light-blue);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer a:hover {
+  color: var(--space-metallic-blue);
+  text-decoration: underline;
+}
