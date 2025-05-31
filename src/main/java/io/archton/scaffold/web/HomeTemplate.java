@@ -20,13 +20,13 @@ public class HomeTemplate {
 
     @CheckedTemplate(basePath = "")
     public static class Templates {
-        public static native TemplateInstance home(int currentYear);
+        public static native TemplateInstance home(int currentYear, String applicationVersion);
     }
 
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String get() {
         log.debug("GET / - Home page");
-        return Templates.home(templateConfig.getCurrentYear()).render();
+        return Templates.home(templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
     }
 }

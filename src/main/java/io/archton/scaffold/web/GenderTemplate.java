@@ -28,7 +28,7 @@ public class GenderTemplate {
 
     @CheckedTemplate(basePath = "gender")
     public static class Templates {
-        public static native TemplateInstance genders(List<Gender> genders, int currentYear);
+        public static native TemplateInstance genders(List<Gender> genders, int currentYear, String applicationVersion);
     }
 
     @GET
@@ -36,6 +36,6 @@ public class GenderTemplate {
     public String get() {
         log.debug("GET /api/genders");
         List<Gender> genderList = genderRepository.listSorted();
-        return Templates.genders(genderList, templateConfig.getCurrentYear()).render();
+        return Templates.genders(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
     }
 }
