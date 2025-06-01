@@ -1,47 +1,49 @@
-<div class="card-body">
-    <div class="row mb-3">
-        <div class="col-sm-4">
-            <strong>ID:</strong>
+<div id="content-area" class="card shadow-sm">
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>ID:</strong>
+            </div>
+            <div class="col-sm-8">
+                <span class="badge bg-secondary">{gender.id}</span>
+            </div>
         </div>
-        <div class="col-sm-8">
-            <span class="badge bg-secondary">{gender.id}</span>
-        </div>
-    </div>
 
-    <div class="row mb-3">
-        <div class="col-sm-4">
-            <strong>Code:</strong>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Code:</strong>
+            </div>
+            <div class="col-sm-8">
+                <span class="badge bg-primary fs-6">{gender.code}</span>
+            </div>
         </div>
-        <div class="col-sm-8">
-            <span class="badge bg-primary fs-6">{gender.code}</span>
-        </div>
-    </div>
 
-    <div class="row mb-3">
-        <div class="col-sm-4">
-            <strong>Description:</strong>
-        </div>
-        <div class="col-sm-8">
-            {gender.description}
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Description:</strong>
+            </div>
+            <div class="col-sm-8">
+                {gender.description}
+            </div>
         </div>
     </div>
-</div>
-<div class="card-footer bg-light">
-    <div class="d-flex gap-2">
-        <button type="button"
-                class="btn btn-outline-info btn-sm"
-                hx-get="/genders-ui/table"
-                hx-target="#content-area"
-                hx-swap="innerHTML">
-            <i class="bi bi-pencil"></i> Back
-        </button>
-        <button type="button"
-                class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-pencil"></i> Edit
-        </button>
-        <button type="button"
-                class="btn btn-outline-danger btn-sm">
-            <i class="bi bi-trash"></i> Delete
-        </button>
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-outline-info btn-sm"
+                    hx-get="/genders-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-pencil"></i> Back
+            </button>
+            <button type="button"
+                    class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil"></i> Edit
+            </button>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
     </div>
 </div>
