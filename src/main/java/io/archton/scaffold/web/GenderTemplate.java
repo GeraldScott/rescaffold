@@ -9,8 +9,10 @@ import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.util.List;
@@ -29,6 +31,8 @@ public class GenderTemplate {
     @CheckedTemplate(basePath = "gender")
     public static class Templates {
         public static native TemplateInstance genders(List<Gender> genders, int currentYear, String applicationVersion);
+        public static native TemplateInstance view(Gender gender, int currentYear, String applicationVersion);
+        public static native TemplateInstance table(List<Gender> genders, int currentYear, String applicationVersion);
     }
 
     @GET
@@ -38,4 +42,31 @@ public class GenderTemplate {
         List<Gender> genderList = genderRepository.listSorted();
         return Templates.genders(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
     }
+
+    @GET
+    @Path("/{id}/view")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderView(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%d/view", id);
+
+        Gender gender = Gender.findById(id);
+        if (gender == null) {
+            // Return 404 or redirect back to list
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        String html = Templates.view(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
+    }
+
+    @GET
+    @Path("/table")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderTable() {
+        log.debug("GET /genders-ui/table");
+        List<Gender> genderList = genderRepository.listSorted();
+        String html = Templates.table(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
+    }
+
 }
