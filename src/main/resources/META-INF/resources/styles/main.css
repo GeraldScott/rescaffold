@@ -42,7 +42,6 @@
 }
 
 .navbar-light .navbar-toggler {
-  border-color: var(--space-light-blue);
   background-color: var(--space-light-grey);
 }
 
@@ -51,8 +50,7 @@
 }
 
 .dropdown-menu {
-  background-color: var(--space-grey);
-  border: 1px solid var(--space-light-grey);
+  background-color: var(--space-metallic-blue-grey);
 }
 
 .dropdown-item {
