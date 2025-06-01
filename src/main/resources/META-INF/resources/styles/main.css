@@ -58,7 +58,7 @@
 }
 
 .dropdown-item:hover {
-  background-color: var(--space-light-grey);
+  background-color: var(--space-light-blue);
   color: var(--space-white);
 }
 
