@@ -3,10 +3,10 @@
         <h5 class="mb-0">Edit Gender</h5>
     </div>
     <div class="card-body">
-        <form hx-put="/api/genders/{gender.id}"
+        <form id="edit-form"
+              hx-put="/genders-ui/{gender.id}"
               hx-target="#content-area"
-              hx-swap="innerHTML"
-              hx-on::after-request="if(event.detail.successful) { htmx.trigger('#content-area', 'refresh-table'); }">
+              hx-swap="innerHTML">
 
             <div class="row mb-3">
                 <div class="col-sm-4">
@@ -62,11 +62,7 @@
             </button>
             <button type="submit"
                     form="edit-form"
-                    class="btn btn-primary btn-sm"
-                    hx-put="/api/genders/{gender.id}"
-                    hx-include="closest form"
-                    hx-target="#content-area"
-                    hx-swap="innerHTML">
+                    class="btn btn-primary btn-sm">
                 <i class="bi bi-check"></i> Save
             </button>
         </div>

@@ -7,10 +7,8 @@ import io.archton.scaffold.util.TemplateConfig;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
@@ -84,5 +82,55 @@ public class GenderTemplate {
 
         String html = Templates.edit(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
         return Response.ok(html).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Transactional
+    public Response updateGenderFromForm(@PathParam("id") Long id,
+                                         @FormParam("code") String code,
+                                         @FormParam("description") String description) {
+        log.debugf("PUT /genders-ui/%d - update with code: %s", id, code);
+
+        try {
+            Gender gender = Gender.findById(id);
+            if (gender == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+
+            // Update fields
+            if (code != null && !code.trim().isEmpty()) {
+                // Check for duplicate code
+                Gender existingWithCode = Gender.find("code = ?1 and id != ?2", code, id).firstResult();
+                if (existingWithCode != null) {
+                    // Return error - you could create an error template or return to edit with error
+                    return Response.status(Response.Status.CONFLICT).build();
+                }
+                gender.code = code.trim().toUpperCase();
+            }
+
+            if (description != null && !description.trim().isEmpty()) {
+                // Check for duplicate description
+                Gender existingWithDesc = Gender.find("description = ?1 and id != ?2", description, id).firstResult();
+                if (existingWithDesc != null) {
+                    // Return error - you could create an error template or return to edit with error
+                    return Response.status(Response.Status.CONFLICT).build();
+                }
+                gender.description = description.trim();
+            }
+
+            gender.persist();
+
+            // Return updated table
+            List<Gender> genderList = genderRepository.listSorted();
+            String html = Templates.table(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+            return Response.ok(html).build();
+
+        } catch (Exception e) {
+            log.error("Error updating gender: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
