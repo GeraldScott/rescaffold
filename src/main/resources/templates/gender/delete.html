@@ -1,0 +1,55 @@
+<div id="content-area" class="card shadow-sm">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Delete Gender</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            You are about to delete this gender record. This action cannot be undone.
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Code:</strong>
+            </div>
+            <div class="col-sm-8">
+                <span class="badge bg-primary fs-6">{gender.code}</span>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Description:</strong>
+            </div>
+            <div class="col-sm-8">
+                {gender.description}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Record no:</strong>
+            </div>
+            <div class="col-sm-8">
+                <span class="badge bg-secondary">{gender.id}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="/genders-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    hx-delete="/genders-ui/{gender.id}"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>

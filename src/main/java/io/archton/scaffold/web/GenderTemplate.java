@@ -29,9 +29,14 @@ public class GenderTemplate {
     @CheckedTemplate(basePath = "gender")
     public static class Templates {
         public static native TemplateInstance genders(List<Gender> genders, int currentYear, String applicationVersion);
+
         public static native TemplateInstance view(Gender gender, int currentYear, String applicationVersion);
+
         public static native TemplateInstance table(List<Gender> genders, int currentYear, String applicationVersion);
+
         public static native TemplateInstance edit(Gender gender, int currentYear, String applicationVersion);
+
+        public static native TemplateInstance delete(Gender gender, int currentYear, String applicationVersion);
     }
 
     @GET
@@ -133,4 +138,47 @@ public class GenderTemplate {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GET
+    @Path("/{id}/delete")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderDelete(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%d/delete", id);
+
+        Gender gender = Gender.findById(id);
+        if (gender == null) {
+            // Return 404 or redirect back to list
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        String html = Templates.delete(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.TEXT_HTML)
+    @Transactional
+    public Response deleteGenderFromForm(@PathParam("id") Long id) {
+        log.debugf("DELETE /genders-ui/%d", id);
+
+        try {
+            Gender gender = Gender.findById(id);
+            if (gender == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+
+            gender.delete();
+
+            // Return updated table
+            List<Gender> genderList = genderRepository.listSorted();
+            String html = Templates.table(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+            return Response.ok(html).build();
+
+        } catch (Exception e) {
+            log.error("Error deleting gender: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
