@@ -3,28 +3,26 @@
         <div class="col-4">
             <div class="row mb-3">
                 <div class="col-sm-4">
-                    <strong>ID:</strong>
-                </div>
-                <div class="col-sm-8">
-                    <span class="badge bg-secondary">{gender.id}</span>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-sm-4">
                     <strong>Code:</strong>
                 </div>
                 <div class="col-sm-8">
                     <span class="badge bg-primary fs-6">{gender.code}</span>
                 </div>
             </div>
-
             <div class="row mb-3">
                 <div class="col-sm-4">
                     <strong>Description:</strong>
                 </div>
                 <div class="col-sm-8">
                     {gender.description}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Record no:</strong>
+                </div>
+                <div class="col-sm-8">
+                    <span class="badge bg-secondary">{gender.id}</span>
                 </div>
             </div>
         </div>
@@ -38,14 +36,6 @@
                     hx-target="#content-area"
                     hx-swap="innerHTML">
                 <i class="bi bi-arrow-left"></i> Back
-            </button>
-            <button type="button"
-                    class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-pencil"></i> Edit
-            </button>
-            <button type="button"
-                    class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-trash"></i> Delete
             </button>
         </div>
     </div>
