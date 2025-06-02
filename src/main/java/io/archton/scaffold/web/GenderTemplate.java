@@ -33,6 +33,7 @@ public class GenderTemplate {
         public static native TemplateInstance genders(List<Gender> genders, int currentYear, String applicationVersion);
         public static native TemplateInstance view(Gender gender, int currentYear, String applicationVersion);
         public static native TemplateInstance table(List<Gender> genders, int currentYear, String applicationVersion);
+        public static native TemplateInstance edit(Gender gender, int currentYear, String applicationVersion);
     }
 
     @GET
@@ -69,4 +70,19 @@ public class GenderTemplate {
         return Response.ok(html).build();
     }
 
+    @GET
+    @Path("/{id}/edit")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderEdit(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%d/edit", id);
+
+        Gender gender = Gender.findById(id);
+        if (gender == null) {
+            // Return 404 or redirect back to list
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        String html = Templates.edit(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
+    }
 }

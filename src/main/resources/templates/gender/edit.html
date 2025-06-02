@@ -1,0 +1,74 @@
+<div id="content-area" class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Edit Gender</h5>
+    </div>
+    <div class="card-body">
+        <form hx-put="/api/genders/{gender.id}"
+              hx-target="#content-area"
+              hx-swap="innerHTML"
+              hx-on::after-request="if(event.detail.successful) { htmx.trigger('#content-area', 'refresh-table'); }">
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="code" class="form-label"><strong>Code:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text"
+                           class="form-control"
+                           id="code"
+                           name="code"
+                           value="{gender.code}"
+                           maxlength="1"
+                           pattern="[A-Z]"
+                           required
+                           title="Code must be a single uppercase alphabetic character">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="description" class="form-label"><strong>Description:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text"
+                           class="form-control"
+                           id="description"
+                           name="description"
+                           value="{gender.description}"
+                           maxlength="256"
+                           required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Record no:</strong>
+                </div>
+                <div class="col-sm-8">
+                    <span class="badge bg-secondary">{gender.id}</span>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="/genders-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+            <button type="submit"
+                    form="edit-form"
+                    class="btn btn-primary btn-sm"
+                    hx-put="/api/genders/{gender.id}"
+                    hx-include="closest form"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-check"></i> Save
+            </button>
+        </div>
+    </div>
+</div>
