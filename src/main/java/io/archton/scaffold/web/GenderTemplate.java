@@ -37,6 +37,8 @@ public class GenderTemplate {
         public static native TemplateInstance edit(Gender gender, int currentYear, String applicationVersion);
 
         public static native TemplateInstance delete(Gender gender, int currentYear, String applicationVersion);
+
+        public static native TemplateInstance create(int currentYear, String applicationVersion);
     }
 
     @GET
@@ -87,6 +89,63 @@ public class GenderTemplate {
 
         String html = Templates.edit(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
         return Response.ok(html).build();
+    }
+
+    @GET
+    @Path("/add")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderCreate() {
+        log.debug("GET /genders-ui/add");
+
+        String html = Templates.create(templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
+    }
+
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Transactional
+    public Response createGenderFromForm(@FormParam("code") String code,
+                                         @FormParam("description") String description) {
+        log.debugf("POST /genders-ui - create with code: %s", code);
+
+        try {
+            if (code == null || code.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            if (description == null || description.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            // Check for duplicate code
+            Gender existingWithCode = Gender.find("code", code.trim().toUpperCase()).firstResult();
+            if (existingWithCode != null) {
+                // Return error - you could create an error template or return to create with error
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+
+            // Check for duplicate description
+            Gender existingWithDesc = Gender.find("description", description.trim()).firstResult();
+            if (existingWithDesc != null) {
+                // Return error - you could create an error template or return to create with error
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+
+            // Create new gender
+            Gender gender = new Gender();
+            gender.code = code.trim().toUpperCase();
+            gender.description = description.trim();
+            gender.persist();
+
+            // Return updated table
+            List<Gender> genderList = genderRepository.listSorted();
+            String html = Templates.table(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+            return Response.ok(html).build();
+
+        } catch (Exception e) {
+            log.error("Error creating gender: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PUT
