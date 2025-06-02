@@ -30,15 +30,16 @@ public class GenderTemplate {
     public static class Templates {
         public static native TemplateInstance genders(List<Gender> genders, int currentYear, String applicationVersion);
 
+        public static native TemplateInstance table(List<Gender> genders, int currentYear, String applicationVersion);
+
         public static native TemplateInstance view(Gender gender, int currentYear, String applicationVersion);
 
-        public static native TemplateInstance table(List<Gender> genders, int currentYear, String applicationVersion);
+        public static native TemplateInstance create(int currentYear, String applicationVersion);
 
         public static native TemplateInstance edit(Gender gender, int currentYear, String applicationVersion);
 
         public static native TemplateInstance delete(Gender gender, int currentYear, String applicationVersion);
 
-        public static native TemplateInstance create(int currentYear, String applicationVersion);
     }
 
     @GET
@@ -47,6 +48,16 @@ public class GenderTemplate {
         log.debug("GET /api/genders");
         List<Gender> genderList = genderRepository.listSorted();
         return Templates.genders(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+    }
+
+    @GET
+    @Path("/table")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderTable() {
+        log.debug("GET /genders-ui/table");
+        List<Gender> genderList = genderRepository.listSorted();
+        String html = Templates.table(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
     }
 
     @GET
@@ -66,36 +77,10 @@ public class GenderTemplate {
     }
 
     @GET
-    @Path("/table")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getGenderTable() {
-        log.debug("GET /genders-ui/table");
-        List<Gender> genderList = genderRepository.listSorted();
-        String html = Templates.table(genderList, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
-        return Response.ok(html).build();
-    }
-
-    @GET
-    @Path("/{id}/edit")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getGenderEdit(@PathParam("id") Long id) {
-        log.debugf("GET /genders-ui/%d/edit", id);
-
-        Gender gender = Gender.findById(id);
-        if (gender == null) {
-            // Return 404 or redirect back to list
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        String html = Templates.edit(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
-        return Response.ok(html).build();
-    }
-
-    @GET
-    @Path("/add")
+    @Path("/create")
     @Produces(MediaType.TEXT_HTML)
     public Response getGenderCreate() {
-        log.debug("GET /genders-ui/add");
+        log.debug("GET /genders-ui/create");
 
         String html = Templates.create(templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
         return Response.ok(html).build();
@@ -146,6 +131,22 @@ public class GenderTemplate {
             log.error("Error creating gender: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GET
+    @Path("/{id}/edit")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderEdit(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%d/edit", id);
+
+        Gender gender = Gender.findById(id);
+        if (gender == null) {
+            // Return 404 or redirect back to list
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        String html = Templates.edit(gender, templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Response.ok(html).build();
     }
 
     @PUT
