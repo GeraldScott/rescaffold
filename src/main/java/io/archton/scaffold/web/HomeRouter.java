@@ -1,6 +1,7 @@
 package io.archton.scaffold.web;
 
 import io.archton.scaffold.util.TemplateConfig;
+import io.archton.scaffold.util.TemplateConfig.TemplateVars;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -20,13 +21,13 @@ public class HomeRouter {
 
     @CheckedTemplate(basePath = "")
     public static class Templates {
-        public static native TemplateInstance home(int currentYear, String applicationVersion);
+        public static native TemplateInstance home(TemplateVars templateVars);
     }
 
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String get() {
         log.debug("GET / - Home page");
-        return Templates.home(templateConfig.getCurrentYear(), templateConfig.getApplicationVersion()).render();
+        return Templates.home(templateConfig.getTemplateVars()).render();
     }
 }
