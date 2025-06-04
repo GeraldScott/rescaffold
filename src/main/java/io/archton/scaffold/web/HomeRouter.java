@@ -11,9 +11,9 @@ import jakarta.ws.rs.core.MediaType;
 import org.jboss.logging.Logger;
 
 @Path("/")
-public class HomeTemplate {
+public class HomeRouter {
 
-    private static final Logger log = Logger.getLogger(HomeTemplate.class);
+    private static final Logger log = Logger.getLogger(HomeRouter.class);
 
     @Inject
     TemplateConfig templateConfig;

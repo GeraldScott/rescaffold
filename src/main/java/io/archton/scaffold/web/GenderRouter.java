@@ -16,7 +16,7 @@ import org.jboss.logging.Logger;
 import java.util.List;
 
 @Path("/genders-ui")
-public class GenderTemplate {
+public class GenderRouter {
 
     private static final Logger log = Logger.getLogger(GenderResource.class);
 
