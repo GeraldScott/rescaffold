@@ -26,9 +26,11 @@
 <body>
     {#include header /}
 
-    {#insert content}
-        Default content
-    {/insert}
+    <div class="container-fluid">
+        {#insert content}
+            Default content
+        {/insert}
+    </div>
 
     {#include footer /}
 </body>
