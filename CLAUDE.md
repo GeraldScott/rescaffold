@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Java environment
-The project uses Java 21 and GraalVM. Run the following in a terminal before running Maven or Quarkus
+The project uses Java 21 and GraalVM, so you must run the following in a terminal before running Maven or Quarkus:
 ```bash
 sdk use java 21.0.2-graalce 
 ```
