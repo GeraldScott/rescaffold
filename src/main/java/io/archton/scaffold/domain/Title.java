@@ -4,22 +4,20 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "gender")
-public class Gender extends PanacheEntityBase {
+@Table(name = "title")
+public class Title extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(name = "code", length = 1, nullable = false, unique = true)
+    @Column(name = "code", length = 5, nullable = false, unique = true)
     @NotNull
     @NotBlank(message = "Code cannot be blank")
-    @Size(min = 1, max = 1, message = "Code must be exactly 1 character")
-    @Pattern(regexp = "[A-Z]", message = "Code must be a single uppercase alphabetic character")
+    @Size(max = 5, message = "Code cannot exceed 5 characters")
     public String code;
 
     @Column(name = "description", nullable = false, unique = true)
@@ -27,10 +25,10 @@ public class Gender extends PanacheEntityBase {
     @NotBlank(message = "Description cannot be blank")
     public String description;
 
-    public Gender() {
+    public Title() {
     }
 
-    public Gender(String code, String description) {
+    public Title(String code, String description) {
         this.code = code;
         this.description = description;
     }

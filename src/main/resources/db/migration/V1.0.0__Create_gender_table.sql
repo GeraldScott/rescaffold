@@ -1,7 +1,7 @@
 create table gender (
     id bigint unique generated always as identity,
     code varchar(1) not null unique,
-    description varchar(255) not null unique
+    description text not null unique
 );
 
 comment on table gender is 'Gender information for demographic analysis';
