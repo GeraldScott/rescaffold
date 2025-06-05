@@ -20,7 +20,7 @@ public class Title extends PanacheEntityBase {
     @Size(max = 5, message = "Code cannot exceed 5 characters")
     public String code;
 
-    @Column(name = "description", nullable = false, unique = true)
+    @Column(name = "description", columnDefinition = "text", nullable = false, unique = true)
     @NotNull
     @NotBlank(message = "Description cannot be blank")
     public String description;

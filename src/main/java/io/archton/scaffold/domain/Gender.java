@@ -22,7 +22,7 @@ public class Gender extends PanacheEntityBase {
     @Pattern(regexp = "[A-Z]", message = "Code must be a single uppercase alphabetic character")
     public String code;
 
-    @Column(name = "description", nullable = false, unique = true)
+    @Column(name = "description", columnDefinition = "text", nullable = false, unique = true)
     @NotNull
     @NotBlank(message = "Description cannot be blank")
     public String description;
