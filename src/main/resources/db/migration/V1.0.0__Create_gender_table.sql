@@ -11,8 +11,13 @@ create table gender (
 
 comment on table gender is 'Gender information for demographic analysis';
 comment on column gender.id is 'Primary key';
-comment on column gender.code is 'Gender code (single character)';
+comment on column gender.code is 'Gender code';
 comment on column gender.description is 'Gender description';
+comment on column gender.is_active is 'Indicator to manage logical deletion';
+comment on column gender.created_at is 'Record creation timestamp';
+comment on column gender.updated_at is 'Record last updated timestamp';
+comment on column gender.created_by is 'User who created the record';
+comment on column gender.updated_by is 'User who last updated the record';
 
 INSERT INTO gender (code, description) VALUES
     ('F', 'Female'),
