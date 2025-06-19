@@ -93,3 +93,89 @@ Entities use Hibernate Panache Active Record pattern:
 - HTML forms use `@FormParam` for parameter binding
 - HTMX returns partial HTML fragments for dynamic updates
 - Error handling returns appropriate HTTP status codes
+
+### Entity Relationship Diagram
+```mermaid
+erDiagram
+    Gender {
+        uuid id PK
+        varchar code
+        text description
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+        uuid updated_by FK
+    }
+    
+    Title {
+        uuid id PK
+        varchar code
+        text description
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+        uuid updated_by FK
+    }
+    
+    Person {
+        uuid id PK
+        varchar first_name
+        varchar last_name
+        varchar email
+        uuid gender_id FK
+        uuid title_id FK
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+        uuid updated_by FK
+    }
+    
+    User {
+        uuid id PK
+        uuid person_id FK
+        varchar username
+        varchar password_hash
+        boolean is_active
+        timestamp last_login
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+        uuid updated_by FK
+    }
+    
+    Role {
+        uuid id PK
+        varchar name
+        text description
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+        uuid updated_by FK
+    }
+    
+    UserRole {
+        uuid user_id FK
+        uuid role_id FK
+        timestamp assigned_at
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+        uuid updated_by FK
+    }
+    
+    Gender ||--o{ Person : "has"
+    Title ||--o{ Person : "has"
+    Person ||--o| User : "becomes"
+    User ||--o{ UserRole : "has"
+    Role ||--o{ UserRole : "assigned to"
+    User ||--o{ Gender : "created_by"
+    User ||--o{ Title : "created_by"
+    User ||--o{ Person : "created_by"
+    User ||--o{ Role : "created_by"
+    User ||--o{ UserRole : "created_by"
+```
