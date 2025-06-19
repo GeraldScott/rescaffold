@@ -99,73 +99,73 @@ Entities use Hibernate Panache Active Record pattern:
 erDiagram
     Gender {
         uuid id PK
-        varchar code
-        text description
-        boolean is_active
-        timestamp created_at
+        varchar code UK
+        text description UK
+        boolean is_active "NOT NULL DEFAULT true"
+        timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at
-        uuid created_by FK
-        uuid updated_by FK
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by
     }
     
     Title {
         uuid id PK
-        varchar code
-        text description
-        boolean is_active
-        timestamp created_at
+        varchar code UK
+        text description UK
+        boolean is_active "NOT NULL DEFAULT true"
+        timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at
-        uuid created_by FK
-        uuid updated_by FK
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by
     }
     
     Person {
         uuid id PK
         varchar first_name
-        varchar last_name
-        varchar email
+        varchar last_name "NOT NULL"
+        varchar email UK
         uuid gender_id FK
         uuid title_id FK
-        boolean is_active
-        timestamp created_at
+        boolean is_active "NOT NULL DEFAULT true"
+        timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at
-        uuid created_by FK
-        uuid updated_by FK
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by
     }
     
     User {
         uuid id PK
         uuid person_id FK
-        varchar username
+        varchar username UK
         varchar password_hash
-        boolean is_active
+        boolean is_active "NOT NULL DEFAULT true"
         timestamp last_login
-        timestamp created_at
+        timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at
-        uuid created_by FK
-        uuid updated_by FK
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by
     }
     
     Role {
         uuid id PK
-        varchar name
-        text description
-        boolean is_active
-        timestamp created_at
+        varchar name UK
+        text description UK
+        boolean is_active "NOT NULL DEFAULT true"
+        timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at
-        uuid created_by FK
-        uuid updated_by FK
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by
     }
     
     UserRole {
         uuid user_id FK
         uuid role_id FK
         timestamp assigned_at
-        boolean is_active
-        timestamp created_at
+        boolean is_active "NOT NULL DEFAULT true"
+        timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at
-        uuid created_by FK
-        uuid updated_by FK
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by
     }
     
     Gender ||--o{ Person : "has"
