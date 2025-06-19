@@ -103,9 +103,9 @@ erDiagram
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at
+        timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
-        varchar updated_by
+        varchar updated_by "NULL"
     }
     
     Title {
@@ -114,9 +114,9 @@ erDiagram
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at
+        timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
-        varchar updated_by
+        varchar updated_by "NULL"
     }
     
     Person {
@@ -128,9 +128,9 @@ erDiagram
         uuid title_id FK
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at
+        timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
-        varchar updated_by
+        varchar updated_by "NULL"
     }
     
     User {
@@ -141,9 +141,9 @@ erDiagram
         boolean is_active "NOT NULL DEFAULT true"
         timestamp last_login
         timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at
+        timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
-        varchar updated_by
+        varchar updated_by "NULL"
     }
     
     Role {
@@ -152,9 +152,9 @@ erDiagram
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at
+        timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
-        varchar updated_by
+        varchar updated_by "NULL"
     }
     
     UserRole {
@@ -163,9 +163,9 @@ erDiagram
         timestamp assigned_at
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at
+        timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
-        varchar updated_by
+        varchar updated_by "NULL"
     }
     
     Gender ||--o{ Person : "has"
