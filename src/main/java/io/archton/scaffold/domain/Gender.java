@@ -6,14 +6,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "gender")
 public class Gender extends PanacheEntityBase {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    @GeneratedValue(generator = "UUID")
+    @Column(columnDefinition = "uuid")
+    public UUID id;
 
     @Column(name = "code", length = 1, nullable = false, unique = true)
     @NotNull
@@ -27,11 +30,33 @@ public class Gender extends PanacheEntityBase {
     @NotBlank(message = "Description cannot be blank")
     public String description;
 
+    @Column(name = "is_active", nullable = false)
+    public Boolean isActive = true;
+
+    @Column(name = "created_at", nullable = false)
+    public LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    public LocalDateTime updatedAt;
+
+    @Column(name = "created_by", nullable = false)
+    public String createdBy = "system";
+
+    @Column(name = "updated_by")
+    public String updatedBy;
+
     public Gender() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public Gender(String code, String description) {
+        this();
         this.code = code;
         this.description = description;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
