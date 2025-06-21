@@ -82,6 +82,7 @@ The application provides both REST API and HTML UI for the same entities:
 - CheckedTemplate pattern for type-safe template references
 - TemplateConfig utility provides common variables (current year, app version)
 - Follows directory structure matching template organization
+- Refer to https://quarkus.io/guides/qute-reference for guidance on templates
 
 ### Entity Pattern
 Entities use Hibernate Panache Active Record pattern:
