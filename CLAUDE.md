@@ -183,3 +183,9 @@ erDiagram
 
 ## Screenshot Location
 - include folder /home/geraldo/Pictures/Screenshots/ to look for screenshots
+
+## Test Strategy
+- test strategy documentaion is here: https://quarkus.io/guides/getting-started-testing
+
+## Documentation Links
+- HTMX documentation is here: https://htmx.org/docs/
