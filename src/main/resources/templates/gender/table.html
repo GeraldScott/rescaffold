@@ -7,6 +7,11 @@
                 <tr>
                     <th>Code</th>
                     <th>Description</th>
+                    <th>Created By</th>
+                    <th>Created At</th>
+                    <th>Updated By</th>
+                    <th>Updated At</th>
+                    <th>Active</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -15,6 +20,17 @@
                     <tr>
                         <td class="fw-bold">{gender.code}</td>
                         <td>{gender.description}</td>
+                        <td>{gender.createdBy}</td>
+                        <td>{#if gender.createdAt}{gender.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
+                        <td>{#if gender.updatedBy}{gender.updatedBy}{#else}-{/if}</td>
+                        <td>{#if gender.updatedAt}{gender.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
+                        <td>
+                            {#if gender.isActive}
+                                <span class="badge bg-success">Active</span>
+                            {#else}
+                                <span class="badge bg-danger">Inactive</span>
+                            {/if}
+                        </td>
                         <td>
                             <button type="button"
                                     class="btn btn-sm btn-outline-primary"
