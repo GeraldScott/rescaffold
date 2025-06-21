@@ -3,8 +3,6 @@ package io.archton.scaffold.web;
 import io.archton.scaffold.domain.Gender;
 import io.archton.scaffold.repository.GenderRepository;
 import io.archton.scaffold.resource.GenderResource;
-import io.archton.scaffold.util.TemplateConfig;
-import io.archton.scaffold.util.TemplateConfig.TemplateVars;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -24,22 +22,20 @@ public class GenderRouter {
     @Inject
     GenderRepository genderRepository;
 
-    @Inject
-    TemplateConfig templateConfig;
 
     @CheckedTemplate(basePath = "gender")
     public static class Templates {
-        public static native TemplateInstance genders(List<Gender> genders, TemplateVars templateVars);
+        public static native TemplateInstance genders(List<Gender> genders);
 
-        public static native TemplateInstance table(List<Gender> genders, TemplateVars templateVars);
+        public static native TemplateInstance table(List<Gender> genders);
 
-        public static native TemplateInstance view(Gender gender, TemplateVars templateVars);
+        public static native TemplateInstance view(Gender gender);
 
-        public static native TemplateInstance create(TemplateVars templateVars);
+        public static native TemplateInstance create();
 
-        public static native TemplateInstance edit(Gender gender, TemplateVars templateVars);
+        public static native TemplateInstance edit(Gender gender);
 
-        public static native TemplateInstance delete(Gender gender, TemplateVars templateVars);
+        public static native TemplateInstance delete(Gender gender);
 
     }
 
@@ -48,7 +44,7 @@ public class GenderRouter {
     public String get() {
         log.debug("GET /api/genders");
         List<Gender> genderList = genderRepository.listSorted();
-        return Templates.genders(genderList, templateConfig.getTemplateVars()).render();
+        return Templates.genders(genderList).render();
     }
 
     @GET
@@ -57,7 +53,7 @@ public class GenderRouter {
     public Response getGenderTable() {
         log.debug("GET /genders-ui/table");
         List<Gender> genderList = genderRepository.listSorted();
-        String html = Templates.table(genderList, templateConfig.getTemplateVars()).render();
+        String html = Templates.table(genderList).render();
         return Response.ok(html).build();
     }
 
@@ -73,7 +69,7 @@ public class GenderRouter {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        String html = Templates.view(gender, templateConfig.getTemplateVars()).render();
+        String html = Templates.view(gender).render();
         return Response.ok(html).build();
     }
 
@@ -83,7 +79,7 @@ public class GenderRouter {
     public Response getGenderCreate() {
         log.debug("GET /genders-ui/create");
 
-        String html = Templates.create(templateConfig.getTemplateVars()).render();
+        String html = Templates.create().render();
         return Response.ok(html).build();
     }
 
@@ -125,7 +121,7 @@ public class GenderRouter {
 
             // Return updated table
             List<Gender> genderList = genderRepository.listSorted();
-            String html = Templates.table(genderList, templateConfig.getTemplateVars()).render();
+            String html = Templates.table(genderList).render();
             return Response.ok(html).build();
 
         } catch (Exception e) {
@@ -146,7 +142,7 @@ public class GenderRouter {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        String html = Templates.edit(gender, templateConfig.getTemplateVars()).render();
+        String html = Templates.edit(gender).render();
         return Response.ok(html).build();
     }
 
@@ -191,7 +187,7 @@ public class GenderRouter {
 
             // Return updated table
             List<Gender> genderList = genderRepository.listSorted();
-            String html = Templates.table(genderList, templateConfig.getTemplateVars()).render();
+            String html = Templates.table(genderList).render();
             return Response.ok(html).build();
 
         } catch (Exception e) {
@@ -212,7 +208,7 @@ public class GenderRouter {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        String html = Templates.delete(gender, templateConfig.getTemplateVars()).render();
+        String html = Templates.delete(gender).render();
         return Response.ok(html).build();
     }
 
@@ -233,7 +229,7 @@ public class GenderRouter {
 
             // Return updated table
             List<Gender> genderList = genderRepository.listSorted();
-            String html = Templates.table(genderList, templateConfig.getTemplateVars()).render();
+            String html = Templates.table(genderList).render();
             return Response.ok(html).build();
 
         } catch (Exception e) {
