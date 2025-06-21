@@ -179,3 +179,6 @@ erDiagram
     User ||--o{ Role : "created_by"
     User ||--o{ UserRole : "created_by"
 ```
+
+## Screenshot Location
+- include folder /home/geraldo/Pictures/Screenshots/ to look for screenshots
