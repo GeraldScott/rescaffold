@@ -18,6 +18,50 @@
             </div>
         </div>
         <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Created By:</strong>
+            </div>
+            <div class="col-sm-8">
+                {gender.createdBy}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Created At:</strong>
+            </div>
+            <div class="col-sm-8">
+                {#if gender.createdAt}{gender.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Updated By:</strong>
+            </div>
+            <div class="col-sm-8">
+                {#if gender.updatedBy}{gender.updatedBy}{#else}-{/if}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Updated At:</strong>
+            </div>
+            <div class="col-sm-8">
+                {#if gender.updatedAt}{gender.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <strong>Active:</strong>
+            </div>
+            <div class="col-sm-8">
+                {#if gender.isActive}
+                    <span class="badge bg-success">Active</span>
+                {#else}
+                    <span class="badge bg-danger">Inactive</span>
+                {/if}
+            </div>
+        </div>
+        <div class="row mb-3">
             <div class="col-12">
                 <small class="text-muted">ID: {gender.id}</small>
             </div>
