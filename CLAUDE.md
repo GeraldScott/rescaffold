@@ -25,11 +25,17 @@ quarkus build --clean
 
 ### Run Tests
 ```bash
+source .env
+export JAVA_HOME=~/.sdkman/candidates/java/21.0.2-graalce
+export PATH=$JAVA_HOME/bin:$PATH
 ./mvnw test
 ```
 
 ### Run Single Test
 ```bash
+source .env
+export JAVA_HOME=~/.sdkman/candidates/java/21.0.2-graalce
+export PATH=$JAVA_HOME/bin:$PATH
 ./mvnw test -Dtest=TestClassName
 ```
 
@@ -182,10 +188,15 @@ erDiagram
 ```
 
 ## Screenshot Location
-- include folder /home/geraldo/Pictures/Screenshots/ to look for screenshots
+- Look in folder /home/geraldo/Pictures/Screenshots/ for screenshots
 
 ## Test Strategy
-- test strategy documentaion is here: https://quarkus.io/guides/getting-started-testing
+- Test documentation is here: https://quarkus.io/guides/getting-started-testing
+- Use @QuarkusTest annotation and follow https://quarkus.io/guides/getting-started-testing#testing-a-specific-endpoint for testing endpoints. 
+- Use PostgreSQL database as defined in %test.quarkus.datasource 
+- Database credentials are loaded from .env file (TEST_DB_USERNAME, TEST_DB_PASSWORD)
+- Tests require Java 21 GraalVM to run properly
+- Example: GenderResourceTest covers all CRUD operations with 18 test cases 
 
-## Documentation Links
+## HTMX Documentation
 - HTMX documentation is here: https://htmx.org/docs/
