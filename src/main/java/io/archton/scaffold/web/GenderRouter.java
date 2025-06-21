@@ -2,17 +2,16 @@ package io.archton.scaffold.web;
 
 import io.archton.scaffold.domain.Gender;
 import io.archton.scaffold.repository.GenderRepository;
-import io.archton.scaffold.resource.GenderResource;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Path("/genders-ui")
@@ -22,9 +21,6 @@ public class GenderRouter {
 
     @Inject
     GenderRepository genderRepository;
-
-    @Inject
-    GenderResource genderResource;
 
 
     @CheckedTemplate(basePath = "gender")
@@ -67,14 +63,18 @@ public class GenderRouter {
     public Response getGenderView(@PathParam("id") UUID id) {
         log.debugf("GET /genders-ui/%s/view", id);
 
-        Response apiResponse = genderResource.getGenderById(id);
-        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
-            return Response.status(apiResponse.getStatus()).build();
-        }
+        try {
+            Optional<Gender> genderOpt = genderRepository.findByIdOptional(id);
+            if (genderOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
 
-        Gender gender = (Gender) apiResponse.getEntity();
-        String html = Templates.view(gender).render();
-        return Response.ok(html).build();
+            String html = Templates.view(genderOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            log.error("Error retrieving gender for view: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GET
@@ -98,18 +98,26 @@ public class GenderRouter {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        Gender gender = new Gender();
-        gender.code = code.trim().toUpperCase();
-        gender.description = description.trim();
+        try {
+            Gender gender = new Gender();
+            gender.code = code.trim().toUpperCase();
+            gender.description = description.trim();
 
-        Response apiResponse = genderResource.createGender(gender);
-        if (apiResponse.getStatus() != Response.Status.CREATED.getStatusCode()) {
-            return Response.status(apiResponse.getStatus()).build();
+            genderRepository.createGender(gender);
+
+            List<Gender> genderList = genderRepository.listSorted();
+            String html = Templates.table(genderList).render();
+            return Response.ok(html).build();
+        } catch (IllegalArgumentException e) {
+            log.error("Error creating gender: " + e.getMessage());
+            if (e.getMessage().contains("already exists")) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Error creating gender: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-
-        List<Gender> genderList = genderRepository.listSorted();
-        String html = Templates.table(genderList).render();
-        return Response.ok(html).build();
     }
 
     @GET
@@ -118,14 +126,18 @@ public class GenderRouter {
     public Response getGenderEdit(@PathParam("id") UUID id) {
         log.debugf("GET /genders-ui/%s/edit", id);
 
-        Response apiResponse = genderResource.getGenderById(id);
-        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
-            return Response.status(apiResponse.getStatus()).build();
-        }
+        try {
+            Optional<Gender> genderOpt = genderRepository.findByIdOptional(id);
+            if (genderOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
 
-        Gender gender = (Gender) apiResponse.getEntity();
-        String html = Templates.edit(gender).render();
-        return Response.ok(html).build();
+            String html = Templates.edit(genderOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            log.error("Error retrieving gender for edit: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PUT
@@ -137,22 +149,33 @@ public class GenderRouter {
                                          @FormParam("description") String description) {
         log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
 
-        Gender updateGender = new Gender();
-        if (code != null && !code.trim().isEmpty()) {
-            updateGender.code = code.trim().toUpperCase();
-        }
-        if (description != null && !description.trim().isEmpty()) {
-            updateGender.description = description.trim();
-        }
+        try {
+            Gender updateGender = new Gender();
+            if (code != null && !code.trim().isEmpty()) {
+                updateGender.code = code.trim().toUpperCase();
+            }
+            if (description != null && !description.trim().isEmpty()) {
+                updateGender.description = description.trim();
+            }
 
-        Response apiResponse = genderResource.updateGender(id, updateGender);
-        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
-            return Response.status(apiResponse.getStatus()).build();
-        }
+            genderRepository.updateGender(id, updateGender);
 
-        List<Gender> genderList = genderRepository.listSorted();
-        String html = Templates.table(genderList).render();
-        return Response.ok(html).build();
+            List<Gender> genderList = genderRepository.listSorted();
+            String html = Templates.table(genderList).render();
+            return Response.ok(html).build();
+        } catch (IllegalArgumentException e) {
+            log.error("Error updating gender: " + e.getMessage());
+            if (e.getMessage().contains("not found")) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            if (e.getMessage().contains("already exists")) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Error updating gender: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GET
@@ -161,14 +184,18 @@ public class GenderRouter {
     public Response getGenderDelete(@PathParam("id") UUID id) {
         log.debugf("GET /genders-ui/%s/delete", id);
 
-        Response apiResponse = genderResource.getGenderById(id);
-        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
-            return Response.status(apiResponse.getStatus()).build();
-        }
+        try {
+            Optional<Gender> genderOpt = genderRepository.findByIdOptional(id);
+            if (genderOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
 
-        Gender gender = (Gender) apiResponse.getEntity();
-        String html = Templates.delete(gender).render();
-        return Response.ok(html).build();
+            String html = Templates.delete(genderOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            log.error("Error retrieving gender for delete: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DELETE
@@ -177,14 +204,19 @@ public class GenderRouter {
     public Response deleteGenderFromForm(@PathParam("id") UUID id) {
         log.debugf("DELETE /genders-ui/%s", id);
 
-        Response apiResponse = genderResource.deleteGender(id);
-        if (apiResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
-            return Response.status(apiResponse.getStatus()).build();
-        }
+        try {
+            genderRepository.deleteGender(id);
 
-        List<Gender> genderList = genderRepository.listSorted();
-        String html = Templates.table(genderList).render();
-        return Response.ok(html).build();
+            List<Gender> genderList = genderRepository.listSorted();
+            String html = Templates.table(genderList).render();
+            return Response.ok(html).build();
+        } catch (IllegalArgumentException e) {
+            log.error("Error deleting gender: " + e.getMessage());
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (Exception e) {
+            log.error("Error deleting gender: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 }
