@@ -18,10 +18,13 @@ import java.util.UUID;
 @Path("/genders-ui")
 public class GenderRouter {
 
-    private static final Logger log = Logger.getLogger(GenderResource.class);
+    private static final Logger log = Logger.getLogger(GenderRouter.class);
 
     @Inject
     GenderRepository genderRepository;
+
+    @Inject
+    GenderResource genderResource;
 
 
     @CheckedTemplate(basePath = "gender")
@@ -64,12 +67,12 @@ public class GenderRouter {
     public Response getGenderView(@PathParam("id") UUID id) {
         log.debugf("GET /genders-ui/%s/view", id);
 
-        Gender gender = Gender.findById(id);
-        if (gender == null) {
-            // Return 404 or redirect back to list
-            return Response.status(Response.Status.NOT_FOUND).build();
+        Response apiResponse = genderResource.getGenderById(id);
+        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
+            return Response.status(apiResponse.getStatus()).build();
         }
 
+        Gender gender = (Gender) apiResponse.getEntity();
         String html = Templates.view(gender).render();
         return Response.ok(html).build();
     }
@@ -87,48 +90,26 @@ public class GenderRouter {
     @POST
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Transactional
     public Response createGenderFromForm(@FormParam("code") String code,
                                          @FormParam("description") String description) {
         log.debugf("POST /genders-ui - create with code: %s", code);
 
-        try {
-            if (code == null || code.trim().isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-            if (description == null || description.trim().isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-
-            // Check for duplicate code
-            Gender existingWithCode = Gender.find("code", code.trim().toUpperCase()).firstResult();
-            if (existingWithCode != null) {
-                // Return error - you could create an error template or return to create with error
-                return Response.status(Response.Status.CONFLICT).build();
-            }
-
-            // Check for duplicate description
-            Gender existingWithDesc = Gender.find("description", description.trim()).firstResult();
-            if (existingWithDesc != null) {
-                // Return error - you could create an error template or return to create with error
-                return Response.status(Response.Status.CONFLICT).build();
-            }
-
-            // Create new gender
-            Gender gender = new Gender();
-            gender.code = code.trim().toUpperCase();
-            gender.description = description.trim();
-            gender.persist();
-
-            // Return updated table
-            List<Gender> genderList = genderRepository.listSorted();
-            String html = Templates.table(genderList).render();
-            return Response.ok(html).build();
-
-        } catch (Exception e) {
-            log.error("Error creating gender: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        if (code == null || code.trim().isEmpty() || description == null || description.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
+
+        Gender gender = new Gender();
+        gender.code = code.trim().toUpperCase();
+        gender.description = description.trim();
+
+        Response apiResponse = genderResource.createGender(gender);
+        if (apiResponse.getStatus() != Response.Status.CREATED.getStatusCode()) {
+            return Response.status(apiResponse.getStatus()).build();
+        }
+
+        List<Gender> genderList = genderRepository.listSorted();
+        String html = Templates.table(genderList).render();
+        return Response.ok(html).build();
     }
 
     @GET
@@ -137,12 +118,12 @@ public class GenderRouter {
     public Response getGenderEdit(@PathParam("id") UUID id) {
         log.debugf("GET /genders-ui/%s/edit", id);
 
-        Gender gender = Gender.findById(id);
-        if (gender == null) {
-            // Return 404 or redirect back to list
-            return Response.status(Response.Status.NOT_FOUND).build();
+        Response apiResponse = genderResource.getGenderById(id);
+        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
+            return Response.status(apiResponse.getStatus()).build();
         }
 
+        Gender gender = (Gender) apiResponse.getEntity();
         String html = Templates.edit(gender).render();
         return Response.ok(html).build();
     }
@@ -151,50 +132,27 @@ public class GenderRouter {
     @Path("/{id}")
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Transactional
     public Response updateGenderFromForm(@PathParam("id") UUID id,
                                          @FormParam("code") String code,
                                          @FormParam("description") String description) {
         log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
 
-        try {
-            Gender gender = Gender.findById(id);
-            if (gender == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            // Update fields
-            if (code != null && !code.trim().isEmpty()) {
-                // Check for duplicate code
-                Gender existingWithCode = Gender.find("code = ?1 and id != ?2", code, id).firstResult();
-                if (existingWithCode != null) {
-                    // Return error - you could create an error template or return to edit with error
-                    return Response.status(Response.Status.CONFLICT).build();
-                }
-                gender.code = code.trim().toUpperCase();
-            }
-
-            if (description != null && !description.trim().isEmpty()) {
-                // Check for duplicate description
-                Gender existingWithDesc = Gender.find("description = ?1 and id != ?2", description, id).firstResult();
-                if (existingWithDesc != null) {
-                    // Return error - you could create an error template or return to edit with error
-                    return Response.status(Response.Status.CONFLICT).build();
-                }
-                gender.description = description.trim();
-            }
-
-            gender.persist();
-
-            // Return updated table
-            List<Gender> genderList = genderRepository.listSorted();
-            String html = Templates.table(genderList).render();
-            return Response.ok(html).build();
-
-        } catch (Exception e) {
-            log.error("Error updating gender: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        Gender updateGender = new Gender();
+        if (code != null && !code.trim().isEmpty()) {
+            updateGender.code = code.trim().toUpperCase();
         }
+        if (description != null && !description.trim().isEmpty()) {
+            updateGender.description = description.trim();
+        }
+
+        Response apiResponse = genderResource.updateGender(id, updateGender);
+        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
+            return Response.status(apiResponse.getStatus()).build();
+        }
+
+        List<Gender> genderList = genderRepository.listSorted();
+        String html = Templates.table(genderList).render();
+        return Response.ok(html).build();
     }
 
     @GET
@@ -203,12 +161,12 @@ public class GenderRouter {
     public Response getGenderDelete(@PathParam("id") UUID id) {
         log.debugf("GET /genders-ui/%s/delete", id);
 
-        Gender gender = Gender.findById(id);
-        if (gender == null) {
-            // Return 404 or redirect back to list
-            return Response.status(Response.Status.NOT_FOUND).build();
+        Response apiResponse = genderResource.getGenderById(id);
+        if (apiResponse.getStatus() != Response.Status.OK.getStatusCode()) {
+            return Response.status(apiResponse.getStatus()).build();
         }
 
+        Gender gender = (Gender) apiResponse.getEntity();
         String html = Templates.delete(gender).render();
         return Response.ok(html).build();
     }
@@ -216,27 +174,17 @@ public class GenderRouter {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.TEXT_HTML)
-    @Transactional
     public Response deleteGenderFromForm(@PathParam("id") UUID id) {
         log.debugf("DELETE /genders-ui/%s", id);
 
-        try {
-            Gender gender = Gender.findById(id);
-            if (gender == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            gender.delete();
-
-            // Return updated table
-            List<Gender> genderList = genderRepository.listSorted();
-            String html = Templates.table(genderList).render();
-            return Response.ok(html).build();
-
-        } catch (Exception e) {
-            log.error("Error deleting gender: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        Response apiResponse = genderResource.deleteGender(id);
+        if (apiResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
+            return Response.status(apiResponse.getStatus()).build();
         }
+
+        List<Gender> genderList = genderRepository.listSorted();
+        String html = Templates.table(genderList).render();
+        return Response.ok(html).build();
     }
 
 }
