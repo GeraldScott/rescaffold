@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.util.List;
+import java.util.UUID;
 
 @Path("/genders-ui")
 public class GenderRouter {
@@ -60,8 +61,8 @@ public class GenderRouter {
     @GET
     @Path("/{id}/view")
     @Produces(MediaType.TEXT_HTML)
-    public Response getGenderView(@PathParam("id") Long id) {
-        log.debugf("GET /genders-ui/%d/view", id);
+    public Response getGenderView(@PathParam("id") UUID id) {
+        log.debugf("GET /genders-ui/%s/view", id);
 
         Gender gender = Gender.findById(id);
         if (gender == null) {
@@ -133,8 +134,8 @@ public class GenderRouter {
     @GET
     @Path("/{id}/edit")
     @Produces(MediaType.TEXT_HTML)
-    public Response getGenderEdit(@PathParam("id") Long id) {
-        log.debugf("GET /genders-ui/%d/edit", id);
+    public Response getGenderEdit(@PathParam("id") UUID id) {
+        log.debugf("GET /genders-ui/%s/edit", id);
 
         Gender gender = Gender.findById(id);
         if (gender == null) {
@@ -151,10 +152,10 @@ public class GenderRouter {
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Transactional
-    public Response updateGenderFromForm(@PathParam("id") Long id,
+    public Response updateGenderFromForm(@PathParam("id") UUID id,
                                          @FormParam("code") String code,
                                          @FormParam("description") String description) {
-        log.debugf("PUT /genders-ui/%d - update with code: %s", id, code);
+        log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
 
         try {
             Gender gender = Gender.findById(id);
@@ -199,8 +200,8 @@ public class GenderRouter {
     @GET
     @Path("/{id}/delete")
     @Produces(MediaType.TEXT_HTML)
-    public Response getGenderDelete(@PathParam("id") Long id) {
-        log.debugf("GET /genders-ui/%d/delete", id);
+    public Response getGenderDelete(@PathParam("id") UUID id) {
+        log.debugf("GET /genders-ui/%s/delete", id);
 
         Gender gender = Gender.findById(id);
         if (gender == null) {
@@ -216,8 +217,8 @@ public class GenderRouter {
     @Path("/{id}")
     @Produces(MediaType.TEXT_HTML)
     @Transactional
-    public Response deleteGenderFromForm(@PathParam("id") Long id) {
-        log.debugf("DELETE /genders-ui/%d", id);
+    public Response deleteGenderFromForm(@PathParam("id") UUID id) {
+        log.debugf("DELETE /genders-ui/%s", id);
 
         try {
             Gender gender = Gender.findById(id);
