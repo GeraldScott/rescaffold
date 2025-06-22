@@ -37,22 +37,6 @@ sdk use java 21.0.2-graalce
 ./mvnw test -Dtest=TestClassName
 ```
 
-### Run Selenium E2E Tests
-```bash
-# Terminal 1: Start the application
-source .env
-sdk use java 21.0.2-graalce
-quarkus dev
-
-# Terminal 2: Run E2E tests
-bash -c "source ~/.sdkman/bin/sdkman-init.sh && sdk use java 21.0.2-graalce && ./mvnw test -Dtest=GenderNavbarTest"
-```
-**Prerequisites for E2E tests:**
-- Chrome or Chromium browser installed
-- Application running on http://localhost:8080
-- Tests run in headless mode by default
-- GenderNavbarTest verifies the Gender menu option exists in navbar
-
 ### Native Build
 ```bash
 sdk use java 21.0.2-graalce
