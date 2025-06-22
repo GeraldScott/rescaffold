@@ -8,10 +8,9 @@ import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @ApplicationScoped
-public class GenderRepository implements PanacheRepositoryBase<Gender, UUID> {
+public class GenderRepository implements PanacheRepositoryBase<Gender, Long> {
 
     public Gender findByCode(String code) {
         return find("code", code).firstResult();
@@ -36,7 +35,7 @@ public class GenderRepository implements PanacheRepositoryBase<Gender, UUID> {
     }
 
     @Transactional
-    public Gender updateGender(UUID id, Gender updates) {
+    public Gender updateGender(Long id, Gender updates) {
         Gender existing = findById(id);
         if (existing == null) {
             throw new IllegalArgumentException("Gender not found with id: " + id);
@@ -57,7 +56,7 @@ public class GenderRepository implements PanacheRepositoryBase<Gender, UUID> {
     }
 
     @Transactional
-    public void deleteGender(UUID id) {
+    public void deleteGender(Long id) {
         Gender gender = findById(id);
         if (gender == null) {
             throw new IllegalArgumentException("Gender not found with id: " + id);
@@ -65,7 +64,7 @@ public class GenderRepository implements PanacheRepositoryBase<Gender, UUID> {
         gender.delete();
     }
 
-    public Optional<Gender> findByIdOptional(UUID id) {
+    public Optional<Gender> findByIdOptional(Long id) {
         Gender gender = findById(id);
         return Optional.ofNullable(gender);
     }
@@ -92,14 +91,14 @@ public class GenderRepository implements PanacheRepositoryBase<Gender, UUID> {
         }
     }
 
-    private void checkDuplicateCodeForUpdate(String code, UUID excludeId) {
+    private void checkDuplicateCodeForUpdate(String code, Long excludeId) {
         Gender existing = find("code = ?1 and id != ?2", code, excludeId).firstResult();
         if (existing != null) {
             throw new IllegalArgumentException("Another gender with code '" + code + "' already exists");
         }
     }
 
-    private void checkDuplicateDescriptionForUpdate(String description, UUID excludeId) {
+    private void checkDuplicateDescriptionForUpdate(String description, Long excludeId) {
         Gender existing = find("description = ?1 and id != ?2", description, excludeId).firstResult();
         if (existing != null) {
             throw new IllegalArgumentException("Another gender with description '" + description + "' already exists");

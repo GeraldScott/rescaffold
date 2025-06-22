@@ -12,7 +12,6 @@ import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Path("/genders-ui")
 public class GenderRouter {
@@ -60,7 +59,7 @@ public class GenderRouter {
     @GET
     @Path("/{id}/view")
     @Produces(MediaType.TEXT_HTML)
-    public Response getGenderView(@PathParam("id") UUID id) {
+    public Response getGenderView(@PathParam("id") Long id) {
         log.debugf("GET /genders-ui/%s/view", id);
 
         try {
@@ -123,7 +122,7 @@ public class GenderRouter {
     @GET
     @Path("/{id}/edit")
     @Produces(MediaType.TEXT_HTML)
-    public Response getGenderEdit(@PathParam("id") UUID id) {
+    public Response getGenderEdit(@PathParam("id") Long id) {
         log.debugf("GET /genders-ui/%s/edit", id);
 
         try {
@@ -144,7 +143,7 @@ public class GenderRouter {
     @Path("/{id}")
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response updateGenderFromForm(@PathParam("id") UUID id,
+    public Response updateGenderFromForm(@PathParam("id") Long id,
                                          @FormParam("code") String code,
                                          @FormParam("description") String description) {
         log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
@@ -181,7 +180,7 @@ public class GenderRouter {
     @GET
     @Path("/{id}/delete")
     @Produces(MediaType.TEXT_HTML)
-    public Response getGenderDelete(@PathParam("id") UUID id) {
+    public Response getGenderDelete(@PathParam("id") Long id) {
         log.debugf("GET /genders-ui/%s/delete", id);
 
         try {
@@ -201,7 +200,7 @@ public class GenderRouter {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.TEXT_HTML)
-    public Response deleteGenderFromForm(@PathParam("id") UUID id) {
+    public Response deleteGenderFromForm(@PathParam("id") Long id) {
         log.debugf("DELETE /genders-ui/%s", id);
 
         try {

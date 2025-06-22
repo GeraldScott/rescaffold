@@ -16,7 +16,6 @@ import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Path("/api/genders")
 @Produces(MediaType.APPLICATION_JSON)
@@ -53,7 +52,7 @@ public class GenderResource {
     @APIResponse(responseCode = "200", description = "Gender found")
     @APIResponse(responseCode = "404", description = "Gender not found")
     @APIResponse(responseCode = "500", description = "Internal server error")
-    public Response getGenderById(@Parameter(description = "Gender ID") @PathParam("id") UUID id) {
+    public Response getGenderById(@Parameter(description = "Gender ID") @PathParam("id") Long id) {
         log.debugf("GET /api/genders/%s", id);
         try {
             Gender gender = Gender.findById(id);
@@ -144,7 +143,7 @@ public class GenderResource {
     @APIResponse(responseCode = "404", description = "Gender not found")
     @APIResponse(responseCode = "409", description = "Conflicts with existing data")
     @APIResponse(responseCode = "500", description = "Internal server error")
-    public Response updateGender(@Parameter(description = "Gender ID") @PathParam("id") UUID id, @Valid Gender newGender) {
+    public Response updateGender(@Parameter(description = "Gender ID") @PathParam("id") Long id, @Valid Gender newGender) {
         log.debugf("PUT /api/genders/%s - update with code: %s", id, newGender.code);
 
         try {
@@ -195,7 +194,7 @@ public class GenderResource {
     @APIResponse(responseCode = "204", description = "Gender deleted successfully")
     @APIResponse(responseCode = "404", description = "Gender not found")
     @APIResponse(responseCode = "500", description = "Internal server error")
-    public Response deleteGender(@Parameter(description = "Gender ID") @PathParam("id") UUID id) {
+    public Response deleteGender(@Parameter(description = "Gender ID") @PathParam("id") Long id) {
         log.debugf("DELETE /api/genders/%s", id);
 
         try {
