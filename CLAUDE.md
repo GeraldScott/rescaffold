@@ -38,14 +38,13 @@ sdk use java 21.0.2-graalce
 ```
 
 ### Run Selenium E2E Tests
-End-to-end tests using Selenium require the application to be running first:
 ```bash
 # Terminal 1: Start the application
 source .env
 sdk use java 21.0.2-graalce
 quarkus dev
 
-# Terminal 2: Run E2E tests (requires Chrome/Chromium installed)
+# Terminal 2: Run E2E tests
 bash -c "source ~/.sdkman/bin/sdkman-init.sh && sdk use java 21.0.2-graalce && ./mvnw test -Dtest=GenderNavbarTest"
 ```
 **Prerequisites for E2E tests:**
