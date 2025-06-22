@@ -3,7 +3,6 @@ package io.archton.scaffold.resource;
 import io.archton.scaffold.domain.Gender;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Assumptions;
@@ -20,8 +19,6 @@ class GenderResourceTest {
     private static Long createdGenderId;
     private static final String VALID_CODE = "T";
     private static final String VALID_DESCRIPTION = "Test Gender";
-    private static final String UPDATED_CODE = "U";
-    private static final String UPDATED_DESCRIPTION = "Updated Gender";
 
 
     @Test
@@ -270,11 +267,11 @@ class GenderResourceTest {
         // Ensure we have a gender to find by creating it if not exists or using the one we know exists
         if (createdGenderId != null) {
             given()
-                    .when().get("/api/genders/code/{code}", UPDATED_CODE)
+                    .when().get("/api/genders/code/{code}", "V")
                     .then()
                     .statusCode(200)
                     .contentType(ContentType.JSON)
-                    .body("code", equalTo(UPDATED_CODE))
+                    .body("code", equalTo("V"))
                     .body("description", notNullValue());
         } else {
             // Create a gender for this test
@@ -369,7 +366,6 @@ class GenderResourceTest {
                 .statusCode(201)
                 .extract().path("id");
         
-        Long anotherId = anotherIdAsInteger.longValue();
 
         // Try to update the first gender with the same code as the second
         Gender updateGender = new Gender();
