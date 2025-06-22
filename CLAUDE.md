@@ -26,26 +26,26 @@ quarkus build --clean
 ### Run Tests
 ```bash
 source .env
-export JAVA_HOME=~/.sdkman/candidates/java/21.0.2-graalce
-export PATH=$JAVA_HOME/bin:$PATH
+sdk use java 21.0.2-graalce
 ./mvnw test
 ```
 
 ### Run Single Test
 ```bash
 source .env
-export JAVA_HOME=~/.sdkman/candidates/java/21.0.2-graalce
-export PATH=$JAVA_HOME/bin:$PATH
+sdk use java 21.0.2-graalce
 ./mvnw test -Dtest=TestClassName
 ```
 
 ### Native Build
 ```bash
+sdk use java 21.0.2-graalce
 quarkus build --native --clean
 ```
 
 ### Upgrade Quarkus
 ```bash
+sdk use java 21.0.2-graalce
 quarkus upgrade
 quarkus dev --clean
 ```
