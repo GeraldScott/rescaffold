@@ -267,11 +267,11 @@ class GenderResourceTest {
         // Ensure we have a gender to find by creating it if not exists or using the one we know exists
         if (createdGenderId != null) {
             given()
-                    .when().get("/api/genders/code/{code}", "V")
+                    .when().get("/api/genders/code/{code}", VALID_CODE)
                     .then()
                     .statusCode(200)
                     .contentType(ContentType.JSON)
-                    .body("code", equalTo("V"))
+                    .body("code", equalTo(VALID_CODE))
                     .body("description", notNullValue());
         } else {
             // Create a gender for this test
