@@ -104,7 +104,7 @@ Entities use Hibernate Panache Active Record pattern:
 ```mermaid
 erDiagram
     Gender {
-        long id PK
+        bigint id PK
         varchar code UK
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
@@ -115,7 +115,7 @@ erDiagram
     }
     
     Title {
-        long id PK
+        bigint id PK
         varchar code UK
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
@@ -126,12 +126,12 @@ erDiagram
     }
     
     Person {
-        long id PK
+        bigint id PK
         varchar first_name
         varchar last_name "NOT NULL"
         varchar email UK
-        long gender_id FK
-        long title_id FK
+        bigint gender_id FK
+        bigint title_id FK
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
@@ -140,8 +140,8 @@ erDiagram
     }
     
     User {
-        long id PK
-        long person_id FK
+        bigint id PK
+        bigint person_id FK
         varchar username UK
         varchar password_hash
         boolean is_active "NOT NULL DEFAULT true"
@@ -153,7 +153,7 @@ erDiagram
     }
     
     Role {
-        long id PK
+        bigint id PK
         varchar name UK
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
@@ -164,8 +164,8 @@ erDiagram
     }
     
     UserRole {
-        long user_id FK
-        long role_id FK
+        bigint user_id FK
+        bigint role_id FK
         timestamp assigned_at
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
