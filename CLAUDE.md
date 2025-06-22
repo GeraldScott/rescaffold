@@ -4,12 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-### Java environment
-The project uses Java 21 and GraalVM, so you must run the following in a terminal before running Maven or Quarkus:
-```bash
-sdk use java 21.0.2-graalce 
-```
-
 ### Start Development Server
 ```bash
 quarkus dev
@@ -25,27 +19,21 @@ quarkus build --clean
 
 ### Run Tests
 ```bash
-source .env
-sdk use java 21.0.2-graalce
 ./mvnw test
 ```
 
 ### Run Single Test
 ```bash
-source .env
-sdk use java 21.0.2-graalce
 ./mvnw test -Dtest=TestClassName
 ```
 
 ### Native Build
 ```bash
-sdk use java 21.0.2-graalce
 quarkus build --native --clean
 ```
 
 ### Upgrade Quarkus
 ```bash
-sdk use java 21.0.2-graalce
 quarkus upgrade
 quarkus dev --clean
 ```
@@ -55,7 +43,7 @@ quarkus dev --clean
 This is a Quarkus + HTMX scaffold application following a layered architecture pattern:
 
 ### Core Stack
-- **Quarkus 3.22.3** with Java 21
+- **Quarkus 3.22.3** with Java 17
 - **PostgreSQL** database with Flyway migrations
 - **Hibernate ORM with Panache** for data persistence
 - **Qute** templating engine for server-side rendering
@@ -194,11 +182,6 @@ erDiagram
 - Use @QuarkusTest annotation and follow https://quarkus.io/guides/getting-started-testing#testing-a-specific-endpoint for testing endpoints. 
 - Use PostgreSQL database as defined in %test.quarkus.datasource 
 - Database credentials are loaded from .env file (TEST_DB_USERNAME, TEST_DB_PASSWORD)
-- Tests require Java 21 GraalVM to run properly
-- Example: GenderResourceTest covers all CRUD operations with 18 test cases
-- **E2E Testing**: Selenium tests in `src/test/java/io/archton/scaffold/ui/` package test UI functionality
-  - GenderNavbarTest verifies Gender menu option exists in navbar
-  - Requires application running on localhost:8080 before executing tests 
 
 ## HTMX Documentation
 - HTMX documentation is here: https://htmx.org/docs/
