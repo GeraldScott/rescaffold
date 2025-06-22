@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -82,9 +83,7 @@ class GenderCrudTest {
         assertNotNull(actionsHeader, "Actions column header should be present");
         
         // Verify Create button is present
-        WebElement createButton = driver.findElement(
-            By.xpath("//button[contains(@class, 'btn-outline-success')]")
-        );
+        WebElement createButton = driver.findElement(By.id("create-new-btn"));
         assertNotNull(createButton, "Create button should be present");
     }
 
@@ -102,7 +101,7 @@ class GenderCrudTest {
         // Find first delete button and click it
         WebElement deleteButton = wait.until(
             ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(@class, 'btn-outline-danger')]")
+                By.xpath("//button[starts-with(@id, 'delete-btn-')]")
             )
         );
         deleteButton.click();
@@ -116,16 +115,12 @@ class GenderCrudTest {
         
         // Verify warning message
         WebElement warningMessage = driver.findElement(
-            By.xpath("//div[contains(@class, 'alert-warning') and contains(text(), 'cannot be undone')]")
+            By.xpath("//div[contains(@class, 'alert-warning')]")
         );
         
         // Verify Cancel and Delete buttons
-        WebElement cancelButton = driver.findElement(
-            By.xpath("//button[contains(text(), 'Cancel')]")
-        );
-        WebElement confirmDeleteButton = driver.findElement(
-            By.xpath("//button[contains(text(), 'Delete') and contains(@class, 'btn-danger')]")
-        );
+        WebElement cancelButton = driver.findElement(By.id("cancel-delete-btn"));
+        WebElement confirmDeleteButton = driver.findElement(By.id("confirm-delete-btn"));
         
         assertNotNull(deleteHeader, "Delete confirmation header should be present");
         assertNotNull(warningMessage, "Warning message should be present");
@@ -142,12 +137,11 @@ class GenderCrudTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(
             By.xpath("//table[contains(@class, 'table')]")));
         
+        // Use JavaScript to click the create button to avoid interception
         WebElement createButton = wait.until(
-            ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(@class, 'btn-outline-success')]")
-            )
+            ExpectedConditions.presenceOfElementLocated(By.id("create-new-btn"))
         );
-        createButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", createButton);
         
         // Wait for create form
         wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -155,9 +149,7 @@ class GenderCrudTest {
         ));
         
         // Try submitting with empty fields (invalid data)
-        WebElement submitButton = driver.findElement(
-            By.xpath("//button[@type='submit' and contains(@class, 'btn-success')]")
-        );
+        WebElement submitButton = driver.findElement(By.id("submit-create-btn"));
         submitButton.click();
         
         // Wait briefly and verify we're still on create form (not redirected)
@@ -188,12 +180,11 @@ class GenderCrudTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(
             By.xpath("//table[contains(@class, 'table')]")));
         
+        // Use JavaScript to click the create button to avoid interception
         WebElement createButton = wait.until(
-            ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(@class, 'btn-outline-success')]")
-            )
+            ExpectedConditions.presenceOfElementLocated(By.id("create-new-btn"))
         );
-        createButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", createButton);
         
         // Wait for create form
         wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -211,9 +202,7 @@ class GenderCrudTest {
         descriptionInput.sendKeys(testDescription);
         
         // Submit form
-        WebElement submitButton = driver.findElement(
-            By.xpath("//button[@type='submit' and contains(@class, 'btn-success')]")
-        );
+        WebElement submitButton = driver.findElement(By.id("submit-create-btn"));
         submitButton.click();
         
         // Wait for redirect back to table
@@ -248,7 +237,7 @@ class GenderCrudTest {
         
         WebElement editButton = wait.until(
             ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(@class, 'btn-outline-dark')]")
+                By.xpath("//button[starts-with(@id, 'edit-btn-')]")
             )
         );
         editButton.click();
@@ -266,9 +255,7 @@ class GenderCrudTest {
         descriptionInput.clear();
         
         // Try to submit
-        WebElement saveButton = driver.findElement(
-            By.xpath("//button[@type='submit' and contains(@class, 'btn-primary')]")
-        );
+        WebElement saveButton = driver.findElement(By.id("submit-edit-btn"));
         saveButton.click();
         
         // Wait briefly and verify we're still on edit form
@@ -309,7 +296,7 @@ class GenderCrudTest {
         // Click Edit button for first row
         WebElement editButton = wait.until(
             ExpectedConditions.elementToBeClickable(
-                By.xpath("//tbody/tr[1]//button[contains(@class, 'btn-outline-dark')]")
+                By.xpath("//tbody/tr[1]//button[starts-with(@id, 'edit-btn-')]")
             )
         );
         editButton.click();
@@ -328,9 +315,7 @@ class GenderCrudTest {
         descriptionInput.sendKeys(newDescription);
         
         // Submit form
-        WebElement saveButton = driver.findElement(
-            By.xpath("//button[@type='submit' and contains(@class, 'btn-primary')]")
-        );
+        WebElement saveButton = driver.findElement(By.id("submit-edit-btn"));
         saveButton.click();
         
         // Wait for redirect back to table

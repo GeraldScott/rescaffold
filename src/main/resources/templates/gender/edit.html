@@ -52,6 +52,7 @@
     <div class="card-footer bg-light">
         <div class="d-flex gap-2">
             <button type="button"
+                    id="cancel-edit-btn"
                     class="btn btn-outline-secondary btn-sm"
                     hx-get="/genders-ui/table"
                     hx-target="#content-area"
@@ -59,6 +60,7 @@
                 <i class="bi bi-arrow-left"></i> Cancel
             </button>
             <button type="submit"
+                    id="submit-edit-btn"
                     form="edit-form"
                     class="btn btn-primary btn-sm">
                 <i class="bi bi-check"></i> Save
