@@ -37,6 +37,23 @@ sdk use java 21.0.2-graalce
 ./mvnw test -Dtest=TestClassName
 ```
 
+### Run Selenium E2E Tests
+End-to-end tests using Selenium require the application to be running first:
+```bash
+# Terminal 1: Start the application
+source .env
+sdk use java 21.0.2-graalce
+quarkus dev
+
+# Terminal 2: Run E2E tests (requires Chrome/Chromium installed)
+bash -c "source ~/.sdkman/bin/sdkman-init.sh && sdk use java 21.0.2-graalce && ./mvnw test -Dtest=GenderNavbarTest"
+```
+**Prerequisites for E2E tests:**
+- Chrome or Chromium browser installed
+- Application running on http://localhost:8080
+- Tests run in headless mode by default
+- GenderNavbarTest verifies the Gender menu option exists in navbar
+
 ### Native Build
 ```bash
 sdk use java 21.0.2-graalce
@@ -195,7 +212,10 @@ erDiagram
 - Use PostgreSQL database as defined in %test.quarkus.datasource 
 - Database credentials are loaded from .env file (TEST_DB_USERNAME, TEST_DB_PASSWORD)
 - Tests require Java 21 GraalVM to run properly
-- Example: GenderResourceTest covers all CRUD operations with 18 test cases 
+- Example: GenderResourceTest covers all CRUD operations with 18 test cases
+- **E2E Testing**: Selenium tests in `src/test/java/io/archton/scaffold/ui/` package test UI functionality
+  - GenderNavbarTest verifies Gender menu option exists in navbar
+  - Requires application running on localhost:8080 before executing tests 
 
 ## HTMX Documentation
 - HTMX documentation is here: https://htmx.org/docs/
