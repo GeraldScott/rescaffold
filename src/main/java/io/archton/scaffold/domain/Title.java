@@ -6,16 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "title")
 public class Title extends PanacheEntityBase {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @Column(columnDefinition = "uuid")
-    public UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @Column(name = "code", nullable = false, unique = true)
     @NotNull
@@ -30,17 +28,17 @@ public class Title extends PanacheEntityBase {
     @Column(name = "is_active", nullable = false)
     public Boolean isActive = true;
 
+    @Column(name = "created_by", nullable = false)
+    public String createdBy;
+
     @Column(name = "created_at", nullable = false)
     public LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    public LocalDateTime updatedAt;
-
-    @Column(name = "created_by", nullable = false)
-    public String createdBy = "system";
-
     @Column(name = "updated_by")
     public String updatedBy;
+
+    @Column(name = "updated_at")
+    public LocalDateTime updatedAt;
 
     public Title() {
         this.createdAt = LocalDateTime.now();

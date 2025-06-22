@@ -66,9 +66,8 @@ This is a Quarkus + HTMX scaffold application following a layered architecture p
 - `domain/` - Entity classes using Panache Active Record pattern
 - `resource/` - REST API endpoints (`/api/*` paths)
 - `web/` - HTML UI controllers (`/*-ui` paths) using Qute templates
-- `repository/` - Data access layer with custom queries
+- `repository/` - Data access layer with custom queries and business logic
 - `util/` - Utility classes like TemplateConfig for template variables
-- `dto/` - Data transfer objects
 - `service/` - Business logic layer
 - `health/` - Health check endpoints
 
@@ -105,7 +104,7 @@ Entities use Hibernate Panache Active Record pattern:
 ```mermaid
 erDiagram
     Gender {
-        uuid id PK
+        long id PK
         varchar code UK
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
@@ -116,7 +115,7 @@ erDiagram
     }
     
     Title {
-        uuid id PK
+        long id PK
         varchar code UK
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
@@ -127,12 +126,12 @@ erDiagram
     }
     
     Person {
-        uuid id PK
+        long id PK
         varchar first_name
         varchar last_name "NOT NULL"
         varchar email UK
-        uuid gender_id FK
-        uuid title_id FK
+        long gender_id FK
+        long title_id FK
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
@@ -141,8 +140,8 @@ erDiagram
     }
     
     User {
-        uuid id PK
-        uuid person_id FK
+        long id PK
+        long person_id FK
         varchar username UK
         varchar password_hash
         boolean is_active "NOT NULL DEFAULT true"
@@ -154,7 +153,7 @@ erDiagram
     }
     
     Role {
-        uuid id PK
+        long id PK
         varchar name UK
         text description UK
         boolean is_active "NOT NULL DEFAULT true"
@@ -165,8 +164,8 @@ erDiagram
     }
     
     UserRole {
-        uuid user_id FK
-        uuid role_id FK
+        long user_id FK
+        long role_id FK
         timestamp assigned_at
         boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
