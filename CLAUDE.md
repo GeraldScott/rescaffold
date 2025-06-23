@@ -27,6 +27,17 @@ quarkus build --clean
 ./mvnw test -Dtest=TestClassName
 ```
 
+### Format Code
+```bash
+./mvnw spotless:apply
+```
+(Note: Only if Spotless plugin is configured)
+
+### Integration Tests
+```bash
+./mvnw verify
+```
+
 ### Native Build
 ```bash
 quarkus build --native --clean
@@ -48,45 +59,54 @@ This is a Quarkus + HTMX scaffold application following a layered architecture p
 - **Hibernate ORM with Panache** for data persistence
 - **Qute** templating engine for server-side rendering
 - **HTMX** for dynamic frontend interactions
-- **JAX-RS REST** for API endpoints
+- **Quarkus REST** (REST-Easy Reactive) for API endpoints
 
 ### Package Structure
 - `domain/` - Entity classes using Panache Active Record pattern
 - `resource/` - REST API endpoints (`/api/*` paths)
 - `web/` - HTML UI controllers (`/*-ui` paths) using Qute templates
 - `repository/` - Data access layer with custom queries and business logic
-- `util/` - Utility classes like TemplateConfig for template variables
+- `util/` - Utility classes like TemplateGlobals for global template variables
 - `service/` - Business logic layer
-- `health/` - Health check endpoints
+- `health/` - Health check endpoints (currently empty, uses Quarkus SmallRye Health)
 
 ### Dual API Pattern
-The application provides both REST API and HTML UI for the same entities:
+The application provides both REST API and HTML UI for entities:
 - **REST Resources** (`resource/` package): JSON API endpoints at `/api/*`
 - **Web Routers** (`web/` package): HTML UI endpoints at `/*-ui` with Qute templates
+- Currently implemented for: Gender entity
+- Pattern ready for: Title and future entities
 
 ### Database Configuration
 - Uses profile-based configuration (`%dev`, `%test`, `%prod`)
 - Flyway migrations in `src/main/resources/db/migration/`
-- Environment variables for database credentials (e.g., `DEV_DB_USERNAME`)
+- Environment variables for database credentials:
+  - `DEV_DB_USERNAME`, `DEV_DB_PASSWORD` (development)
+  - `TEST_DB_USERNAME`, `TEST_DB_PASSWORD` (testing)
+  - `PROD_DB_USERNAME`, `PROD_DB_PASSWORD` (production)
 - Automatic clean/migrate on startup in dev/test modes
+- **Note**: Create `.env` file in project root with database credentials (not committed to git)
 
 ### Template System
 - Qute templates in `src/main/resources/templates/`
 - CheckedTemplate pattern for type-safe template references
-- TemplateConfig utility provides common variables (current year, app version)
+- TemplateGlobals utility provides common variables (current year, app version)
 - Follows directory structure matching template organization
 - Refer to https://quarkus.io/guides/qute-reference for guidance on templates
 
 ### Entity Pattern
 Entities use Hibernate Panache Active Record pattern:
-- Extend `PanacheEntity` for auto-generated ID
+- Extend `PanacheEntityBase` with manual ID management
 - Business logic methods directly on entity classes
 - Repository classes for complex queries and sorting
+- Audit fields: `created_at`, `updated_at`, `created_by`, `updated_by`, `is_active`
 
 ### Form Handling
 - HTML forms use `@FormParam` for parameter binding
 - HTMX returns partial HTML fragments for dynamic updates
 - Error handling returns appropriate HTTP status codes
+- Jakarta Bean Validation for form validation
+- Bootstrap styling with responsive design
 
 ### Entity Relationship Diagram
 ```mermaid
@@ -173,6 +193,28 @@ erDiagram
     User ||--o{ Role : "created_by"
     User ||--o{ UserRole : "created_by"
 ```
+
+## Current Implementation Status
+
+### ✅ Completed Features
+- **Gender Entity**: Full CRUD operations with REST API and HTML UI
+- **Title Entity**: Domain model and database schema (UI pending)
+- **Database Setup**: PostgreSQL with Flyway migrations
+- **Template System**: Qute templates with HTMX integration
+- **Development Environment**: Hot reload, DevUI, Swagger documentation
+
+### 🚧 In Progress / Planned
+- **Title Entity**: REST API and HTML UI implementation
+- **Person Entity**: Complete implementation per ERD
+- **User Management**: User, Role, UserRole entities and authentication
+- **Additional Features**: As defined in entity relationship diagram
+
+### 🏗️ Architecture Scaffold Ready
+- Dual API pattern (REST + HTML UI) established
+- Audit trail fields on all entities
+- Form validation and error handling
+- Bootstrap responsive design
+- HTMX dynamic interactions
 
 ## Screenshot Location
 - Look in folder /home/geraldo/Pictures/Screenshots/ for screenshots
