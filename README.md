@@ -2,12 +2,40 @@
 
 ## Overview
 
-Scaffold application using QUARKUS+HTMX
+Scaffold application using Quarkus + HTMX with PostgreSQL database
+
+## Prerequisites
+
+### Database Setup
+
+1. **Install PostgreSQL** (if not already installed)
+2. **Create databases:**
+   ```sql
+   CREATE DATABASE scaffold_dev;
+   CREATE DATABASE scaffold_test;
+   CREATE DATABASE scaffold_prod;
+   ```
+
+3. **Create .env file** in project root with database credentials:
+   ```bash
+   # Development
+   DEV_DB_USERNAME=your_username
+   DEV_DB_PASSWORD=your_password
+   
+   # Testing
+   TEST_DB_USERNAME=your_username
+   TEST_DB_PASSWORD=your_password
+   
+   # Production
+   PROD_DB_USERNAME=your_username
+   PROD_DB_PASSWORD=your_password
+   ```
+
+**Note:** The `.env` file is ignored by git for security.
 
 ### Run development mode
 
 ```bash
-sdk use java 21.0.2-graalce
 quarkus dev
 ```
 
@@ -25,16 +53,41 @@ quarkus upgrade
 quarkus dev --clean
 ```
 
+### Testing
+
+Run all tests:
+```bash
+./mvnw test
+```
+
+Run specific test:
+```bash
+./mvnw test -Dtest=TestClassName
+```
+
+Run integration tests:
+```bash
+./mvnw verify
+```
+
+### Code Formatting
+
+Format code (if Spotless plugin configured):
+```bash
+./mvnw spotless:apply
+```
+
 ### Flyway database management
 
 Flyway migration scripts are in `src/main/resources/db/migration`
+
+Database is automatically cleaned and migrated on startup in dev/test modes.
 
 ## Packaging
 
 ### Runnable JAR
 
 ```bash
-sdk use java 21.0.2-graalce
 quarkus build --clean
 java -jar target/quarkus-app/quarkus-run.jar
 ```
@@ -49,7 +102,6 @@ Notes:
 First build the JAR in the default fast-jar format:
 
 ```bash
-sdk use java 21.0.2-graalce
 quarkus build --clean
 ```
 
@@ -66,9 +118,8 @@ Notes:
 ### GraalVM executable
 
 ```bash
-sdk use java 21.0.2-graalce
 quarkus build --native --clean
-./target/rescaffold-1.0.0-SNAPSHOT-runner
+./target/rescaffold-1.0.0-runner
 ```
 
 Notes:
@@ -83,7 +134,6 @@ Generate the application and start in dev mode:
 
 ```bash
 cd ~/quarkus
-sdk use java 21.0.2-graalce
 quarkus create app \
 --description='Scaffold Quarkus+HTMX application' \
 --extensions='rest, rest-jackson, jdbc-postgresql, hibernate-orm-panache, hibernate-validator, qute, smallrye-openapi, flyway' \
