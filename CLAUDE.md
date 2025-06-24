@@ -38,6 +38,25 @@ quarkus build --clean
 ./mvnw verify
 ```
 
+### E2E Tests (Selenide)
+```bash
+# Run all e2e tests (requires dev server running on localhost:8080)
+./mvnw test -Dtest="**/e2e/**/*Test"
+
+# Run specific e2e test class
+./mvnw test -Dtest=HomePageNavigationTest
+
+# Run e2e tests with browser visible (non-headless)
+./mvnw test -Dtest="**/e2e/**/*Test" -Dselenide.headless=false
+
+# Run all tests (unit + e2e)
+./mvnw test
+
+# If no e2e tests match pattern, ignore the error
+./mvnw test -Dtest="**/e2e/**/*Test" -Dsurefire.failIfNoSpecifiedTests=false
+```
+**Note**: E2E tests require the dev server to be running on http://localhost:8080
+
 ### Native Build
 ```bash
 quarkus build --native --clean
@@ -224,6 +243,11 @@ erDiagram
 - Use @QuarkusTest annotation and follow https://quarkus.io/guides/getting-started-testing#testing-a-specific-endpoint for testing endpoints. 
 - Use PostgreSQL database as defined in %test.quarkus.datasource 
 - Database credentials are loaded from .env file (TEST_DB_USERNAME, TEST_DB_PASSWORD)
-
+- Use Selenide for end-to-end testing as it is based on Selenium
+- Cover critical user journeys
+- Test across different browsers and screen sizes
+- Automate UI interaction and validation scenarios
+ 
 ## HTMX Documentation
 - HTMX documentation is here: https://htmx.org/docs/
+
