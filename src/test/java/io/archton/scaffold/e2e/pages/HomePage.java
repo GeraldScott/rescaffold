@@ -12,6 +12,7 @@ public class HomePage {
     private final SelenideElement maintenanceDropdown = $("#maintenanceDropdown");
     private final SelenideElement navbar = $("nav.navbar");
     private final SelenideElement navbarBrand = $("a.navbar-brand");
+    private final SelenideElement gendersDropdownLink = $("a.dropdown-item[href='/genders-ui']");
     
     public HomePage openPage() {
         open("/");
@@ -56,5 +57,23 @@ public class HomePage {
     
     public String getMaintenanceDropdownText() {
         return maintenanceDropdown.getText();
+    }
+    
+    public SelenideElement getGendersDropdownLink() {
+        return gendersDropdownLink;
+    }
+    
+    public HomePage clickMaintenanceDropdown() {
+        maintenanceDropdown.click();
+        return this;
+    }
+    
+    public HomePage clickGendersLink() {
+        gendersDropdownLink.click();
+        return this;
+    }
+    
+    public boolean isGendersDropdownLinkVisible() {
+        return gendersDropdownLink.isDisplayed();
     }
 }
