@@ -1,8 +1,8 @@
 package io.archton.scaffold.resource;
 
 import io.archton.scaffold.domain.Gender;
-import jakarta.transaction.Transactional;
-import org.hibernate.exception.ConstraintViolationException;
+import io.archton.scaffold.service.GenderService;
+import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -11,7 +11,6 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.hibernate.exception.DataException;
 import org.jboss.logging.Logger;
 
 import java.util.List;
@@ -25,6 +24,9 @@ public class GenderResource {
 
     private static final Logger log = Logger.getLogger(GenderResource.class);
 
+    @Inject
+    GenderService genderService;
+
     private Map<String, String> createErrorResponse(String message) {
         return Map.of("error", message);
     }
@@ -36,7 +38,7 @@ public class GenderResource {
     public Response getAllGenders() {
         log.debug("GET /api/genders");
         try {
-            List<Gender> genders = Gender.listAll();
+            List<Gender> genders = genderService.listAll();
             return Response.ok(genders).build();
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -55,7 +57,7 @@ public class GenderResource {
     public Response getGenderById(@Parameter(description = "Gender ID") @PathParam("id") Long id) {
         log.debugf("GET /api/genders/%s", id);
         try {
-            Gender gender = Gender.findById(id);
+            Gender gender = genderService.findById(id);
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(createErrorResponse("Entity not found with id: " + id))
@@ -79,7 +81,7 @@ public class GenderResource {
     public Response getGenderByCode(@Parameter(description = "Gender code") @PathParam("code") String code) {
         log.debugf("GET /api/genders/code/%s", code);
         try {
-            Gender gender = Gender.find("code", code).firstResult();
+            Gender gender = genderService.findByCode(code);
             if (gender == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(createErrorResponse("Entity not found with code: " + code))
@@ -95,7 +97,6 @@ public class GenderResource {
     }
 
     @POST
-    @Transactional
     @Operation(summary = "Create a new gender", description = "Creates a new gender record")
     @APIResponse(responseCode = "201", description = "Gender created successfully")
     @APIResponse(responseCode = "400", description = "Bad request: invalid input data")
@@ -105,25 +106,15 @@ public class GenderResource {
         log.debugf("POST /api/genders - create with code: %s", gender.code);
 
         try {
-            if (gender.id != null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(createErrorResponse("ID must not be included in POST request"))
-                        .build();
-            }
-            if (Gender.find("code", gender.code).firstResult() != null) {
+            Gender created = genderService.createGender(gender);
+            return Response.status(Response.Status.CREATED).entity(created).build();
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error creating gender: " + e.getMessage());
+            if (e.getMessage().contains("already exists")) {
                 return Response.status(Response.Status.CONFLICT)
-                        .entity(createErrorResponse("Gender with code '" + gender.code + "' already exists"))
+                        .entity(createErrorResponse(e.getMessage()))
                         .build();
             }
-            if (Gender.find("description", gender.description).firstResult() != null) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity(createErrorResponse("Gender with description '" + gender.description + "' already exists"))
-                        .build();
-            }
-            gender.persist();
-            return Response.status(Response.Status.CREATED).entity(gender).build();
-
-        } catch (DataException | ConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(createErrorResponse(e.getMessage()))
                     .build();
@@ -137,7 +128,6 @@ public class GenderResource {
 
     @PUT
     @Path("/{id}")
-    @Transactional
     @Operation(summary = "Update an existing gender", description = "Updates an existing gender record")
     @APIResponse(responseCode = "200", description = "Gender updated successfully")
     @APIResponse(responseCode = "404", description = "Gender not found")
@@ -147,36 +137,21 @@ public class GenderResource {
         log.debugf("PUT /api/genders/%s - update with code: %s", id, newGender.code);
 
         try {
-            Gender gender = Gender.findById(id);
-            if (gender == null) {
+            Gender updated = genderService.updateGender(id, newGender);
+            return Response.ok(updated).build();
+        } catch (IllegalArgumentException e) {
+            log.error("Error updating gender: " + e.getMessage());
+            if (e.getMessage().contains("not found")) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(createErrorResponse("Entity not found with id: " + id))
+                        .entity(createErrorResponse(e.getMessage()))
                         .build();
             }
-            if (newGender.code != null){
-                if (Gender.find("code = ?1 and id != ?2", newGender.code, id).firstResult() != null) {
-                    return Response.status(Response.Status.CONFLICT)
-                            .entity(createErrorResponse("Another gender with code '" + newGender.code + "' already exists"))
-                            .build();
-                } else {
-                    gender.code = newGender.code;
-                }
+            if (e.getMessage().contains("already exists")) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity(createErrorResponse(e.getMessage()))
+                        .build();
             }
-            if (newGender.description != null){
-                if (Gender.find("description = ?1 and id != ?2", newGender.description, id).firstResult() != null) {
-                    return Response.status(Response.Status.CONFLICT)
-                            .entity(createErrorResponse("Another gender with description '" + newGender.description + "' already exists"))
-                            .build();
-                } else {
-                    gender.description = newGender.description;
-                }
-            }
-
-            gender.persist();
-            return Response.ok(gender).build();
-
-        } catch (DataException | ConstraintViolationException e) {
-            return Response.status(Response.Status.CONFLICT)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity(createErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
@@ -189,7 +164,6 @@ public class GenderResource {
 
     @DELETE
     @Path("/{id}")
-    @Transactional
     @Operation(summary = "Delete a gender", description = "Deletes an existing gender record")
     @APIResponse(responseCode = "204", description = "Gender deleted successfully")
     @APIResponse(responseCode = "404", description = "Gender not found")
@@ -198,15 +172,13 @@ public class GenderResource {
         log.debugf("DELETE /api/genders/%s", id);
 
         try {
-            Gender gender = Gender.findById(id);
-            if (gender == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(createErrorResponse("Entity not found with id: " + id))
-                        .build();
-            }
-
-            gender.delete();
+            genderService.deleteGender(id);
             return Response.noContent().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Error deleting gender: " + e.getMessage());
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(createErrorResponse(e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

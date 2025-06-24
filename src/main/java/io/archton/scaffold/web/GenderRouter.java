@@ -1,7 +1,7 @@
 package io.archton.scaffold.web;
 
 import io.archton.scaffold.domain.Gender;
-import io.archton.scaffold.repository.GenderRepository;
+import io.archton.scaffold.service.GenderService;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -19,7 +19,7 @@ public class GenderRouter {
     private static final Logger log = Logger.getLogger(GenderRouter.class);
 
     @Inject
-    GenderRepository genderRepository;
+    GenderService genderService;
 
 
     @CheckedTemplate(basePath = "gender")
@@ -41,8 +41,8 @@ public class GenderRouter {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String get() {
-        log.debug("GET /api/genders");
-        List<Gender> genderList = genderRepository.listSorted();
+        log.debug("GET /genders-ui");
+        List<Gender> genderList = genderService.listSorted();
         return Templates.genders(genderList).render();
     }
 
@@ -51,7 +51,7 @@ public class GenderRouter {
     @Produces(MediaType.TEXT_HTML)
     public Response getGenderTable() {
         log.debug("GET /genders-ui/table");
-        List<Gender> genderList = genderRepository.listSorted();
+        List<Gender> genderList = genderService.listSorted();
         String html = Templates.table(genderList).render();
         return Response.ok(html).build();
     }
@@ -63,7 +63,7 @@ public class GenderRouter {
         log.debugf("GET /genders-ui/%s/view", id);
 
         try {
-            Optional<Gender> genderOpt = genderRepository.findByIdOptional(id);
+            Optional<Gender> genderOpt = genderService.findByIdOptional(id);
             if (genderOpt.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -93,18 +93,14 @@ public class GenderRouter {
                                          @FormParam("description") String description) {
         log.debugf("POST /genders-ui - create with code: %s", code);
 
-        if (code == null || code.trim().isEmpty() || description == null || description.trim().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
         try {
             Gender gender = new Gender();
-            gender.code = code.trim().toUpperCase();
-            gender.description = description.trim();
+            gender.code = code;
+            gender.description = description;
 
-            genderRepository.createGender(gender);
+            genderService.createGender(gender);
 
-            List<Gender> genderList = genderRepository.listSorted();
+            List<Gender> genderList = genderService.listSorted();
             String html = Templates.table(genderList).render();
             return Response.ok(html).build();
         } catch (IllegalArgumentException e) {
@@ -126,7 +122,7 @@ public class GenderRouter {
         log.debugf("GET /genders-ui/%s/edit", id);
 
         try {
-            Optional<Gender> genderOpt = genderRepository.findByIdOptional(id);
+            Optional<Gender> genderOpt = genderService.findByIdOptional(id);
             if (genderOpt.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -150,16 +146,12 @@ public class GenderRouter {
 
         try {
             Gender updateGender = new Gender();
-            if (code != null && !code.trim().isEmpty()) {
-                updateGender.code = code.trim().toUpperCase();
-            }
-            if (description != null && !description.trim().isEmpty()) {
-                updateGender.description = description.trim();
-            }
+            updateGender.code = code;
+            updateGender.description = description;
 
-            genderRepository.updateGender(id, updateGender);
+            genderService.updateGender(id, updateGender);
 
-            List<Gender> genderList = genderRepository.listSorted();
+            List<Gender> genderList = genderService.listSorted();
             String html = Templates.table(genderList).render();
             return Response.ok(html).build();
         } catch (IllegalArgumentException e) {
@@ -184,7 +176,7 @@ public class GenderRouter {
         log.debugf("GET /genders-ui/%s/delete", id);
 
         try {
-            Optional<Gender> genderOpt = genderRepository.findByIdOptional(id);
+            Optional<Gender> genderOpt = genderService.findByIdOptional(id);
             if (genderOpt.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -204,9 +196,9 @@ public class GenderRouter {
         log.debugf("DELETE /genders-ui/%s", id);
 
         try {
-            genderRepository.deleteGender(id);
+            genderService.deleteGender(id);
 
-            List<Gender> genderList = genderRepository.listSorted();
+            List<Gender> genderList = genderService.listSorted();
             String html = Templates.table(genderList).render();
             return Response.ok(html).build();
         } catch (IllegalArgumentException e) {
