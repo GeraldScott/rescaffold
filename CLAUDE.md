@@ -119,6 +119,7 @@ Entities use Hibernate Panache Active Record pattern:
 - Business logic methods directly on entity classes
 - Repository classes for complex queries and sorting
 - Audit fields: `created_at`, `updated_at`, `created_by`, `updated_by`, `is_active`
+- Refer to https://quarkus.io/guides/hibernate-orm-panache for guidance
 
 ### Form Handling
 - HTML forms use `@FormParam` for parameter binding
