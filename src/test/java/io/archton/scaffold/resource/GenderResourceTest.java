@@ -34,8 +34,8 @@ class GenderResourceTest {
     @BeforeEach
     @TestTransaction
     void cleanupBeforeTest() {
-        // Only clean up test data, not the base/seed data
-        cleanupTestData();
+        // Clean up any test data that might exist from failed tests
+        Gender.delete("createdBy = ?1 OR code in ?2", "test-user", TEST_CODES);
     }
 
     @AfterEach
