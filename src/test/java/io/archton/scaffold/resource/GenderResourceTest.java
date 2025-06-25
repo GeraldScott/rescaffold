@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.*;
 class GenderResourceTest {
 
     private static final Set<String> TEST_CODES = Set.of("T", "X", "Y", "Z", "G", "C", "U", "V", "D", "E", "P", "R", "A", "B", "I");
+    private static final Long NON_EXISTENT_ID = 99999L;
+    private static final String NON_EXISTENT_CODE = "Q";
 
     @BeforeAll
     @TestTransaction
@@ -162,11 +164,11 @@ class GenderResourceTest {
     void shouldReturn404ForNonExistentId() {
         given()
                 .when()
-                .get("/api/genders/99999")
+                .get("/api/genders/" + NON_EXISTENT_ID)
                 .then()
                 .statusCode(404)
                 .contentType(ContentType.JSON)
-                .body("error", containsString("Entity not found with id: 99999"));
+                .body("error", equalTo("Entity not found with id: " + NON_EXISTENT_ID));
     }
 
     @Test
@@ -193,11 +195,11 @@ class GenderResourceTest {
     void shouldReturn404ForNonExistentCode() {
         given()
                 .when()
-                .get("/api/genders/code/Q")
+                .get("/api/genders/code/" + NON_EXISTENT_CODE)
                 .then()
                 .statusCode(404)
                 .contentType(ContentType.JSON)
-                .body("error", containsString("Entity not found with code: Q"));
+                .body("error", equalTo("Entity not found with code: " + NON_EXISTENT_CODE));
     }
 
     @Test
@@ -240,11 +242,11 @@ class GenderResourceTest {
                 .contentType(ContentType.JSON)
                 .body(updateData)
                 .when()
-                .put("/api/genders/99999")
+                .put("/api/genders/" + NON_EXISTENT_ID)
                 .then()
                 .statusCode(404)
                 .contentType(ContentType.JSON)
-                .body("error", containsString("Entity not found with id: 99999"));
+                .body("error", equalTo("Entity not found with id: " + NON_EXISTENT_ID));
     }
 
     @Test
@@ -299,11 +301,11 @@ class GenderResourceTest {
     void shouldReturn404ForDeleteNonExistentId() {
         given()
                 .when()
-                .delete("/api/genders/99999")
+                .delete("/api/genders/" + NON_EXISTENT_ID)
                 .then()
                 .statusCode(404)
                 .contentType(ContentType.JSON)
-                .body("error", containsString("Entity not found with id: 99999"));
+                .body("error", equalTo("Entity not found with id: " + NON_EXISTENT_ID));
     }
 
     @Test
