@@ -18,9 +18,3 @@ comment on column gender.created_by is 'User who created the record';
 comment on column gender.created_at is 'Record creation timestamp';
 comment on column gender.updated_by is 'User who last updated the record';
 comment on column gender.updated_at is 'Record last updated timestamp';
-
-INSERT INTO gender (code, description) VALUES
-    ('F', 'Female'),
-    ('M', 'Male'),
-    ('O', 'Other'),
-    ('U', 'Unknown');

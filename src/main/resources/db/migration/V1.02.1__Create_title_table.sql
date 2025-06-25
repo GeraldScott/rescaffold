@@ -18,11 +18,3 @@ comment on column title.created_by is 'User who created the record';
 comment on column title.created_at is 'Record creation timestamp';
 comment on column title.updated_by is 'User who last updated the record';
 comment on column title.updated_at is 'Record last updated timestamp';
-
-INSERT INTO title (code, description) VALUES
-    ('MR', 'Mr'),
-    ('MS', 'Ms'),
-    ('MRS', 'Mrs'),
-    ('DR', 'Dr'),
-    ('PROF', 'Prof'),
-    ('U', 'Unknown');
