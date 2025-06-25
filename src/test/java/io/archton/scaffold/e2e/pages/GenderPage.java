@@ -5,6 +5,7 @@ import com.codeborne.selenide.SelenideElement;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.*;
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.open;
 
 public class GenderPage {
@@ -169,8 +170,12 @@ public class GenderPage {
     }
     
     public SelenideElement getRowByCode(String code) {
+        // Wait for table to be present after HTMX updates
+        gendersTable.should(exist);
+        // Wait for table body to be visible (ensures content is loaded)
+        tableBody.should(exist);
         // Find the table row that contains the code in the first cell (fw-bold class)
-        return $(byText(code)).closest("tr");
+        return $$("td.fw-bold").findBy(text(code)).closest("tr");
     }
     
     public boolean isDeleteConfirmationVisible() {

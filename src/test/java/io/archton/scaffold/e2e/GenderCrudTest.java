@@ -4,8 +4,11 @@ import io.archton.scaffold.e2e.base.BaseSelenideTest;
 import io.archton.scaffold.e2e.pages.GenderPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.*;
@@ -13,17 +16,51 @@ import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Gender CRUD E2E Tests")
-@TestMethodOrder(MethodOrderer.DisplayName.class)
 class GenderCrudTest extends BaseSelenideTest {
     
     private final GenderPage genderPage = new GenderPage();
-    private static final String TEST_CODE = "Z";
-    private static final String TEST_DESCRIPTION = "Test Gender E2E";
-    private static final String UPDATED_CODE = "Y";
-    private static final String UPDATED_DESCRIPTION = "Updated Test Gender E2E";
+    private String testCode;
+    private String testDescription;
+    private String updatedCode;
+    private String updatedDescription;
+    
+    @BeforeEach
+    void setUpTestData() {
+        // Generate single character codes for Gender entity (maxlength=1)
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("ss"));
+        char testChar = (char) ('A' + (Integer.parseInt(timestamp) % 26));
+        char updatedChar = (char) ('A' + ((Integer.parseInt(timestamp) + 1) % 26));
+        
+        testCode = String.valueOf(testChar);
+        testDescription = "Test Gender " + testChar;
+        updatedCode = String.valueOf(updatedChar);
+        updatedDescription = "Updated Test Gender " + updatedChar;
+    }
+    
+    @AfterEach
+    void cleanUpTestData() {
+        // Clean up any test data that might have been created
+        genderPage.openPage();
+        try {
+            if (genderPage.hasRowWithCode(testCode)) {
+                genderPage.getRowByCode(testCode).$("button[id^='delete-btn-']").click();
+                genderPage.confirmDelete();
+            }
+        } catch (Exception e) {
+            // Ignore cleanup errors
+        }
+        try {
+            if (genderPage.hasRowWithCode(updatedCode)) {
+                genderPage.getRowByCode(updatedCode).$("button[id^='delete-btn-']").click();
+                genderPage.confirmDelete();
+            }
+        } catch (Exception e) {
+            // Ignore cleanup errors
+        }
+    }
     
     @Test
-    @DisplayName("01 - Should load Genders page and display table")
+    @DisplayName("Should load Genders page and display table")
     void shouldLoadGendersPageAndDisplayTable() {
         genderPage.openPage();
         
@@ -48,7 +85,7 @@ class GenderCrudTest extends BaseSelenideTest {
     }
     
     @Test
-    @DisplayName("02 - Should create new gender successfully")
+    @DisplayName("Should create new gender successfully")
     void shouldCreateNewGenderSuccessfully() {
         genderPage.openPage();
         
@@ -60,43 +97,41 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getDescriptionInput().should(exist);
         genderPage.getSubmitCreateButton().should(exist);
         
-        assertTrue(genderPage.isCreateFormVisible(), "Create form should be visible");
-        
         // Fill out the form
-        genderPage.fillCreateForm(TEST_CODE, TEST_DESCRIPTION);
+        genderPage.fillCreateForm(testCode, testDescription);
         
         // Verify form fields are populated
-        genderPage.getCodeInput().should(have(value(TEST_CODE)));
-        genderPage.getDescriptionInput().should(have(value(TEST_DESCRIPTION)));
+        genderPage.getCodeInput().should(have(value(testCode)));
+        genderPage.getDescriptionInput().should(have(value(testDescription)));
         
         // Submit the form
         genderPage.submitCreateForm();
         
-        // Verify we're back to the table view and new record appears
+        // Wait for HTMX to complete and verify we're back to the table view and new record appears
         genderPage.getGendersTable().should(exist);
-        genderPage.getRowByCode(TEST_CODE).should(exist);
-        
-        assertTrue(genderPage.hasRowWithCode(TEST_CODE), "New gender should appear in table");
+        genderPage.getRowByCode(testCode).should(exist);
     }
     
     @Test
-    @DisplayName("03 - Should view gender details successfully")
+    @DisplayName("Should view gender details successfully")
     void shouldViewGenderDetailsSuccessfully() {
+        // First create a gender to view
         genderPage.openPage();
+        genderPage.clickCreateNew();
+        genderPage.fillCreateForm(testCode, testDescription);
+        genderPage.submitCreateForm();
         
-        // Find the test record and click View
-        genderPage.getRowByCode(TEST_CODE).should(exist);
-        
-        // Get the ID from the row to click the correct view button
-        // Since we can't easily get the ID, we'll use a more direct approach
-        genderPage.getRowByCode(TEST_CODE).$("button[id^='view-btn-']").click();
+        // Wait for table to load after creation, then find the test record and click View
+        genderPage.getGendersTable().should(exist);
+        genderPage.getRowByCode(testCode).should(exist);
+        genderPage.getRowByCode(testCode).$("button[id^='view-btn-']").click();
         
         // Verify view page is displayed
         genderPage.getContentArea().should(exist);
         genderPage.getContentArea().shouldHave(text("Code:"));
-        genderPage.getContentArea().shouldHave(text(TEST_CODE));
+        genderPage.getContentArea().shouldHave(text(testCode));
         genderPage.getContentArea().shouldHave(text("Description:"));
-        genderPage.getContentArea().shouldHave(text(TEST_DESCRIPTION));
+        genderPage.getContentArea().shouldHave(text(testDescription));
         
         // Verify Back button is present
         $(byText("Back")).should(exist);
@@ -110,28 +145,31 @@ class GenderCrudTest extends BaseSelenideTest {
     }
     
     @Test
-    @DisplayName("04 - Should edit gender successfully")
+    @DisplayName("Should edit gender successfully")
     void shouldEditGenderSuccessfully() {
+        // First create a gender to edit
         genderPage.openPage();
+        genderPage.clickCreateNew();
+        genderPage.fillCreateForm(testCode, testDescription);
+        genderPage.submitCreateForm();
         
-        // Find the test record and click Edit
-        genderPage.getRowByCode(TEST_CODE).should(exist);
-        genderPage.getRowByCode(TEST_CODE).$("button[id^='edit-btn-']").click();
+        // Wait for table to load after creation, then find the test record and click Edit
+        genderPage.getGendersTable().should(exist);
+        genderPage.getRowByCode(testCode).should(exist);
+        genderPage.getRowByCode(testCode).$("button[id^='edit-btn-']").click();
         
         // Verify edit form is displayed with current values
         genderPage.getCodeInput().should(exist);
         genderPage.getDescriptionInput().should(exist);
-        genderPage.getCodeInput().should(have(value(TEST_CODE)));
-        genderPage.getDescriptionInput().should(have(value(TEST_DESCRIPTION)));
-        
-        assertTrue(genderPage.isEditFormVisible(), "Edit form should be visible");
+        genderPage.getCodeInput().should(have(value(testCode)));
+        genderPage.getDescriptionInput().should(have(value(testDescription)));
         
         // Update the form
-        genderPage.fillEditForm(UPDATED_CODE, UPDATED_DESCRIPTION);
+        genderPage.fillEditForm(updatedCode, updatedDescription);
         
         // Verify form fields are updated
-        genderPage.getCodeInput().should(have(value(UPDATED_CODE)));
-        genderPage.getDescriptionInput().should(have(value(UPDATED_DESCRIPTION)));
+        genderPage.getCodeInput().should(have(value(updatedCode)));
+        genderPage.getDescriptionInput().should(have(value(updatedDescription)));
         
         // Submit the form
         genderPage.submitEditForm();
@@ -140,28 +178,29 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getGendersTable().should(exist);
         
         // Verify updated record appears in the table
-        genderPage.getRowByCode(UPDATED_CODE).should(exist);
-        
-        assertTrue(genderPage.hasRowWithCode(UPDATED_CODE), "Updated gender should appear in table");
+        genderPage.getRowByCode(updatedCode).should(exist);
     }
     
     @Test
-    @DisplayName("05 - Should delete gender successfully")
+    @DisplayName("Should delete gender successfully")
     void shouldDeleteGenderSuccessfully() {
+        // First create a gender to delete
         genderPage.openPage();
+        genderPage.clickCreateNew();
+        genderPage.fillCreateForm(testCode, testDescription);
+        genderPage.submitCreateForm();
         
-        // Find the updated test record and click Delete
-        genderPage.getRowByCode(UPDATED_CODE).should(exist);
-        genderPage.getRowByCode(UPDATED_CODE).$("button[id^='delete-btn-']").click();
+        // Wait for table to load after creation, then find the test record and click Delete
+        genderPage.getGendersTable().should(exist);
+        genderPage.getRowByCode(testCode).should(exist);
+        genderPage.getRowByCode(testCode).$("button[id^='delete-btn-']").click();
         
         // Verify delete confirmation is displayed
         genderPage.getContentArea().should(exist);
         genderPage.getContentArea().shouldHave(text("Delete Gender"));
         genderPage.getContentArea().shouldHave(text("You are about to delete this gender record"));
-        genderPage.getContentArea().shouldHave(text(UPDATED_CODE));
-        genderPage.getContentArea().shouldHave(text(UPDATED_DESCRIPTION));
-        
-        assertTrue(genderPage.isDeleteConfirmationVisible(), "Delete confirmation should be visible");
+        genderPage.getContentArea().shouldHave(text(testCode));
+        genderPage.getContentArea().shouldHave(text(testDescription));
         
         // Verify Cancel and Delete buttons are present
         genderPage.getConfirmDeleteButton().should(exist);
@@ -178,27 +217,21 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getGendersTable().should(exist);
         
         // Verify the record no longer exists in the table
-        // We use a try-catch approach since the element shouldn't exist
-        try {
-            genderPage.getRowByCode(UPDATED_CODE).shouldNot(exist);
-        } catch (Exception e) {
-            // This is expected - the row should not exist after deletion
-        }
+        genderPage.getRowByCode(testCode).shouldNot(exist);
     }
     
     @Test
-    @DisplayName("06 - Should edit gender isActive status successfully")
+    @DisplayName("Should edit gender isActive status successfully")
     void shouldEditGenderIsActiveStatusSuccessfully() {
         genderPage.openPage();
         
         // First create a gender to test with
         genderPage.clickCreateNew();
-        String testCode = "A";
-        String testDescription = "Test Active Status";
         genderPage.fillCreateForm(testCode, testDescription);
         genderPage.submitCreateForm();
         
-        // Verify it appears in the table as active
+        // Wait for table to load after creation, then verify it appears as active
+        genderPage.getGendersTable().should(exist);
         genderPage.getRowByCode(testCode).should(exist);
         genderPage.getRowByCode(testCode).shouldHave(text("Active"));
         
@@ -211,13 +244,13 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getIsActiveCheckbox().should(exist);
         
         // Verify checkbox is initially checked (active)
-        assertTrue(genderPage.isActiveCheckboxSelected(), "isActive checkbox should be checked initially");
+        genderPage.getIsActiveCheckbox().should(be(checked));
         
         // Uncheck the isActive checkbox to make it inactive
         genderPage.setIsActiveCheckbox(false);
         
         // Verify checkbox is now unchecked
-        assertTrue(!genderPage.isActiveCheckboxSelected(), "isActive checkbox should be unchecked");
+        genderPage.getIsActiveCheckbox().shouldNot(be(checked));
         
         // Submit the form
         genderPage.submitEditForm();
@@ -234,7 +267,7 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.setIsActiveCheckbox(true);
         
         // Verify checkbox is now checked
-        assertTrue(genderPage.isActiveCheckboxSelected(), "isActive checkbox should be checked");
+        genderPage.getIsActiveCheckbox().should(be(checked));
         
         // Submit the form
         genderPage.submitEditForm();
@@ -243,14 +276,10 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getGendersTable().should(exist);
         genderPage.getRowByCode(testCode).should(exist);
         genderPage.getRowByCode(testCode).shouldHave(text("Active"));
-        
-        // Clean up - delete the test gender
-        genderPage.getRowByCode(testCode).$("button[id^='delete-btn-']").click();
-        genderPage.confirmDelete();
     }
 
     @Test
-    @DisplayName("07 - Should cancel create operation")
+    @DisplayName("Should cancel create operation")
     void shouldCancelCreateOperation() {
         genderPage.openPage();
         
@@ -258,10 +287,12 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.clickCreateNew();
         
         // Verify create form is displayed
-        assertTrue(genderPage.isCreateFormVisible(), "Create form should be visible");
+        genderPage.getCodeInput().should(exist);
+        genderPage.getDescriptionInput().should(exist);
         
         // Fill out the form partially
-        genderPage.fillCreateForm("C", "Cancel Test");
+        String cancelCode = "CANCEL" + System.currentTimeMillis();
+        genderPage.fillCreateForm(cancelCode, "Cancel Test");
         
         // Click Cancel
         genderPage.cancelCreate();
@@ -270,11 +301,7 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getGendersTable().should(exist);
         
         // Verify the cancelled record was not created
-        try {
-            genderPage.getRowByCode("C").shouldNot(exist);
-        } catch (Exception e) {
-            // This is expected - the row should not exist after cancellation
-        }
+        genderPage.getRowByCode(cancelCode).shouldNot(exist);
     }
     
 }
