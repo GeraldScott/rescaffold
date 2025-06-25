@@ -36,6 +36,9 @@ nb-configuration.xml
 *.orig
 *.rej
 
+# e2e testing
+build/
+
 # Local environment
 .env
 
