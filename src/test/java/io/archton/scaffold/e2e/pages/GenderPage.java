@@ -4,214 +4,90 @@ import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.*;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 
+/**
+ * Simplified Page Object following Selenide best practices.
+ * Focus on essential actions and verifications, letting Selenide handle waits.
+ */
 public class GenderPage {
-    
-    // Table elements
-    private final SelenideElement contentArea = $("#content-area");
-    private final SelenideElement gendersTable = $("table.table");
-    private final SelenideElement tableBody = $("tbody");
-    private final SelenideElement pageTitle = $("h1");
-    
-    // Action buttons in table
-    private final SelenideElement createNewButton = $("#create-new-btn");
-    
+
+    // Essential element selectors only
+    public SelenideElement contentArea() { return $("#content-area"); }
+    public SelenideElement gendersTable() { return $("table.table"); }
+    public SelenideElement pageTitle() { return $("h1"); }
+    public SelenideElement createButton() { return $("#create-new-btn"); }
+
     // Form elements
-    private final SelenideElement codeInput = $("#code");
-    private final SelenideElement descriptionInput = $("#description");
-    private final SelenideElement isActiveCheckbox = $("#isActive");
-    private final SelenideElement createForm = $("#create-form");
-    private final SelenideElement editForm = $("#edit-form");
-    
-    // Form action buttons
-    private final SelenideElement submitCreateButton = $("#submit-create-btn");
-    private final SelenideElement cancelCreateButton = $("#cancel-create-btn");
-    private final SelenideElement submitEditButton = $("#submit-edit-btn");
-    private final SelenideElement cancelEditButton = $("#cancel-edit-btn");
-    private final SelenideElement confirmDeleteButton = $("#confirm-delete-btn");
-    private final SelenideElement cancelDeleteButton = $("#cancel-delete-btn");
-    
+    public SelenideElement codeInput() { return $("#code"); }
+    public SelenideElement descriptionInput() { return $("#description"); }
+    public SelenideElement isActiveCheckbox() { return $("#isActive"); }
+
+    // Action buttons
+    public SelenideElement submitCreateButton() { return $("#submit-create-btn"); }
+    public SelenideElement cancelCreateButton() { return $("#cancel-create-btn"); }
+    public SelenideElement submitEditButton() { return $("#submit-edit-btn"); }
+    public SelenideElement cancelEditButton() { return $("#cancel-edit-btn"); }
+    public SelenideElement confirmDeleteButton() { return $("#confirm-delete-btn"); }
+
     public GenderPage openPage() {
         open("/genders-ui");
         return this;
     }
-    
-    // Table verification methods
-    public SelenideElement getContentArea() {
-        return contentArea;
-    }
-    
-    public SelenideElement getGendersTable() {
-        return gendersTable;
-    }
-    
-    public SelenideElement getPageTitle() {
-        return pageTitle;
-    }
-    
-    public boolean isTableVisible() {
-        return gendersTable.isDisplayed();
-    }
-    
-    public boolean isContentAreaVisible() {
-        return contentArea.isDisplayed();
-    }
-    
-    // Navigation and CRUD action methods
-    public GenderPage clickCreateNew() {
-        createNewButton.click();
+
+    // Streamlined methods using Selenide's fluent API
+    public GenderPage createGender(String code, String description) {
+        createButton().click();
+        codeInput().setValue(code);
+        descriptionInput().setValue(description);
+        submitCreateButton().click();
         return this;
     }
-    
-    public GenderPage clickViewButton(Long genderId) {
-        $("#view-btn-" + genderId).click();
+
+    public GenderPage editGender(String currentCode, String newCode, String newDescription) {
+        getRowByCode(currentCode).$("button", 1).click(); // Edit button is second
+        codeInput().clear();
+        codeInput().setValue(newCode);
+        descriptionInput().clear();
+        descriptionInput().setValue(newDescription);
+        submitEditButton().click();
         return this;
     }
-    
-    public GenderPage clickEditButton(Long genderId) {
-        $("#edit-btn-" + genderId).click();
+
+    public GenderPage deleteGender(String code) {
+        getRowByCode(code).$("button", 2).click(); // Delete button is third
+        confirmDeleteButton().click();
         return this;
     }
-    
-    public GenderPage clickDeleteButton(Long genderId) {
-        $("#delete-btn-" + genderId).click();
+
+    public GenderPage viewGender(String code) {
+        getRowByCode(code).$("button", 0).click(); // View button is first
         return this;
     }
-    
-    // Form interaction methods
-    public GenderPage fillCreateForm(String code, String description) {
-        codeInput.setValue(code);
-        descriptionInput.setValue(description);
-        return this;
-    }
-    
-    public GenderPage fillEditForm(String code, String description) {
-        codeInput.clear();
-        codeInput.setValue(code);
-        descriptionInput.clear();
-        descriptionInput.setValue(description);
-        return this;
-    }
-    
-    public GenderPage fillEditForm(String code, String description, boolean isActive) {
-        codeInput.clear();
-        codeInput.setValue(code);
-        descriptionInput.clear();
-        descriptionInput.setValue(description);
-        setIsActiveCheckbox(isActive);
-        return this;
-    }
-    
-    public GenderPage setIsActiveCheckbox(boolean isActive) {
-        if (isActive && !isActiveCheckbox.isSelected()) {
-            isActiveCheckbox.click();
-        } else if (!isActive && isActiveCheckbox.isSelected()) {
-            isActiveCheckbox.click();
-        }
-        return this;
-    }
-    
-    public GenderPage submitCreateForm() {
-        submitCreateButton.click();
-        return this;
-    }
-    
-    public GenderPage submitEditForm() {
-        submitEditButton.click();
-        return this;
-    }
-    
-    public GenderPage cancelCreate() {
-        cancelCreateButton.click();
-        return this;
-    }
-    
-    public GenderPage cancelEdit() {
-        cancelEditButton.click();
-        return this;
-    }
-    
-    public GenderPage confirmDelete() {
-        confirmDeleteButton.click();
-        return this;
-    }
-    
-    public GenderPage cancelDelete() {
-        cancelDeleteButton.click();
-        return this;
-    }
-    
-    // Verification methods
-    public String getCurrentCode() {
-        return codeInput.getValue();
-    }
-    
-    public String getCurrentDescription() {
-        return descriptionInput.getValue();
-    }
-    
-    public boolean isCreateFormVisible() {
-        return createForm.exists();
-    }
-    
-    public boolean isEditFormVisible() {
-        return editForm.exists();
-    }
-    
-    public boolean hasRowWithCode(String code) {
-        try {
-            return getRowByCode(code).exists();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
+
+    // Simplified element finding
     public SelenideElement getRowByCode(String code) {
-        // Wait for table to be present after HTMX updates
-        gendersTable.should(exist);
-        // Wait for table body to be visible (ensures content is loaded)
-        tableBody.should(exist);
-        // Find the table row that contains the code in the first cell (fw-bold class)
         return $$("td.fw-bold").findBy(text(code)).closest("tr");
     }
-    
-    public boolean isDeleteConfirmationVisible() {
-        return $(".alert-warning").exists();
+
+    // Essential verification methods
+    public GenderPage shouldHaveGender(String code) {
+        $$("td.fw-bold").findBy(text(code)).shouldBe(visible);
+        return this;
     }
-    
-    // Get form elements for direct access
-    public SelenideElement getCodeInput() {
-        return codeInput;
+
+    public GenderPage shouldNotHaveGender(String code) {
+        $$("td.fw-bold").findBy(text(code)).shouldNot(exist);
+        return this;
     }
-    
-    public SelenideElement getDescriptionInput() {
-        return descriptionInput;
-    }
-    
-    public SelenideElement getIsActiveCheckbox() {
-        return isActiveCheckbox;
-    }
-    
-    public boolean isActiveCheckboxSelected() {
-        return isActiveCheckbox.isSelected();
-    }
-    
-    public SelenideElement getCreateNewButton() {
-        return createNewButton;
-    }
-    
-    public SelenideElement getSubmitCreateButton() {
-        return submitCreateButton;
-    }
-    
-    public SelenideElement getSubmitEditButton() {
-        return submitEditButton;
-    }
-    
-    public SelenideElement getConfirmDeleteButton() {
-        return confirmDeleteButton;
+
+    public GenderPage shouldShowActiveStatus(String code, boolean isActive) {
+        var row = getRowByCode(code);
+        if (isActive) {
+            row.shouldHave(text("Active"));
+        } else {
+            row.shouldHave(text("Inactive"));
+        }
+        return this;
     }
 }
