@@ -382,7 +382,7 @@ class GenderResourceTest {
     }
 
     @Test
-    @Order(19)
+    @Order(18)
     @DisplayName("PUT /api/genders/{id} - Should update with valid data")
     void testUpdateGenderPartial() {
         Assumptions.assumeTrue(createdGenderId != null, "Created gender ID should not be null");
@@ -404,7 +404,46 @@ class GenderResourceTest {
     }
 
     @Test
-    @Order(20)
+    @Order(19)
+    @DisplayName("PUT /api/genders/{id} - Should update isActive field")
+    void testUpdateGenderIsActive() {
+        Assumptions.assumeTrue(createdGenderId != null, "Created gender ID should not be null");
+        
+        // Update gender to inactive
+        Gender updateGender = new Gender();
+        updateGender.code = "Y"; // Valid code
+        updateGender.description = "Test Inactive Gender";
+        updateGender.isActive = false;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(updateGender)
+                .when().put("/api/genders/{id}", createdGenderId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("code", equalTo("Y"))
+                .body("description", equalTo("Test Inactive Gender"))
+                .body("isActive", equalTo(false));
+
+        // Update gender back to active
+        updateGender.isActive = true;
+        updateGender.description = "Test Active Gender";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(updateGender)
+                .when().put("/api/genders/{id}", createdGenderId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("code", equalTo("Y"))
+                .body("description", equalTo("Test Active Gender"))
+                .body("isActive", equalTo(true));
+    }
+
+    @Test
+    @Order(21)
     @DisplayName("DELETE /api/genders/{id} - Should delete gender successfully")
     void testDeleteGender() {
         Assumptions.assumeTrue(createdGenderId != null, "Created gender ID should not be null");
@@ -422,7 +461,7 @@ class GenderResourceTest {
     }
 
     @Test
-    @Order(21)
+    @Order(22)
     @DisplayName("DELETE /api/genders/{id} - Should return 404 for non-existent ID")
     void testDeleteGenderNotFound() {
         given()

@@ -42,6 +42,25 @@
             </div>
 
             <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="isActive" class="form-label"><strong>Active:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <div class="form-check">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               id="isActive"
+                               name="isActive"
+                               value="true"
+                               {#if gender.isActive}checked{/if}>
+                        <label class="form-check-label" for="isActive">
+                            Mark as active
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
                 <div class="col-12">
                     <small class="text-muted">Record no.: {gender.id}</small>
                 </div>

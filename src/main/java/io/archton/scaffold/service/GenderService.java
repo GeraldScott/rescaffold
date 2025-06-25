@@ -71,6 +71,9 @@ public class GenderService {
             checkDuplicateDescriptionForUpdate(updates.description, id);
             existing.description = updates.description;
         }
+        
+        // Update isActive field
+        existing.isActive = updates.isActive;
 
         existing.persist();
         return existing;

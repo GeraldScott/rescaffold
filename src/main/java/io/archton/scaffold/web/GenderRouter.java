@@ -141,13 +141,15 @@ public class GenderRouter {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response updateGenderFromForm(@PathParam("id") Long id,
                                          @FormParam("code") String code,
-                                         @FormParam("description") String description) {
+                                         @FormParam("description") String description,
+                                         @FormParam("isActive") Boolean isActive) {
         log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
 
         try {
             Gender updateGender = new Gender();
             updateGender.code = code;
             updateGender.description = description;
+            updateGender.isActive = isActive != null ? isActive : false;
 
             genderService.updateGender(id, updateGender);
 

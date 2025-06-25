@@ -187,7 +187,70 @@ class GenderCrudTest extends BaseSelenideTest {
     }
     
     @Test
-    @DisplayName("06 - Should cancel create operation")
+    @DisplayName("06 - Should edit gender isActive status successfully")
+    void shouldEditGenderIsActiveStatusSuccessfully() {
+        genderPage.openPage();
+        
+        // First create a gender to test with
+        genderPage.clickCreateNew();
+        String testCode = "A";
+        String testDescription = "Test Active Status";
+        genderPage.fillCreateForm(testCode, testDescription);
+        genderPage.submitCreateForm();
+        
+        // Verify it appears in the table as active
+        genderPage.getRowByCode(testCode).should(exist);
+        genderPage.getRowByCode(testCode).shouldHave(text("Active"));
+        
+        // Click Edit button for this gender
+        genderPage.getRowByCode(testCode).$("button[id^='edit-btn-']").click();
+        
+        // Verify edit form is displayed with isActive checkbox
+        genderPage.getCodeInput().should(exist);
+        genderPage.getDescriptionInput().should(exist);
+        genderPage.getIsActiveCheckbox().should(exist);
+        
+        // Verify checkbox is initially checked (active)
+        assertTrue(genderPage.isActiveCheckboxSelected(), "isActive checkbox should be checked initially");
+        
+        // Uncheck the isActive checkbox to make it inactive
+        genderPage.setIsActiveCheckbox(false);
+        
+        // Verify checkbox is now unchecked
+        assertTrue(!genderPage.isActiveCheckboxSelected(), "isActive checkbox should be unchecked");
+        
+        // Submit the form
+        genderPage.submitEditForm();
+        
+        // Verify we're back to the table and gender shows as inactive
+        genderPage.getGendersTable().should(exist);
+        genderPage.getRowByCode(testCode).should(exist);
+        genderPage.getRowByCode(testCode).shouldHave(text("Inactive"));
+        
+        // Edit again to make it active
+        genderPage.getRowByCode(testCode).$("button[id^='edit-btn-']").click();
+        
+        // Check the isActive checkbox to make it active again
+        genderPage.setIsActiveCheckbox(true);
+        
+        // Verify checkbox is now checked
+        assertTrue(genderPage.isActiveCheckboxSelected(), "isActive checkbox should be checked");
+        
+        // Submit the form
+        genderPage.submitEditForm();
+        
+        // Verify gender shows as active again
+        genderPage.getGendersTable().should(exist);
+        genderPage.getRowByCode(testCode).should(exist);
+        genderPage.getRowByCode(testCode).shouldHave(text("Active"));
+        
+        // Clean up - delete the test gender
+        genderPage.getRowByCode(testCode).$("button[id^='delete-btn-']").click();
+        genderPage.confirmDelete();
+    }
+
+    @Test
+    @DisplayName("07 - Should cancel create operation")
     void shouldCancelCreateOperation() {
         genderPage.openPage();
         

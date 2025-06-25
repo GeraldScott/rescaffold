@@ -21,6 +21,7 @@ public class GenderPage {
     // Form elements
     private final SelenideElement codeInput = $("#code");
     private final SelenideElement descriptionInput = $("#description");
+    private final SelenideElement isActiveCheckbox = $("#isActive");
     private final SelenideElement createForm = $("#create-form");
     private final SelenideElement editForm = $("#edit-form");
     
@@ -91,6 +92,24 @@ public class GenderPage {
         codeInput.setValue(code);
         descriptionInput.clear();
         descriptionInput.setValue(description);
+        return this;
+    }
+    
+    public GenderPage fillEditForm(String code, String description, boolean isActive) {
+        codeInput.clear();
+        codeInput.setValue(code);
+        descriptionInput.clear();
+        descriptionInput.setValue(description);
+        setIsActiveCheckbox(isActive);
+        return this;
+    }
+    
+    public GenderPage setIsActiveCheckbox(boolean isActive) {
+        if (isActive && !isActiveCheckbox.isSelected()) {
+            isActiveCheckbox.click();
+        } else if (!isActive && isActiveCheckbox.isSelected()) {
+            isActiveCheckbox.click();
+        }
         return this;
     }
     
@@ -165,6 +184,14 @@ public class GenderPage {
     
     public SelenideElement getDescriptionInput() {
         return descriptionInput;
+    }
+    
+    public SelenideElement getIsActiveCheckbox() {
+        return isActiveCheckbox;
+    }
+    
+    public boolean isActiveCheckboxSelected() {
+        return isActiveCheckbox.isSelected();
     }
     
     public SelenideElement getCreateNewButton() {
