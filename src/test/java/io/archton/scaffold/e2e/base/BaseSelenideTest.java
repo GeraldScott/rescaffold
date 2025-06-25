@@ -15,6 +15,10 @@ public abstract class BaseSelenideTest {
     
     @BeforeAll
     static void setUpAll() {
+        // Suppress CDP warnings
+        System.setProperty("webdriver.chrome.verboseLogging", "false");
+        System.setProperty("selenide.reports", "false");
+        
         // Setup WebDriver manager
         WebDriverManager.chromedriver().setup();
         
@@ -27,6 +31,9 @@ public abstract class BaseSelenideTest {
         Configuration.savePageSource = false;
         Configuration.timeout = 10000;
         Configuration.pageLoadTimeout = 30000;
+        
+        // Chrome options to avoid CDP warnings
+        System.setProperty("selenide.chrome.opts", "--disable-dev-shm-usage --no-sandbox --disable-gpu --disable-logging --log-level=3");
         
         Log.info("Selenide configuration completed");
     }
