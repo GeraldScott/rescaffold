@@ -240,14 +240,15 @@ erDiagram
 - Look in folder /home/geraldo/Pictures/Screenshots/ for screenshots
 
 ## Test Strategy
-- Test documentation is here: https://quarkus.io/guides/getting-started-testing
-- Use @QuarkusTest annotation and follow https://quarkus.io/guides/getting-started-testing#testing-a-specific-endpoint for testing endpoints. 
-- Use PostgreSQL database as defined in %test.quarkus.datasource 
-- Database credentials are loaded from .env file (TEST_DB_USERNAME, TEST_DB_PASSWORD)
-- Use Selenide for end-to-end testing as it is based on Selenium
-- Cover critical user journeys
-- Test across different browsers and screen sizes
-- Automate UI interaction and validation scenarios
+- **Resource Testing**: Comprehensive strategy documented in `docs/resource-test-strategy.md`
+- **Reference Implementation**: Follow the `GenderResourceTest` pattern for all new REST resource tests
+- **Framework**: Use @QuarkusTest with @TestTransaction for database rollback and REST Assured for API testing
+- **Test Coverage**: CRUD operations, validation rules, error handling, and data processing scenarios
+- **Data Isolation**: Use unique test data per test method to prevent conflicts
+- **Documentation**: https://quarkus.io/guides/getting-started-testing
+- **Database**: PostgreSQL as defined in %test.quarkus.datasource with credentials from .env file
+- **E2E Testing**: Use Selenide for end-to-end browser testing
+- **UI Testing**: Cover critical user journeys across different browsers and screen sizes
  
 ## HTMX Documentation
 - HTMX documentation is here: https://htmx.org/docs/
