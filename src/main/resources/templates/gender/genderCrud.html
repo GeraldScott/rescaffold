@@ -1,8 +1,5 @@
-{! genders : java.util.List<io.archton.scaffold.domain.Gender> !}
-{! gender : io.archton.scaffold.domain.Gender !}
-{! mode : java.lang.String !}
-
 {#if mode == "list"}
+    {! genders : java.util.List<io.archton.scaffold.domain.Gender> !}
     {#fragment id=gender_table}
     <div id="content-area" class="card">
         <div class="card-body">
@@ -199,6 +196,7 @@
 {/if}
 
 {#if mode == "edit"}
+    {! gender : io.archton.scaffold.domain.Gender !}
     {#fragment id=edit_form}
     <div class="card">
         <div class="card-header bg-primary text-white">
@@ -292,6 +290,7 @@
 {/if}
 
 {#if mode == "view"}
+    {! gender : io.archton.scaffold.domain.Gender !}
     {#fragment id=view_details}
     <div class="card">
         <div class="card-header bg-info text-white">
@@ -381,6 +380,7 @@
 {/if}
 
 {#if mode == "delete"}
+    {! gender : io.archton.scaffold.domain.Gender !}
     {#fragment id=delete_confirm}
     <div class="card">
         <div class="card-header bg-danger text-white">

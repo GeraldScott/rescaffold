@@ -23,7 +23,7 @@ class GenderCrudTest extends BaseSelenideTest {
 
     @BeforeEach
     void setUpTestData() {
-        // Generate single character codes for Gender entity (maxlength=1)
+        // Generate unique test data for each test run
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("ss"));
         char testChar = (char) ('A' + (Integer.parseInt(timestamp) % 26));
         char updatedChar = (char) ('A' + ((Integer.parseInt(timestamp) + 1) % 26));
@@ -33,70 +33,53 @@ class GenderCrudTest extends BaseSelenideTest {
         updatedCode = String.valueOf(updatedChar);
         updatedDescription = "Updated Test Gender " + updatedChar;
 
-        // Navigate to the page once for all tests
+        // Navigate to the page
         open("/genders-ui");
     }
 
-    // Flag to track if we're in the create test
-    private boolean isCreateTest = false;
-
     @AfterEach
-    void cleanUpTestData() {
-        System.out.println("[DEBUG_LOG] Running cleanup, isCreateTest: " + isCreateTest);
-
-        // Skip cleanup for the create test
-        if (isCreateTest) {
-            System.out.println("[DEBUG_LOG] Skipping cleanup for create test");
-            isCreateTest = false;
-            return;
+    void cleanUp() {
+        // Simple cleanup: delete any test data that was created
+        // This is necessary for E2E tests since @TestTransaction doesn't work across HTTP
+        try {
+            refresh(); // Ensure clean state
+            deleteGenderIfExists(testCode);
+            deleteGenderIfExists(updatedCode);
+        } catch (Exception e) {
+            // Log but don't fail the test due to cleanup issues
+            System.err.println("Cleanup warning: " + e.getMessage());
         }
-
-        // Clean up any test data that might have been created
-        refresh(); // Refresh to ensure clean state
-
-        cleanupGenderIfExists(testCode);
-        cleanupGenderIfExists(updatedCode);
     }
 
-    private void cleanupGenderIfExists(String code) {
+    private void deleteGenderIfExists(String code) {
         try {
-            System.out.println("[DEBUG_LOG] Cleaning up gender with code: " + code);
-            // Use more direct selectors instead of page object methods
+            refresh(); // Ensure we have the latest state
+            
             if ($$("td.fw-bold").findBy(text(code)).exists()) {
-                System.out.println("[DEBUG_LOG] Found gender with code: " + code);
-                $$("td.fw-bold").findBy(text(code)).closest("tr")
-                    .$("button[id^='delete-btn-']").click();
-                System.out.println("[DEBUG_LOG] Clicked delete button");
+                // Scroll to element and click delete
+                var deleteButton = $$("td.fw-bold").findBy(text(code)).closest("tr")
+                    .$("button[id^='delete-btn-']");
+                deleteButton.scrollTo().click();
 
-                // Add a wait to give the server time to process the request
-                try {
-                    System.out.println("[DEBUG_LOG] Waiting for 1 second");
-                    Thread.sleep(1000);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                }
+                // Wait for delete confirmation dialog to appear
+                $("#confirm-delete-btn").shouldBe(visible, java.time.Duration.ofSeconds(5));
+                
+                // Click confirm delete
+                $("#confirm-delete-btn").click();
 
-                // Check if confirm-delete-btn exists before clicking
-                if ($("#confirm-delete-btn").exists()) {
-                    System.out.println("[DEBUG_LOG] Found confirm-delete-btn");
-                    $("#confirm-delete-btn").click();
-                    System.out.println("[DEBUG_LOG] Clicked confirm-delete-btn");
-                } else {
-                    System.out.println("[DEBUG_LOG] confirm-delete-btn not found, skipping");
-                }
-            } else {
-                System.out.println("[DEBUG_LOG] Gender with code " + code + " not found");
+                // Wait for deletion to complete - check the table is back and element is gone
+                $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
+                $$("td.fw-bold").findBy(text(code)).should(not(exist), java.time.Duration.ofSeconds(5));
             }
         } catch (Exception e) {
-            // Ignore cleanup errors
-            System.out.println("[DEBUG_LOG] Error during cleanup: " + e.getMessage());
+            // Ignore cleanup errors to prevent test failures
+            System.err.println("Cleanup warning for " + code + ": " + e.getMessage());
         }
     }
 
     @Test
     @DisplayName("Should load Genders page and display table")
     void shouldLoadGendersPageAndDisplayTable() {
-        // Use direct selectors with implicit waits
         $("h1").shouldHave(text("Genders"));
         $("#content-area").shouldBe(visible);
         $("table.table").shouldBe(visible);
@@ -106,67 +89,40 @@ class GenderCrudTest extends BaseSelenideTest {
     @Test
     @DisplayName("Should create new gender successfully")
     void shouldCreateNewGenderSuccessfully() {
-        // Set flag to skip cleanup for this test
-        isCreateTest = true;
+        $("#create-new-btn").scrollTo().click();
 
-        // Chain actions fluently
-        System.out.println("[DEBUG_LOG] Test code: " + testCode);
-        System.out.println("[DEBUG_LOG] Test description: " + testDescription);
-        $("#create-new-btn").click();
-        System.out.println("[DEBUG_LOG] Clicked create button");
-
-        // Wait for form and fill it in one flow
-        $("#code").shouldBe(visible).setValue(testCode);
-        System.out.println("[DEBUG_LOG] Set code: " + testCode);
+        // Wait for form to appear
+        $("#code").shouldBe(visible, java.time.Duration.ofSeconds(5));
+        $("#code").setValue(testCode);
         $("#description").setValue(testDescription);
-        System.out.println("[DEBUG_LOG] Set description: " + testDescription);
-
-        // Submit and verify
         $("#submit-create-btn").click();
-        System.out.println("[DEBUG_LOG] Clicked submit button");
 
-        // Add a wait to give the server time to process the request
-        try {
-            System.out.println("[DEBUG_LOG] Waiting for 2 seconds");
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Verify record appears in table using more specific selector
-        System.out.println("[DEBUG_LOG] Looking for td.fw-bold with text: " + testCode);
-        $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible);
-        System.out.println("[DEBUG_LOG] Found td.fw-bold with text: " + testCode);
-
-        // Add another wait to ensure the test completes before cleanup
-        try {
-            System.out.println("[DEBUG_LOG] Test completed successfully, waiting for 2 seconds before cleanup");
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for table to reappear and verify record appears
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
+        $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible, java.time.Duration.ofSeconds(5));
     }
 
     @Test
     @DisplayName("Should view gender details successfully")
     void shouldViewGenderDetailsSuccessfully() {
-        // Create test data
         createTestGender();
 
-        // Click view button using text-based selection
-        $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .$("button", 0).click(); // First button is View
+        // Click view button (first button in row)
+        var viewButton = $$("td.fw-bold").findBy(text(testCode)).closest("tr")
+            .$("button", 0);
+        viewButton.scrollTo().click();
 
-        // Verify view page content with chained assertions
+        // Wait for view details to appear and verify content
+        $("#content-area").shouldBe(visible, java.time.Duration.ofSeconds(5));
         $("#content-area")
-            .shouldHave(text("Code:"))
+            .shouldHave(text("Code:"), java.time.Duration.ofSeconds(5))
             .shouldHave(text(testCode))
             .shouldHave(text("Description:"))
             .shouldHave(text(testDescription));
 
         // Go back
         $(byText("Back")).click();
-        $("table.table").shouldBe(visible);
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
     }
 
     @Test
@@ -175,22 +131,25 @@ class GenderCrudTest extends BaseSelenideTest {
         createTestGender();
 
         // Click edit button (second button in row)
-        $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .$("button", 1).click(); // Second button is Edit
+        var editButton = $$("td.fw-bold").findBy(text(testCode)).closest("tr")
+            .$("button", 1);
+        editButton.scrollTo().click();
 
-        // Verify form loads with current values and update
-        $("#code").shouldHave(value(testCode));
+        // Wait for edit form to appear and update it
+        $("#code").shouldBe(visible, java.time.Duration.ofSeconds(5))
+            .shouldHave(value(testCode));
         $("#code").clear();
         $("#code").setValue(updatedCode);
+
         $("#description").shouldHave(value(testDescription));
         $("#description").clear();
         $("#description").setValue(updatedDescription);
-
         $("#submit-edit-btn").click();
 
-        // Verify updated record
-        $$("td.fw-bold").findBy(text(updatedCode)).shouldBe(visible);
-        $$("td.fw-bold").findBy(text(testCode)).shouldNot(exist);
+        // Wait for table to reappear and verify updated record
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
+        $$("td.fw-bold").findBy(text(updatedCode)).shouldBe(visible, java.time.Duration.ofSeconds(5));
+        $$("td.fw-bold").findBy(text(testCode)).should(not(exist));
     }
 
     @Test
@@ -199,21 +158,23 @@ class GenderCrudTest extends BaseSelenideTest {
         createTestGender();
 
         // Click delete button (third button in row)
-        $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .$("button", 2).click(); // Third button is Delete
+        var deleteButton = $$("td.fw-bold").findBy(text(testCode)).closest("tr")
+            .$("button", 2);
+        deleteButton.scrollTo().click();
 
-        // Verify delete confirmation with chained assertions
+        // Wait for delete confirmation to appear and verify content
+        $("#content-area").shouldBe(visible, java.time.Duration.ofSeconds(5));
         $("#content-area")
-            .shouldHave(text("Delete Gender"))
+            .shouldHave(text("Delete Gender"), java.time.Duration.ofSeconds(5))
             .shouldHave(text("You are about to delete this gender record"))
             .shouldHave(text(testCode));
 
         // Confirm deletion
-        $("#confirm-delete-btn").shouldBe(visible).click();
+        $("#confirm-delete-btn").shouldBe(visible, java.time.Duration.ofSeconds(5)).click();
 
-        // Verify record is gone
-        $("table.table").shouldBe(visible);
-        $$("td.fw-bold").findBy(text(testCode)).shouldNot(exist);
+        // Wait for table to reappear and verify record is gone
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
+        $$("td.fw-bold").findBy(text(testCode)).should(not(exist), java.time.Duration.ofSeconds(5));
     }
 
     @Test
@@ -221,79 +182,93 @@ class GenderCrudTest extends BaseSelenideTest {
     void shouldToggleGenderActiveStatusSuccessfully() {
         createTestGender();
 
-        // Verify initially active
         var genderRow = $$("td.fw-bold").findBy(text(testCode)).closest("tr");
         genderRow.shouldHave(text("Active"));
 
         // Edit to make inactive
-        genderRow.$("button", 1).click(); // Edit button
-
-        $("#isActive").shouldBe(checked).click(); // Uncheck
+        genderRow.$("button", 1).scrollTo().click();
+        
+        // Wait for edit form and toggle active status
+        $("#isActive").shouldBe(visible, java.time.Duration.ofSeconds(5))
+            .shouldBe(checked).click(); // Uncheck
         $("#submit-edit-btn").click();
 
-        // Verify now inactive
+        // Wait for table and verify now inactive
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
         $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .shouldHave(text("Inactive"));
+            .shouldHave(text("Inactive"), java.time.Duration.ofSeconds(5));
 
         // Edit to make active again
         $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .$("button", 1).click(); // Edit button
-
-        $("#isActive").shouldNotBe(checked).click(); // Check
+            .$("button", 1).scrollTo().click();
+        
+        // Wait for edit form and toggle active status back
+        $("#isActive").shouldBe(visible, java.time.Duration.ofSeconds(5))
+            .shouldNotBe(checked).click(); // Check
         $("#submit-edit-btn").click();
 
-        // Verify active again
+        // Wait for table and verify active again
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
         $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .shouldHave(text("Active"));
+            .shouldHave(text("Active"), java.time.Duration.ofSeconds(5));
     }
 
     @Test
     @DisplayName("Should cancel operations without side effects")
     void shouldCancelOperationsWithoutSideEffects() {
         // Test cancel create
-        $("#create-new-btn").click();
-        $("#code").setValue("CANCEL");
+        $("#create-new-btn").scrollTo().click();
+        
+        // Wait for create form and fill it
+        $("#code").shouldBe(visible, java.time.Duration.ofSeconds(5))
+            .setValue("Z"); // Use a different code to avoid conflicts
         $("#cancel-create-btn").click();
 
-        $("table.table").shouldBe(visible);
-        $$("td.fw-bold").findBy(text("CANCEL")).shouldNot(exist);
+        // Verify back to table and no record created
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
+        $$("td.fw-bold").findBy(text("Z")).shouldNot(exist);
 
-        // Test cancel edit
+        // Test cancel edit with existing data
         createTestGender();
-        $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .$("button", 1).click(); // Edit
+        var editButton = $$("td.fw-bold").findBy(text(testCode)).closest("tr")
+            .$("button", 1);
+        editButton.scrollTo().click();
 
+        // Wait for edit form and modify it
+        $("#code").shouldBe(visible, java.time.Duration.ofSeconds(5));
         $("#code").clear();
-        $("#code").setValue("EDITED");
+        $("#code").setValue("Y");
         $("#cancel-edit-btn").click();
 
-        // Verify original data unchanged
+        // Verify back to table and original data unchanged
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
         $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible);
-        $$("td.fw-bold").findBy(text("EDITED")).shouldNot(exist);
+        $$("td.fw-bold").findBy(text("Y")).shouldNot(exist);
 
         // Test cancel delete
-        $$("td.fw-bold").findBy(text(testCode)).closest("tr")
-            .$("button", 2).click(); // Delete
+        var deleteButton = $$("td.fw-bold").findBy(text(testCode)).closest("tr")
+            .$("button", 2);
+        deleteButton.scrollTo().click();
 
-        $(byText("Cancel")).click();
+        // Wait for delete confirmation and cancel
+        $("#cancel-delete-btn").shouldBe(visible, java.time.Duration.ofSeconds(5)).click();
 
-        // Verify record still exists
+        // Verify back to table and record still exists
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
         $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible);
     }
 
     private void createTestGender() {
-        $("#create-new-btn").click();
-        System.out.println("[DEBUG_LOG] Clicking create button");
+        $("#create-new-btn").scrollTo().click();
+        
+        // Wait for create form to appear
+        $("#code").shouldBe(visible, java.time.Duration.ofSeconds(5));
         $("#code").setValue(testCode);
-        System.out.println("[DEBUG_LOG] Setting code: " + testCode);
         $("#description").setValue(testDescription);
-        System.out.println("[DEBUG_LOG] Setting description: " + testDescription);
         $("#submit-create-btn").click();
-        System.out.println("[DEBUG_LOG] Clicking submit button");
 
-        // Wait for table to load
-        System.out.println("[DEBUG_LOG] Waiting for table to load with code: " + testCode);
-        $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible);
-        System.out.println("[DEBUG_LOG] Found table row with code: " + testCode);
+        // Wait for table to reappear and record to be created
+        $("table.table").shouldBe(visible, java.time.Duration.ofSeconds(10));
+        $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible, java.time.Duration.ofSeconds(5));
     }
 }
