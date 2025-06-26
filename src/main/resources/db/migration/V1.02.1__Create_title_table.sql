@@ -1,6 +1,6 @@
 create table title (
     id bigint unique generated always as identity,
-    code varchar not null unique,
+    code varchar(5) not null unique,
     description text not null unique,
     is_active boolean not null default true,
     created_by varchar not null default 'system',

@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
+import java.util.List;
+import io.quarkus.panache.common.Sort;
 
 @Entity
 @Table(name = "title")
@@ -15,9 +18,11 @@ public class Title extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(name = "code", nullable = false, unique = true)
+    @Column(name = "code", nullable = false, unique = true, length = 5)
     @NotNull
     @NotBlank(message = "Code cannot be blank")
+    @Size(min = 1, max = 5, message = "Code must be between 1 and 5 characters")
+    @Pattern(regexp = "[A-Z]+", message = "Code must contain only uppercase letters")
     public String code;
 
     @Column(name = "description", columnDefinition = "text", nullable = false, unique = true)
@@ -29,7 +34,7 @@ public class Title extends PanacheEntityBase {
     public Boolean isActive = true;
 
     @Column(name = "created_by", nullable = false)
-    public String createdBy;
+    public String createdBy = "system";
 
     @Column(name = "created_at", nullable = false)
     public LocalDateTime createdAt;
@@ -53,5 +58,13 @@ public class Title extends PanacheEntityBase {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public static Title findByCode(String code) {
+        return find("code", code).firstResult();
+    }
+
+    public static List<Title> listSorted() {
+        return listAll(Sort.ascending("description"));
     }
 }
