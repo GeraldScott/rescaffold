@@ -145,10 +145,15 @@ public class PersonRouter {
 
         } catch (IllegalArgumentException e) {
             log.error("Validation error creating person: " + e.getMessage());
+            List<Title> titleList = titleService.listSorted();
+            List<Gender> genderList = genderService.listSorted();
+            List<IdType> idTypeList = idTypeService.listSorted();
+            String html = Templates.create(titleList, genderList, idTypeList).render();
+            
             if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).build();
+                return Response.status(Response.Status.CONFLICT).entity(html).build();
             }
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
             log.error("Error creating person: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
