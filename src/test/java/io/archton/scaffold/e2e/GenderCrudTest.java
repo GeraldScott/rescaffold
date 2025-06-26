@@ -4,6 +4,7 @@ import com.codeborne.selenide.SelenideElement;
 import io.archton.scaffold.e2e.base.BaseSelenideTest;
 import io.archton.scaffold.e2e.pages.GenderPage;
 import io.archton.scaffold.e2e.pages.HomePage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,15 @@ class GenderCrudTest extends BaseSelenideTest {
 
     private final HomePage homePage = new HomePage();
     private final GenderPage genderPage = new GenderPage();
+
+    @BeforeEach
+    void setUp() {
+        // Navigate to genders page before each test
+        genderPage.openPage();
+
+        // Wait for table to load
+        genderPage.getGenderTable().should(exist);
+    }
 
     @Test
     @DisplayName("Should navigate to Genders page from Maintenance menu")
@@ -48,9 +58,6 @@ class GenderCrudTest extends BaseSelenideTest {
     @Test
     @DisplayName("Should display gender list table with correct headers")
     void shouldDisplayGenderListTable() {
-        // Navigate directly to genders page
-        genderPage.openPage();
-
         // Verify table exists and is visible
         genderPage.getGenderTable().should(exist);
         genderPage.getGenderTable().should(be(visible));
@@ -75,14 +82,37 @@ class GenderCrudTest extends BaseSelenideTest {
     }
 
     @Test
+    @DisplayName("Should create a new gender successfully")
+    void shouldCreateNewGender() {
+        // Generate unique code and description for the test
+        String uniqueCode = findUniqueCode();
+        String description = "Test Gender " + System.currentTimeMillis();
+
+        // Create a new gender using the extracted method
+        createGender(uniqueCode, description, true);
+
+        // Verify the new gender appears in the table
+        assertTrue(genderPage.hasGenderWithCode(uniqueCode),
+                "Newly created gender with code " + uniqueCode + " should exist");
+
+        // Get the row and verify the description and active status
+        SelenideElement newRow = genderPage.getRowByCode(uniqueCode);
+        assertNotNull(newRow, "New gender row should not be null");
+
+        // Verify description
+        newRow.$$("td").get(1).shouldHave(text(description));
+
+        // Verify active status
+        newRow.$$("td").get(6).$(".badge").shouldHave(text("Active"));
+
+        // Verify creation details
+        newRow.$$("td").get(2).shouldHave(text("system")); // Created by
+        newRow.$$("td").get(3).shouldNotBe(empty); // Created at
+    }
+
+    @Test
     @DisplayName("Should view gender details")
     void shouldViewGenderDetails() {
-        // Navigate to genders page
-        genderPage.openPage();
-
-        // Wait for table to load
-        genderPage.getGenderTable().should(exist);
-
         // Find first row and get its ID
         var firstRow = genderPage.getTableRows().first();
         firstRow.should(exist);
@@ -114,12 +144,6 @@ class GenderCrudTest extends BaseSelenideTest {
     @Test
     @DisplayName("Should edit an existing gender")
     void shouldEditExistingGender() {
-        // Navigate to genders page
-        genderPage.openPage();
-
-        // Wait for table to load
-        genderPage.getGenderTable().should(exist);
-
         // Find first row and get its ID
         var firstRow = genderPage.getTableRows().first();
         firstRow.should(exist);
@@ -168,26 +192,14 @@ class GenderCrudTest extends BaseSelenideTest {
     @Test
     @DisplayName("Should delete an existing gender")
     void shouldDeleteExistingGender() {
-        // First create a new gender to ensure we have something to delete
-        // Navigate to genders page
-        genderPage.openPage();
-
-        // Click Create button
-        genderPage.clickCreateButton();
-
-        // Generate unique code and description for the test
+        // Create a new gender to ensure we have something to delete
         String uniqueCode = findUniqueCode();
         String description = "Delete Test " + System.currentTimeMillis();
 
-        // Fill in the form
-        genderPage.enterCode(uniqueCode)
-                .enterDescription(description);
-
-        // Submit the form
-        genderPage.clickSubmitCreateButton();
+        // Create the gender using the extracted method
+        createGender(uniqueCode, description, true);
 
         // Verify the new gender appears in the table
-        genderPage.getGenderTable().should(exist);
         assertTrue(genderPage.hasGenderWithCode(uniqueCode),
                 "Newly created gender with code " + uniqueCode + " should exist before deletion");
 
@@ -222,6 +234,37 @@ class GenderCrudTest extends BaseSelenideTest {
         // Verify the gender is no longer in the table
         assertFalse(genderPage.hasGenderWithCode(uniqueCode),
                 "Gender with code " + uniqueCode + " should not exist after deletion");
+    }
+
+    /**
+     * Helper method to create a new gender with the given attributes
+     *
+     * @param code The gender code (single uppercase character)
+     * @param description The gender description
+     * @param isActive Whether the gender should be active
+     */
+    private void createGender(String code, String description, boolean isActive) {
+        // Click Create button
+        genderPage.clickCreateButton();
+
+        // Verify create form loads
+        genderPage.getCodeInput().should(exist);
+        genderPage.getDescriptionInput().should(exist);
+
+        // Fill in the form
+        genderPage.enterCode(code)
+                .enterDescription(description);
+
+        // Set active status if needed (active by default)
+        if (!isActive) {
+            genderPage.setActive(false);
+        }
+
+        // Submit the form
+        genderPage.clickSubmitCreateButton();
+
+        // Verify return to list
+        genderPage.getGenderTable().should(exist);
     }
 
     /**
