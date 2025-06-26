@@ -111,4 +111,30 @@ class HomePageTest extends BaseSelenideTest {
         $("#content-area").should(exist);
         $("table.table").should(exist);
     }
+
+    @Test
+    @DisplayName("Should navigate to Titles page from Maintenance menu")
+    void shouldNavigateToTitlesPage() {
+        // Navigate to home page
+        homePage.openPage();
+
+        // Click Maintenance dropdown
+        homePage.clickMaintenanceDropdown();
+
+        // Verify Titles link is visible
+        homePage.getTitlesDropdownLink().should(exist);
+        homePage.getTitlesDropdownLink().should(be(visible));
+        homePage.getTitlesDropdownLink().should(have(text("Titles")));
+
+        // Click Titles link
+        homePage.clickTitlesLink();
+
+        // Verify navigation to Titles page
+        webdriver().shouldHave(url(BASE_URL + "/titles-ui"));
+
+        // Verify page loads correctly
+        $("h1").should(have(text("Titles")));
+        $("#content-area").should(exist);
+        $("table.table").should(exist);
+    }
 }

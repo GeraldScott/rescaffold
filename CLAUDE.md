@@ -153,11 +153,24 @@ erDiagram
         varchar updated_by "NULL"
     }
     
+    IdType {
+        bigint id PK
+        varchar code UK
+        text description UK
+        boolean is_active "NOT NULL DEFAULT true"
+        timestamp created_at "NOT NULL DEFAULT now()"
+        timestamp updated_at "NULL"
+        varchar created_by "NOT NULL DEFAULT 'system'"
+        varchar updated_by "NULL"
+    }
+    
     Person {
         bigint id PK
         varchar first_name
         varchar last_name "NOT NULL"
         varchar email UK
+        varchar id_number
+        bigint id_type_id FK
         bigint gender_id FK
         bigint title_id FK
         boolean is_active "NOT NULL DEFAULT true"
@@ -204,6 +217,7 @@ erDiagram
     
     Gender ||--o{ Person : "has"
     Title ||--o{ Person : "has"
+    IdType ||--o{ Person : "has"
     Person ||--o| User : "becomes"
     User ||--o{ UserRole : "has"
     Role ||--o{ UserRole : "assigned to"
