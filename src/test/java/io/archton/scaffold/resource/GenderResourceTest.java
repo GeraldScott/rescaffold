@@ -80,9 +80,7 @@ class GenderResourceTest {
         return gender;
     }
 
-    // ==============================================
-    // HAPPY PATH CRUD OPERATION TESTS
-    // ==============================================
+    // CRUD operation tests
 
     @Test
     @TestTransaction
@@ -267,9 +265,7 @@ class GenderResourceTest {
                 .body("description", hasItems("List Test Alpha", "List Test Beta", "List Test Charlie"));
     }
 
-    // ==============================================
-    // VALIDATION TESTS
-    // ==============================================
+    // Data validation tests
 
     @Test
     @TestTransaction
@@ -455,13 +451,6 @@ class GenderResourceTest {
                 .body("error", containsString("already exists"));
     }
 
-    // ==============================================
-    // DATA NORMALIZATION TESTS
-    // ==============================================
-    // Note: Bean Validation (@Pattern, @Size) happens before service normalization,
-    // so lowercase codes and whitespace are rejected before normalization can occur.
-    // These tests verify that valid data is properly processed.
-
     @Test
     @TestTransaction
     @DisplayName("POST /api/genders - Should properly process valid uppercase code")
@@ -480,9 +469,7 @@ class GenderResourceTest {
                 .body("description", equalTo("Uppercase"));
     }
 
-    // ==============================================
-    // ERROR HANDLING TESTS
-    // ==============================================
+    // Error handling tests
 
     @Test
     @TestTransaction
