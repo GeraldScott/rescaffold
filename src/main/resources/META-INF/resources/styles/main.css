@@ -108,3 +108,24 @@
   vertical-align: middle;
   border-color: var(--space-silver);
 }
+
+/* Checkbox styling */
+.form-check-input {
+  background-color: #e9ecef;
+  border: 1px solid #adb5bd;
+}
+
+.form-check-input:not(:checked) {
+  background-color: #e9ecef;
+  border: 1px solid #6c757d;
+}
+
+.form-check-input:checked {
+  background-color: var(--space-metallic-blue);
+  border-color: var(--space-metallic-blue);
+}
+
+.form-check-input:focus {
+  border-color: var(--space-light-blue);
+  box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
