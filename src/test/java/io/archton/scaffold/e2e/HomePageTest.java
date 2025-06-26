@@ -11,7 +11,7 @@ import static com.codeborne.selenide.WebDriverConditions.url;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Home Page Navigation E2E Tests")
-class HomePageNavigationTest extends BaseSelenideTest {
+class HomePageTest extends BaseSelenideTest {
     
     private final HomePage homePage = new HomePage();
     
@@ -87,29 +87,28 @@ class HomePageNavigationTest extends BaseSelenideTest {
     }
     
     @Test
-    @DisplayName("Should navigate to Genders from Maintenance dropdown")
-    void shouldNavigateToGendersFromMaintenanceDropdown() {
+    @DisplayName("Should navigate to Genders page from Maintenance menu")
+    void shouldNavigateToGendersPage() {
+        // Navigate to home page
         homePage.openPage();
-        
-        // Click on Maintenance dropdown to reveal menu items
+
+        // Click Maintenance dropdown
         homePage.clickMaintenanceDropdown();
-        
-        // Verify Genders link is visible in dropdown
+
+        // Verify Genders link is visible
         homePage.getGendersDropdownLink().should(exist);
         homePage.getGendersDropdownLink().should(be(visible));
         homePage.getGendersDropdownLink().should(have(text("Genders")));
-        
-        assertTrue(homePage.isGendersDropdownLinkVisible(), "Genders dropdown link should be visible");
-        
+
         // Click Genders link
         homePage.clickGendersLink();
-        
+
         // Verify navigation to Genders page
         webdriver().shouldHave(url(BASE_URL + "/genders-ui"));
-        
-        // Verify Gender CRUD page loads with table
+
+        // Verify page loads correctly
+        $("h1").should(have(text("Genders")));
         $("#content-area").should(exist);
         $("table.table").should(exist);
-        $("h1").should(have(text("Genders")));
     }
 }

@@ -3,7 +3,6 @@ package io.archton.scaffold.e2e;
 import com.codeborne.selenide.SelenideElement;
 import io.archton.scaffold.e2e.base.BaseSelenideTest;
 import io.archton.scaffold.e2e.pages.GenderPage;
-import io.archton.scaffold.e2e.pages.HomePage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,13 +10,11 @@ import org.junit.jupiter.api.Test;
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
-import static com.codeborne.selenide.WebDriverConditions.url;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Gender CRUD E2E Tests")
 class GenderCrudTest extends BaseSelenideTest {
 
-    private final HomePage homePage = new HomePage();
     private final GenderPage genderPage = new GenderPage();
 
     @BeforeEach
@@ -26,32 +23,6 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.openPage();
 
         // Wait for table to load
-        genderPage.getGenderTable().should(exist);
-    }
-
-    @Test
-    @DisplayName("Should navigate to Genders page from Maintenance menu")
-    void shouldNavigateToGendersPage() {
-        // Navigate to home page
-        homePage.openPage();
-
-        // Click Maintenance dropdown
-        homePage.clickMaintenanceDropdown();
-
-        // Verify Genders link is visible
-        homePage.getGendersDropdownLink().should(exist);
-        homePage.getGendersDropdownLink().should(be(visible));
-        homePage.getGendersDropdownLink().should(have(text("Genders")));
-
-        // Click Genders link
-        homePage.clickGendersLink();
-
-        // Verify navigation to Genders page
-        webdriver().shouldHave(url(BASE_URL + "/genders-ui"));
-
-        // Verify page loads correctly
-        genderPage.getPageTitle().should(have(text("Genders")));
-        genderPage.getContentArea().should(exist);
         genderPage.getGenderTable().should(exist);
     }
 
