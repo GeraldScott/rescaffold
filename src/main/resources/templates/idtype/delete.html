@@ -1,12 +1,12 @@
-{! gender : io.archton.scaffold.domain.Gender !}
+{! idType : io.archton.scaffold.domain.IdType !}
 <div id="content-area" class="card">
     <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">Delete Gender</h5>
+        <h5 class="mb-0">Delete IdType</h5>
     </div>
     <div class="card-body">
         <div class="alert alert-warning" role="alert">
             <i class="bi bi-exclamation-triangle"></i>
-            You are about to delete this gender record. This action cannot be undone.
+            You are about to delete this id type record. This action cannot be undone.
         </div>
 
         <div class="row mb-3">
@@ -14,7 +14,7 @@
                 <strong>Code:</strong>
             </div>
             <div class="col-sm-8">
-                <span class="badge bg-primary fs-6">{gender.code}</span>
+                <span class="badge bg-primary fs-6">{idType.code}</span>
             </div>
         </div>
         <div class="row mb-3">
@@ -22,12 +22,12 @@
                 <strong>Description:</strong>
             </div>
             <div class="col-sm-8">
-                {gender.description}
+                {idType.description}
             </div>
         </div>
         <div class="row mb-3">
             <div class="col-12">
-                <small class="text-muted">Record no.: {gender.id}</small>
+                <small class="text-muted">Record no.: {idType.id}</small>
             </div>
         </div>
     </div>
@@ -37,7 +37,7 @@
             <button type="button"
                     id="cancel-delete-btn"
                     class="btn btn-outline-secondary btn-sm"
-                    hx-get="/genders-ui/table"
+                    hx-get="/id-types-ui/table"
                     hx-target="#content-area"
                     hx-swap="innerHTML">
                 <i class="bi bi-arrow-left"></i> Cancel
@@ -45,7 +45,7 @@
             <button type="button"
                     id="confirm-delete-btn"
                     class="btn btn-danger btn-sm"
-                    hx-delete="/genders-ui/{gender.id}"
+                    hx-delete="/id-types-ui/{idType.id}"
                     hx-target="#content-area"
                     hx-swap="innerHTML">
                 <i class="bi bi-trash"></i> Delete

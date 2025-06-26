@@ -137,4 +137,30 @@ class HomePageTest extends BaseSelenideTest {
         $("#content-area").should(exist);
         $("table.table").should(exist);
     }
+
+    @Test
+    @DisplayName("Should navigate to IdTypes page from Maintenance menu")
+    void shouldNavigateToIdTypesPage() {
+        // Navigate to home page
+        homePage.openPage();
+
+        // Click Maintenance dropdown
+        homePage.clickMaintenanceDropdown();
+
+        // Verify IdTypes link is visible
+        homePage.getIdTypesDropdownLink().should(exist);
+        homePage.getIdTypesDropdownLink().should(be(visible));
+        homePage.getIdTypesDropdownLink().should(have(text("IdTypes")));
+
+        // Click IdTypes link
+        homePage.clickIdTypesLink();
+
+        // Verify navigation to IdTypes page
+        webdriver().shouldHave(url(BASE_URL + "/id-types-ui"));
+
+        // Verify page loads correctly
+        $("h1").should(have(text("IdTypes")));
+        $("#content-area").should(exist);
+        $("table.table").should(exist);
+    }
 }

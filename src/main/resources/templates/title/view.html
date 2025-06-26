@@ -1,4 +1,4 @@
-{! gender : io.archton.scaffold.domain.Gender !}
+{! title : io.archton.scaffold.domain.Title !}
 <div id="content-area" class="card">
     <div class="card-body">
         <div class="row mb-3">
@@ -6,7 +6,7 @@
                 <strong>Code:</strong>
             </div>
             <div class="col-sm-8">
-                <span class="badge bg-primary fs-6">{gender.code}</span>
+                <span class="badge bg-primary fs-6">{title.code}</span>
             </div>
         </div>
         <div class="row mb-3">
@@ -14,7 +14,7 @@
                 <strong>Description:</strong>
             </div>
             <div class="col-sm-8">
-                {gender.description}
+                {title.description}
             </div>
         </div>
         <div class="row mb-3">
@@ -22,7 +22,7 @@
                 <strong>Created By:</strong>
             </div>
             <div class="col-sm-8">
-                {gender.createdBy}
+                {title.createdBy}
             </div>
         </div>
         <div class="row mb-3">
@@ -30,7 +30,7 @@
                 <strong>Created At:</strong>
             </div>
             <div class="col-sm-8">
-                {#if gender.createdAt}{gender.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                {#if title.createdAt}{title.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
             </div>
         </div>
         <div class="row mb-3">
@@ -38,7 +38,7 @@
                 <strong>Updated By:</strong>
             </div>
             <div class="col-sm-8">
-                {#if gender.updatedBy}{gender.updatedBy}{#else}-{/if}
+                {#if title.updatedBy}{title.updatedBy}{#else}-{/if}
             </div>
         </div>
         <div class="row mb-3">
@@ -46,7 +46,7 @@
                 <strong>Updated At:</strong>
             </div>
             <div class="col-sm-8">
-                {#if gender.updatedAt}{gender.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                {#if title.updatedAt}{title.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
             </div>
         </div>
         <div class="row mb-3">
@@ -54,7 +54,7 @@
                 <strong>Active:</strong>
             </div>
             <div class="col-sm-8">
-                {#if gender.isActive}
+                {#if title.isActive}
                     <span class="badge bg-success">Active</span>
                 {#else}
                     <span class="badge bg-danger">Inactive</span>
@@ -63,7 +63,7 @@
         </div>
         <div class="row mb-3">
             <div class="col-12">
-                <small class="text-muted">Record no.: {gender.id}</small>
+                <small class="text-muted">Record no.: {title.id}</small>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
         <div class="d-flex gap-2">
             <button type="button"
                     class="btn btn-outline-secondary btn-sm"
-                    hx-get="/genders-ui/table"
+                    hx-get="/titles-ui/table"
                     hx-target="#content-area"
                     hx-swap="innerHTML">
                 <i class="bi bi-arrow-left"></i> Back

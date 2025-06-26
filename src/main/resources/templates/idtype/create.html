@@ -1,10 +1,10 @@
 <div id="content-area" class="card">
     <div class="card-header bg-success text-white">
-        <h5 class="mb-0">Create New Gender</h5>
+        <h5 class="mb-0">Create New IdType</h5>
     </div>
     <div class="card-body">
         <form id="create-form"
-              hx-post="/genders-ui"
+              hx-post="/id-types-ui"
               hx-target="#content-area"
               hx-swap="innerHTML">
 
@@ -17,11 +17,11 @@
                            class="form-control"
                            id="code"
                            name="code"
-                           maxlength="1"
-                           pattern="[A-Z]"
+                           maxlength="5"
+                           pattern="[A-Z]+"
                            required
-                           title="Code must be a single uppercase alphabetic character"
-                           placeholder="e.g. N">
+                           title="Code must be uppercase alphabetic characters (1-5 characters)"
+                           placeholder="e.g. ID">
                 </div>
             </div>
 
@@ -36,7 +36,7 @@
                            name="description"
                            maxlength="256"
                            required
-                           placeholder="e.g. Non-binary">
+                           placeholder="e.g. Identity Document">
                 </div>
             </div>
         </form>
@@ -47,7 +47,7 @@
             <button type="button"
                     id="cancel-create-btn"
                     class="btn btn-outline-secondary btn-sm"
-                    hx-get="/genders-ui/table"
+                    hx-get="/id-types-ui/table"
                     hx-target="#content-area"
                     hx-swap="innerHTML">
                 <i class="bi bi-arrow-left"></i> Cancel

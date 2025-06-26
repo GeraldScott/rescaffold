@@ -1,11 +1,11 @@
-{! gender : io.archton.scaffold.domain.Gender !}
+{! title : io.archton.scaffold.domain.Title !}
 <div id="content-area" class="card">
     <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Edit Gender</h5>
+        <h5 class="mb-0">Edit Title</h5>
     </div>
     <div class="card-body">
         <form id="edit-form"
-              hx-put="/genders-ui/{gender.id}"
+              hx-put="/titles-ui/{title.id}"
               hx-target="#content-area"
               hx-swap="innerHTML">
 
@@ -18,11 +18,11 @@
                            class="form-control"
                            id="code"
                            name="code"
-                           value="{gender.code}"
-                           maxlength="1"
-                           pattern="[A-Z]"
+                           value="{title.code}"
+                           maxlength="5"
+                           pattern="[A-Z]+"
                            required
-                           title="Code must be a single uppercase alphabetic character">
+                           title="Code must be uppercase alphabetic characters (1-5 characters)">
                 </div>
             </div>
 
@@ -35,7 +35,7 @@
                            class="form-control"
                            id="description"
                            name="description"
-                           value="{gender.description}"
+                           value="{title.description}"
                            maxlength="256"
                            required>
                 </div>
@@ -52,7 +52,7 @@
                                id="isActive"
                                name="isActive"
                                value="true"
-                               {#if gender.isActive}checked{/if}>
+                               {#if title.isActive}checked{/if}>
                         <label class="form-check-label" for="isActive">
                             Mark as active
                         </label>
@@ -62,7 +62,7 @@
 
             <div class="row mb-3">
                 <div class="col-12">
-                    <small class="text-muted">Record no.: {gender.id}</small>
+                    <small class="text-muted">Record no.: {title.id}</small>
                 </div>
             </div>
         </form>
@@ -73,7 +73,7 @@
             <button type="button"
                     id="cancel-edit-btn"
                     class="btn btn-outline-secondary btn-sm"
-                    hx-get="/genders-ui/table"
+                    hx-get="/titles-ui/table"
                     hx-target="#content-area"
                     hx-swap="innerHTML">
                 <i class="bi bi-arrow-left"></i> Cancel
