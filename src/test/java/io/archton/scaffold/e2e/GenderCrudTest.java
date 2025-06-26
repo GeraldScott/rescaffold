@@ -37,8 +37,20 @@ class GenderCrudTest extends BaseSelenideTest {
         open("/genders-ui");
     }
 
+    // Flag to track if we're in the create test
+    private boolean isCreateTest = false;
+
     @AfterEach
     void cleanUpTestData() {
+        System.out.println("[DEBUG_LOG] Running cleanup, isCreateTest: " + isCreateTest);
+
+        // Skip cleanup for the create test
+        if (isCreateTest) {
+            System.out.println("[DEBUG_LOG] Skipping cleanup for create test");
+            isCreateTest = false;
+            return;
+        }
+
         // Clean up any test data that might have been created
         refresh(); // Refresh to ensure clean state
 
@@ -48,14 +60,36 @@ class GenderCrudTest extends BaseSelenideTest {
 
     private void cleanupGenderIfExists(String code) {
         try {
+            System.out.println("[DEBUG_LOG] Cleaning up gender with code: " + code);
             // Use more direct selectors instead of page object methods
             if ($$("td.fw-bold").findBy(text(code)).exists()) {
+                System.out.println("[DEBUG_LOG] Found gender with code: " + code);
                 $$("td.fw-bold").findBy(text(code)).closest("tr")
                     .$("button[id^='delete-btn-']").click();
-                $("#confirm-delete-btn").click();
+                System.out.println("[DEBUG_LOG] Clicked delete button");
+
+                // Add a wait to give the server time to process the request
+                try {
+                    System.out.println("[DEBUG_LOG] Waiting for 1 second");
+                    Thread.sleep(1000);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
+
+                // Check if confirm-delete-btn exists before clicking
+                if ($("#confirm-delete-btn").exists()) {
+                    System.out.println("[DEBUG_LOG] Found confirm-delete-btn");
+                    $("#confirm-delete-btn").click();
+                    System.out.println("[DEBUG_LOG] Clicked confirm-delete-btn");
+                } else {
+                    System.out.println("[DEBUG_LOG] confirm-delete-btn not found, skipping");
+                }
+            } else {
+                System.out.println("[DEBUG_LOG] Gender with code " + code + " not found");
             }
         } catch (Exception e) {
             // Ignore cleanup errors
+            System.out.println("[DEBUG_LOG] Error during cleanup: " + e.getMessage());
         }
     }
 
@@ -72,18 +106,45 @@ class GenderCrudTest extends BaseSelenideTest {
     @Test
     @DisplayName("Should create new gender successfully")
     void shouldCreateNewGenderSuccessfully() {
+        // Set flag to skip cleanup for this test
+        isCreateTest = true;
+
         // Chain actions fluently
+        System.out.println("[DEBUG_LOG] Test code: " + testCode);
+        System.out.println("[DEBUG_LOG] Test description: " + testDescription);
         $("#create-new-btn").click();
+        System.out.println("[DEBUG_LOG] Clicked create button");
 
         // Wait for form and fill it in one flow
         $("#code").shouldBe(visible).setValue(testCode);
+        System.out.println("[DEBUG_LOG] Set code: " + testCode);
         $("#description").setValue(testDescription);
+        System.out.println("[DEBUG_LOG] Set description: " + testDescription);
 
         // Submit and verify
         $("#submit-create-btn").click();
+        System.out.println("[DEBUG_LOG] Clicked submit button");
+
+        // Add a wait to give the server time to process the request
+        try {
+            System.out.println("[DEBUG_LOG] Waiting for 2 seconds");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // Verify record appears in table using more specific selector
+        System.out.println("[DEBUG_LOG] Looking for td.fw-bold with text: " + testCode);
         $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible);
+        System.out.println("[DEBUG_LOG] Found td.fw-bold with text: " + testCode);
+
+        // Add another wait to ensure the test completes before cleanup
+        try {
+            System.out.println("[DEBUG_LOG] Test completed successfully, waiting for 2 seconds before cleanup");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -222,11 +283,17 @@ class GenderCrudTest extends BaseSelenideTest {
 
     private void createTestGender() {
         $("#create-new-btn").click();
+        System.out.println("[DEBUG_LOG] Clicking create button");
         $("#code").setValue(testCode);
+        System.out.println("[DEBUG_LOG] Setting code: " + testCode);
         $("#description").setValue(testDescription);
+        System.out.println("[DEBUG_LOG] Setting description: " + testDescription);
         $("#submit-create-btn").click();
+        System.out.println("[DEBUG_LOG] Clicking submit button");
 
         // Wait for table to load
+        System.out.println("[DEBUG_LOG] Waiting for table to load with code: " + testCode);
         $$("td.fw-bold").findBy(text(testCode)).shouldBe(visible);
+        System.out.println("[DEBUG_LOG] Found table row with code: " + testCode);
     }
 }

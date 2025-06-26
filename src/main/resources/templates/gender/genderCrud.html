@@ -1,0 +1,440 @@
+{! genders : java.util.List<io.archton.scaffold.domain.Gender> !}
+{! gender : io.archton.scaffold.domain.Gender !}
+{! mode : java.lang.String !}
+
+{#if mode == "list"}
+    {#fragment id=gender_table}
+    <div id="content-area" class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                        <th>Updated By</th>
+                        <th>Updated At</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="table-tbody">
+                    {#for gender in genders}
+                        <tr id="gender-row-{gender.id}">
+                            <td class="fw-bold">{gender.code}</td>
+                            <td>{gender.description}</td>
+                            <td>{gender.createdBy}</td>
+                            <td>{#if gender.createdAt}{gender.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
+                            <td>{#if gender.updatedBy}{gender.updatedBy}{#else}-{/if}</td>
+                            <td>{#if gender.updatedAt}{gender.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
+                            <td>
+                                {#if gender.isActive}
+                                    <span class="badge bg-success">Active</span>
+                                {#else}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {/if}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            hx-get="/genders-ui/{gender.id}/view"
+                                            hx-target="#form-area"
+                                            hx-swap="innerHTML">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-dark"
+                                            hx-get="/genders-ui/{gender.id}/edit"
+                                            hx-target="#form-area"
+                                            hx-swap="innerHTML">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <button type="button"
+                                            id="delete-btn-{gender.id}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            hx-get="/genders-ui/{gender.id}/delete"
+                                            hx-target="#form-area"
+                                            hx-swap="innerHTML">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {/for}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex gap-2">
+                <button type="button"
+                        id="create-new-btn"
+                        class="btn btn-outline-success btn-sm"
+                        hx-get="/genders-ui/create"
+                        hx-target="#form-area"
+                        hx-swap="innerHTML">
+                    <i class="bi bi-plus"></i> Create
+                </button>
+            </div>
+        </div>
+    </div>
+    {/fragment}
+
+    {#fragment id=table_rows}
+    {#for gender in genders}
+        <tr id="gender-row-{gender.id}">
+            <td class="fw-bold">{gender.code}</td>
+            <td>{gender.description}</td>
+            <td>{gender.createdBy}</td>
+            <td>{#if gender.createdAt}{gender.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
+            <td>{#if gender.updatedBy}{gender.updatedBy}{#else}-{/if}</td>
+            <td>{#if gender.updatedAt}{gender.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
+            <td>
+                {#if gender.isActive}
+                    <span class="badge bg-success">Active</span>
+                {#else}
+                    <span class="badge bg-danger">Inactive</span>
+                {/if}
+            </td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            hx-get="/genders-ui/{gender.id}/view"
+                            hx-target="#form-area"
+                            hx-swap="innerHTML">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-dark"
+                            hx-get="/genders-ui/{gender.id}/edit"
+                            hx-target="#form-area"
+                            hx-swap="innerHTML">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button type="button"
+                            id="delete-btn-{gender.id}"
+                            class="btn btn-sm btn-outline-danger"
+                            hx-get="/genders-ui/{gender.id}/delete"
+                            hx-target="#form-area"
+                            hx-swap="innerHTML">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </td>
+        </tr>
+    {/for}
+    {/fragment}
+{/if}
+
+{#if mode == "create"}
+    {#fragment id=create_form}
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Create New Gender</h5>
+        </div>
+        <div class="card-body">
+            <form id="create-form"
+                  hx-post="/genders-ui"
+                  hx-target="#content-area"
+                  hx-swap="innerHTML">
+
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <label for="code" class="form-label"><strong>Code:</strong></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="text"
+                               class="form-control"
+                               id="code"
+                               name="code"
+                               maxlength="1"
+                               pattern="[A-Z]"
+                               required
+                               title="Code must be a single uppercase alphabetic character"
+                               placeholder="e.g. N">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <label for="description" class="form-label"><strong>Description:</strong></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="text"
+                               class="form-control"
+                               id="description"
+                               name="description"
+                               maxlength="256"
+                               required
+                               placeholder="e.g. Non-binary">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer bg-light">
+            <div class="d-flex gap-2">
+                <button type="button"
+                        id="cancel-create-btn"
+                        class="btn btn-outline-secondary btn-sm"
+                        hx-get="/genders-ui/table"
+                        hx-target="#form-area"
+                        hx-swap="innerHTML">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </button>
+                <button type="submit"
+                        id="submit-create-btn"
+                        form="create-form"
+                        class="btn btn-success btn-sm">
+                    <i class="bi bi-plus"></i> Create
+                </button>
+            </div>
+        </div>
+    </div>
+    {/fragment}
+{/if}
+
+{#if mode == "edit"}
+    {#fragment id=edit_form}
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Edit Gender</h5>
+        </div>
+        <div class="card-body">
+            <form id="edit-form"
+                  hx-put="/genders-ui/{gender.id}"
+                  hx-target="#content-area"
+                  hx-swap="innerHTML">
+
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <label for="code" class="form-label"><strong>Code:</strong></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="text"
+                               class="form-control"
+                               id="code"
+                               name="code"
+                               value="{gender.code}"
+                               maxlength="1"
+                               pattern="[A-Z]"
+                               required
+                               title="Code must be a single uppercase alphabetic character">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <label for="description" class="form-label"><strong>Description:</strong></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="text"
+                               class="form-control"
+                               id="description"
+                               name="description"
+                               value="{gender.description}"
+                               maxlength="256"
+                               required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <label for="isActive" class="form-label"><strong>Active:</strong></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="form-check">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   id="isActive"
+                                   name="isActive"
+                                   value="true"
+                                   {#if gender.isActive}checked{/if}>
+                            <label class="form-check-label" for="isActive">
+                                Mark as active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <small class="text-muted">Record no.: {gender.id}</small>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer bg-light">
+            <div class="d-flex gap-2">
+                <button type="button"
+                        id="cancel-edit-btn"
+                        class="btn btn-outline-secondary btn-sm"
+                        hx-get="/genders-ui/table"
+                        hx-target="#form-area"
+                        hx-swap="innerHTML">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </button>
+                <button type="submit"
+                        id="submit-edit-btn"
+                        form="edit-form"
+                        class="btn btn-primary btn-sm">
+                    <i class="bi bi-check"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+    {/fragment}
+{/if}
+
+{#if mode == "view"}
+    {#fragment id=view_details}
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Gender Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Code:</strong>
+                </div>
+                <div class="col-sm-8">
+                    <span class="badge bg-primary fs-6">{gender.code}</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Description:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {gender.description}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Created By:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {gender.createdBy}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Created At:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {#if gender.createdAt}{gender.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Updated By:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {#if gender.updatedBy}{gender.updatedBy}{#else}-{/if}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Updated At:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {#if gender.updatedAt}{gender.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Active:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {#if gender.isActive}
+                        <span class="badge bg-success">Active</span>
+                    {#else}
+                        <span class="badge bg-danger">Inactive</span>
+                    {/if}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <small class="text-muted">Record no.: {gender.id}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light">
+            <div class="d-flex gap-2">
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        hx-get="/genders-ui/table"
+                        hx-target="#form-area"
+                        hx-swap="innerHTML">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+    </div>
+    {/fragment}
+{/if}
+
+{#if mode == "delete"}
+    {#fragment id=delete_confirm}
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Delete Gender</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                You are about to delete this gender record. This action cannot be undone.
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Code:</strong>
+                </div>
+                <div class="col-sm-8">
+                    <span class="badge bg-primary fs-6">{gender.code}</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Description:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {gender.description}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <small class="text-muted">Record no.: {gender.id}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light">
+            <div class="d-flex gap-2">
+                <button type="button"
+                        id="cancel-delete-btn"
+                        class="btn btn-outline-secondary btn-sm"
+                        hx-get="/genders-ui/table"
+                        hx-target="#form-area"
+                        hx-swap="innerHTML">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </button>
+                <button type="button"
+                        id="confirm-delete-btn"
+                        class="btn btn-danger btn-sm"
+                        hx-delete="/genders-ui/{gender.id}"
+                        hx-target="#content-area"
+                        hx-swap="innerHTML">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    {/fragment}
+{/if}
