@@ -1,0 +1,127 @@
+{! titles : java.util.List<io.archton.scaffold.domain.Title> !}
+{! genders : java.util.List<io.archton.scaffold.domain.Gender> !}
+{! idTypes : java.util.List<io.archton.scaffold.domain.IdType> !}
+<div id="content-area" class="card">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Create New Person</h5>
+    </div>
+    <div class="card-body">
+        <form id="create-form"
+              hx-post="/persons-ui"
+              hx-target="#content-area"
+              hx-swap="innerHTML">
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="titleId" class="form-label"><strong>Title:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-select" id="titleId" name="titleId">
+                        <option value="">Select Title</option>
+                        {#for title in titles}
+                            <option value="{title.id}">{title.description}</option>
+                        {/for}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="firstName" class="form-label"><strong>First Name:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <input type="text"
+                           class="form-control"
+                           id="firstName"
+                           name="firstName"
+                           maxlength="100"
+                           placeholder="e.g. John">
+                </div>
+                <div class="col-sm-2">
+                    <label for="lastName" class="form-label"><strong>Last Name:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <input type="text"
+                           class="form-control"
+                           id="lastName"
+                           name="lastName"
+                           maxlength="100"
+                           required
+                           placeholder="e.g. Doe">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="email" class="form-label"><strong>Email:</strong></label>
+                </div>
+                <div class="col-sm-10">
+                    <input type="email"
+                           class="form-control"
+                           id="email"
+                           name="email"
+                           maxlength="255"
+                           placeholder="e.g. john.doe@example.com">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="genderId" class="form-label"><strong>Gender:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-select" id="genderId" name="genderId">
+                        <option value="">Select Gender</option>
+                        {#for gender in genders}
+                            <option value="{gender.id}">{gender.description}</option>
+                        {/for}
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <label for="idTypeId" class="form-label"><strong>ID Type:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-select" id="idTypeId" name="idTypeId">
+                        <option value="">Select ID Type</option>
+                        {#for idType in idTypes}
+                            <option value="{idType.id}">{idType.description}</option>
+                        {/for}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="idNumber" class="form-label"><strong>ID Number:</strong></label>
+                </div>
+                <div class="col-sm-10">
+                    <input type="text"
+                           class="form-control"
+                           id="idNumber"
+                           name="idNumber"
+                           maxlength="50"
+                           placeholder="e.g. 1234567890">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    id="cancel-create-btn"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="/persons-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+            <button type="submit"
+                    id="submit-create-btn"
+                    form="create-form"
+                    class="btn btn-success btn-sm">
+                <i class="bi bi-plus"></i> Create
+            </button>
+        </div>
+    </div>
+</div>

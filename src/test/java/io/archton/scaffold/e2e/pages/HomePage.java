@@ -9,6 +9,7 @@ public class HomePage {
     
     // Navigation elements
     private final SelenideElement homeNavLink = $("a.nav-link[href='/']");
+    private final SelenideElement peopleNavLink = $("a.nav-link[href='/persons-ui']");
     private final SelenideElement maintenanceDropdown = $("#maintenanceDropdown");
     private final SelenideElement navbar = $("nav.navbar");
     private final SelenideElement navbarBrand = $("a.navbar-brand");
@@ -23,6 +24,10 @@ public class HomePage {
     
     public SelenideElement getHomeNavLink() {
         return homeNavLink;
+    }
+    
+    public SelenideElement getPeopleNavLink() {
+        return peopleNavLink;
     }
     
     public SelenideElement getMaintenanceDropdown() {
@@ -45,6 +50,10 @@ public class HomePage {
         return homeNavLink.isDisplayed();
     }
     
+    public boolean isPeopleNavLinkVisible() {
+        return peopleNavLink.isDisplayed();
+    }
+    
     public boolean isMaintenanceDropdownVisible() {
         return maintenanceDropdown.isDisplayed();
     }
@@ -55,6 +64,10 @@ public class HomePage {
     
     public String getHomeNavLinkText() {
         return homeNavLink.getText();
+    }
+    
+    public String getPeopleNavLinkText() {
+        return peopleNavLink.getText();
     }
     
     public String getMaintenanceDropdownText() {
@@ -73,6 +86,11 @@ public class HomePage {
         return idTypesDropdownLink;
     }
 
+    public HomePage clickPeopleNavLink() {
+        peopleNavLink.click();
+        return this;
+    }
+    
     public HomePage clickMaintenanceDropdown() {
         maintenanceDropdown.click();
         return this;

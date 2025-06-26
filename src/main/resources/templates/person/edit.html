@@ -1,0 +1,151 @@
+{! person : io.archton.scaffold.domain.Person !}
+{! titles : java.util.List<io.archton.scaffold.domain.Title> !}
+{! genders : java.util.List<io.archton.scaffold.domain.Gender> !}
+{! idTypes : java.util.List<io.archton.scaffold.domain.IdType> !}
+<div id="content-area" class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Edit Person</h5>
+    </div>
+    <div class="card-body">
+        <form id="edit-form"
+              hx-post="/persons-ui/{person.id}/edit"
+              hx-target="#content-area"
+              hx-swap="innerHTML">
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="titleId" class="form-label"><strong>Title:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-select" id="titleId" name="titleId">
+                        <option value="">Select Title</option>
+                        {#for title in titles}
+                            <option value="{title.id}" {#if person.title && person.title.id == title.id}selected{/if}>{title.description}</option>
+                        {/for}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="firstName" class="form-label"><strong>First Name:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <input type="text"
+                           class="form-control"
+                           id="firstName"
+                           name="firstName"
+                           value="{#if person.firstName}{person.firstName}{/if}"
+                           maxlength="100"
+                           placeholder="e.g. John">
+                </div>
+                <div class="col-sm-2">
+                    <label for="lastName" class="form-label"><strong>Last Name:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <input type="text"
+                           class="form-control"
+                           id="lastName"
+                           name="lastName"
+                           value="{person.lastName}"
+                           maxlength="100"
+                           required
+                           placeholder="e.g. Doe">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="email" class="form-label"><strong>Email:</strong></label>
+                </div>
+                <div class="col-sm-10">
+                    <input type="email"
+                           class="form-control"
+                           id="email"
+                           name="email"
+                           value="{#if person.email}{person.email}{/if}"
+                           maxlength="255"
+                           placeholder="e.g. john.doe@example.com">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="genderId" class="form-label"><strong>Gender:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-select" id="genderId" name="genderId">
+                        <option value="">Select Gender</option>
+                        {#for gender in genders}
+                            <option value="{gender.id}" {#if person.gender && person.gender.id == gender.id}selected{/if}>{gender.description}</option>
+                        {/for}
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <label for="idTypeId" class="form-label"><strong>ID Type:</strong></label>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-select" id="idTypeId" name="idTypeId">
+                        <option value="">Select ID Type</option>
+                        {#for idType in idTypes}
+                            <option value="{idType.id}" {#if person.idType && person.idType.id == idType.id}selected{/if}>{idType.description}</option>
+                        {/for}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="idNumber" class="form-label"><strong>ID Number:</strong></label>
+                </div>
+                <div class="col-sm-10">
+                    <input type="text"
+                           class="form-control"
+                           id="idNumber"
+                           name="idNumber"
+                           value="{#if person.idNumber}{person.idNumber}{/if}"
+                           maxlength="50"
+                           placeholder="e.g. 1234567890">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-2">
+                    <label for="isActive" class="form-label"><strong>Active:</strong></label>
+                </div>
+                <div class="col-sm-10">
+                    <div class="form-check">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               id="isActive"
+                               name="isActive"
+                               value="true"
+                               {#if person.isActive}checked{/if}>
+                        <label class="form-check-label" for="isActive">
+                            Active
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    id="cancel-edit-btn"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="/persons-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+            <button type="submit"
+                    id="submit-edit-btn"
+                    form="edit-form"
+                    class="btn btn-primary btn-sm">
+                <i class="bi bi-pencil"></i> Update
+            </button>
+        </div>
+    </div>
+</div>

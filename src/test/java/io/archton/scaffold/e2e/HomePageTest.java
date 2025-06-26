@@ -41,6 +41,19 @@ class HomePageTest extends BaseSelenideTest {
     }
     
     @Test
+    @DisplayName("Should display People navigation link")
+    void shouldDisplayPeopleNavigationLink() {
+        homePage.openPage();
+        
+        // Verify People nav link exists and is visible
+        homePage.getPeopleNavLink().should(exist);
+        homePage.getPeopleNavLink().should(be(visible));
+        homePage.getPeopleNavLink().should(have(text("People")));
+        
+        assertTrue(homePage.isPeopleNavLinkVisible(), "People navigation link should be visible");
+    }
+    
+    @Test
     @DisplayName("Should display Maintenance dropdown")
     void shouldDisplayMaintenanceDropdown() {
         homePage.openPage();
@@ -73,16 +86,19 @@ class HomePageTest extends BaseSelenideTest {
         homePage.getNavbar().should(exist);
         homePage.getNavbarBrand().should(exist);
         homePage.getHomeNavLink().should(exist);
+        homePage.getPeopleNavLink().should(exist);
         homePage.getMaintenanceDropdown().should(exist);
         
         // Verify all elements are visible
         assertTrue(homePage.isNavbarVisible(), "Navbar should be visible");
         assertTrue(homePage.isHomeNavLinkVisible(), "Home nav link should be visible");
+        assertTrue(homePage.isPeopleNavLinkVisible(), "People nav link should be visible");
         assertTrue(homePage.isMaintenanceDropdownVisible(), "Maintenance dropdown should be visible");
         
         // Verify text content
         assertTrue(homePage.getNavbarBrandText().contains("Rescaffold"), "Navbar brand should contain 'Rescaffold'");
         assertTrue(homePage.getHomeNavLinkText().contains("Home"), "Home nav link should contain 'Home'");
+        assertTrue(homePage.getPeopleNavLinkText().contains("People"), "People nav link should contain 'People'");
         assertTrue(homePage.getMaintenanceDropdownText().contains("Maintenance"), "Maintenance dropdown should contain 'Maintenance'");
     }
     
@@ -150,7 +166,7 @@ class HomePageTest extends BaseSelenideTest {
         // Verify IdTypes link is visible
         homePage.getIdTypesDropdownLink().should(exist);
         homePage.getIdTypesDropdownLink().should(be(visible));
-        homePage.getIdTypesDropdownLink().should(have(text("IdTypes")));
+        homePage.getIdTypesDropdownLink().should(have(text("ID Types")));
 
         // Click IdTypes link
         homePage.clickIdTypesLink();
@@ -159,7 +175,30 @@ class HomePageTest extends BaseSelenideTest {
         webdriver().shouldHave(url(BASE_URL + "/id-types-ui"));
 
         // Verify page loads correctly
-        $("h1").should(have(text("IdTypes")));
+        $("h1").should(have(text("Types of identity documents")));
+        $("#content-area").should(exist);
+        $("table.table").should(exist);
+    }
+    
+    @Test
+    @DisplayName("Should navigate to People page from navigation menu")
+    void shouldNavigateToPeoplePage() {
+        // Navigate to home page
+        homePage.openPage();
+
+        // Verify People nav link is visible
+        homePage.getPeopleNavLink().should(exist);
+        homePage.getPeopleNavLink().should(be(visible));
+        homePage.getPeopleNavLink().should(have(text("People")));
+
+        // Click People link
+        homePage.clickPeopleNavLink();
+
+        // Verify navigation to People page
+        webdriver().shouldHave(url(BASE_URL + "/persons-ui"));
+
+        // Verify page loads correctly
+        $("h1").should(have(text("People")));
         $("#content-area").should(exist);
         $("table.table").should(exist);
     }

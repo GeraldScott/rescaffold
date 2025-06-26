@@ -109,7 +109,7 @@ class IdTypeCrudTest extends BaseSelenideTest {
 
         // Verify return to list
         idTypePage.getIdTypeTable().should(exist);
-        idTypePage.getPageTitle().should(have(text("IdTypes")));
+        idTypePage.getPageTitle().should(have(text("Types of identity documents")));
     }
 
     @Test
@@ -188,7 +188,7 @@ class IdTypeCrudTest extends BaseSelenideTest {
         // Verify delete confirmation page loads
         idTypePage.getContentArea().should(exist);
         $(".card-header.bg-danger").should(exist);
-        $(".card-header.bg-danger").should(have(text("Delete IdType")));
+        $(".card-header.bg-danger").should(have(text("Delete ID Type")));
         $(".alert.alert-warning").should(exist);
         $("#confirm-delete-btn").should(exist);
         $("#cancel-delete-btn").should(exist);
