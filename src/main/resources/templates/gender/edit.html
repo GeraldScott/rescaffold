@@ -1,0 +1,89 @@
+{! gender : io.archton.scaffold.domain.Gender !}
+<div id="content-area" class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Edit Gender</h5>
+    </div>
+    <div class="card-body">
+        <form id="edit-form"
+              hx-put="/genders-ui/{gender.id}"
+              hx-target="#content-area"
+              hx-swap="innerHTML">
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="code" class="form-label"><strong>Code:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text"
+                           class="form-control"
+                           id="code"
+                           name="code"
+                           value="{gender.code}"
+                           maxlength="1"
+                           pattern="[A-Z]"
+                           required
+                           title="Code must be a single uppercase alphabetic character">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="description" class="form-label"><strong>Description:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text"
+                           class="form-control"
+                           id="description"
+                           name="description"
+                           value="{gender.description}"
+                           maxlength="256"
+                           required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="isActive" class="form-label"><strong>Active:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <div class="form-check">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               id="isActive"
+                               name="isActive"
+                               value="true"
+                               {#if gender.isActive}checked{/if}>
+                        <label class="form-check-label" for="isActive">
+                            Mark as active
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-12">
+                    <small class="text-muted">Record no.: {gender.id}</small>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    id="cancel-edit-btn"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="/genders-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+            <button type="submit"
+                    id="submit-edit-btn"
+                    form="edit-form"
+                    class="btn btn-primary btn-sm">
+                <i class="bi bi-check"></i> Save
+            </button>
+        </div>
+    </div>
+</div>

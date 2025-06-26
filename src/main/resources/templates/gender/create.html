@@ -1,0 +1,63 @@
+<div id="content-area" class="card">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Create New Gender</h5>
+    </div>
+    <div class="card-body">
+        <form id="create-form"
+              hx-post="/genders-ui"
+              hx-target="#content-area"
+              hx-swap="innerHTML">
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="code" class="form-label"><strong>Code:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text"
+                           class="form-control"
+                           id="code"
+                           name="code"
+                           maxlength="1"
+                           pattern="[A-Z]"
+                           required
+                           title="Code must be a single uppercase alphabetic character"
+                           placeholder="e.g. N">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="description" class="form-label"><strong>Description:</strong></label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text"
+                           class="form-control"
+                           id="description"
+                           name="description"
+                           maxlength="256"
+                           required
+                           placeholder="e.g. Non-binary">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-footer bg-light">
+        <div class="d-flex gap-2">
+            <button type="button"
+                    id="cancel-create-btn"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="/genders-ui/table"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+            <button type="submit"
+                    id="submit-create-btn"
+                    form="create-form"
+                    class="btn btn-success btn-sm">
+                <i class="bi bi-plus"></i> Create
+            </button>
+        </div>
+    </div>
+</div>
