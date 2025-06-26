@@ -2,11 +2,19 @@
 {! titles : java.util.List<io.archton.scaffold.domain.Title> !}
 {! genders : java.util.List<io.archton.scaffold.domain.Gender> !}
 {! idTypes : java.util.List<io.archton.scaffold.domain.IdType> !}
+{! errorMessage: java.lang.String !}
 <div id="content-area" class="card">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">Edit Person</h5>
     </div>
     <div class="card-body">
+        {#if errorMessage}
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {errorMessage}
+        </div>
+        {/if}
+
         <form id="edit-form"
               hx-post="/persons-ui/{person.id}/edit"
               hx-target="#content-area"
@@ -44,13 +52,16 @@
                 </div>
                 <div class="col-sm-4">
                     <input type="text"
-                           class="form-control"
+                           class="form-control {#if errorMessage && (!person.lastName || person.lastName.empty)}is-invalid{/if}"
                            id="lastName"
                            name="lastName"
                            value="{person.lastName}"
                            maxlength="100"
                            required
                            placeholder="e.g. Doe">
+                    {#if errorMessage && (!person.lastName || person.lastName.empty)}
+                    <div class="invalid-feedback">Last name is required</div>
+                    {/if}
                 </div>
             </div>
 
@@ -60,12 +71,15 @@
                 </div>
                 <div class="col-sm-10">
                     <input type="email"
-                           class="form-control"
+                           class="form-control {#if errorMessage && errorMessage.contains('email')}is-invalid{/if}"
                            id="email"
                            name="email"
                            value="{#if person.email}{person.email}{/if}"
                            maxlength="255"
                            placeholder="e.g. john.doe@example.com">
+                    {#if errorMessage && errorMessage.contains('email')}
+                    <div class="invalid-feedback">Email must be unique or in a valid format</div>
+                    {/if}
                 </div>
             </div>
 

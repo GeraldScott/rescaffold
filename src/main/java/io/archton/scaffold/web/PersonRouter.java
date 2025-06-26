@@ -44,9 +44,9 @@ public class PersonRouter {
 
         public static native TemplateInstance view(Person person);
 
-        public static native TemplateInstance create(List<Title> titles, List<Gender> genders, List<IdType> idTypes);
+        public static native TemplateInstance create(List<Title> titles, List<Gender> genders, List<IdType> idTypes, String errorMessage, Person personData);
 
-        public static native TemplateInstance edit(Person person, List<Title> titles, List<Gender> genders, List<IdType> idTypes);
+        public static native TemplateInstance edit(Person person, List<Title> titles, List<Gender> genders, List<IdType> idTypes, String errorMessage);
 
         public static native TemplateInstance delete(Person person);
     }
@@ -101,7 +101,7 @@ public class PersonRouter {
         List<Title> titleList = titleService.listSorted();
         List<Gender> genderList = genderService.listSorted();
         List<IdType> idTypeList = idTypeService.listSorted();
-        String html = Templates.create(titleList, genderList, idTypeList).render();
+        String html = Templates.create(titleList, genderList, idTypeList, null, null).render();
         return Response.ok(html).build();
     }
 
@@ -123,7 +123,7 @@ public class PersonRouter {
             person.lastName = lastName;
             person.email = email;
             person.idNumber = idNumber;
-            
+
             // Set relationships
             if (titleId != null) {
                 person.title = titleService.findById(titleId);
@@ -148,15 +148,60 @@ public class PersonRouter {
             List<Title> titleList = titleService.listSorted();
             List<Gender> genderList = genderService.listSorted();
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.create(titleList, genderList, idTypeList).render();
-            
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).entity(html).build();
+
+            // Create a temporary person object to preserve entered data
+            Person enteredData = new Person();
+            enteredData.firstName = firstName;
+            enteredData.lastName = lastName;
+            enteredData.email = email;
+            enteredData.idNumber = idNumber;
+
+            // Set relationships to preserve selected dropdowns
+            if (titleId != null) {
+                try {
+                    enteredData.title = titleService.findById(titleId);
+                } catch (Exception ex) {
+                    log.warn("Could not find title with ID: " + titleId);
+                }
             }
-            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
+            if (genderId != null) {
+                try {
+                    enteredData.gender = genderService.findById(genderId);
+                } catch (Exception ex) {
+                    log.warn("Could not find gender with ID: " + genderId);
+                }
+            }
+            if (idTypeId != null) {
+                try {
+                    enteredData.idType = idTypeService.findById(idTypeId);
+                } catch (Exception ex) {
+                    log.warn("Could not find idType with ID: " + idTypeId);
+                }
+            }
+
+            String errorMessage = e.getMessage();
+            String html = Templates.create(titleList, genderList, idTypeList, errorMessage, enteredData).render();
+
+            // Return HTTP 200 with the form containing the error message
+            return Response.ok(html).build();
         } catch (Exception e) {
             log.error("Error creating person: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
+            List<Title> titleList = titleService.listSorted();
+            List<Gender> genderList = genderService.listSorted();
+            List<IdType> idTypeList = idTypeService.listSorted();
+
+            // Create a temporary person object to preserve entered data
+            Person enteredData = new Person();
+            enteredData.firstName = firstName;
+            enteredData.lastName = lastName;
+            enteredData.email = email;
+            enteredData.idNumber = idNumber;
+
+            String errorMessage = "An unexpected error occurred while creating the person. Please try again.";
+            String html = Templates.create(titleList, genderList, idTypeList, errorMessage, enteredData).render();
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
         }
     }
 
@@ -175,7 +220,7 @@ public class PersonRouter {
             List<Title> titleList = titleService.listSorted();
             List<Gender> genderList = genderService.listSorted();
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList).render();
+            String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList, null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             log.error("Error retrieving person for edit: " + e.getMessage());
@@ -205,7 +250,7 @@ public class PersonRouter {
             updates.email = email;
             updates.idNumber = idNumber;
             updates.isActive = isActive != null ? isActive : true;
-            
+
             // Set relationships
             if (titleId != null) {
                 updates.title = titleService.findById(titleId);
@@ -227,18 +272,78 @@ public class PersonRouter {
 
         } catch (IllegalArgumentException e) {
             log.error("Validation error updating person: " + e.getMessage());
+
+            // Get the original person record
             Optional<Person> personOpt = personService.findByIdOptional(id);
             if (personOpt.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+            // Update the person with form values to preserve input
+            Person person = personOpt.get();
+            person.firstName = firstName;
+            person.lastName = lastName;
+            person.email = email;
+            person.idNumber = idNumber;
+            person.isActive = isActive != null ? isActive : true;
+
+            // Set relationships
+            if (titleId != null) {
+                try {
+                    person.title = titleService.findById(titleId);
+                } catch (Exception ex) {
+                    log.warn("Could not find title with ID: " + titleId);
+                }
+            } else {
+                person.title = null;
+            }
+
+            if (genderId != null) {
+                try {
+                    person.gender = genderService.findById(genderId);
+                } catch (Exception ex) {
+                    log.warn("Could not find gender with ID: " + genderId);
+                }
+            } else {
+                person.gender = null;
+            }
+
+            if (idTypeId != null) {
+                try {
+                    person.idType = idTypeService.findById(idTypeId);
+                } catch (Exception ex) {
+                    log.warn("Could not find idType with ID: " + idTypeId);
+                }
+            } else {
+                person.idType = null;
+            }
+
             List<Title> titleList = titleService.listSorted();
             List<Gender> genderList = genderService.listSorted();
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList).render();
-            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
+
+            String errorMessage = e.getMessage();
+            String html = Templates.edit(person, titleList, genderList, idTypeList, errorMessage).render();
+
+            // Return HTTP 200 with the form containing the error message
+            return Response.ok(html).build();
         } catch (Exception e) {
             log.error("Error updating person: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
+            // Get the original person
+            Optional<Person> personOpt = personService.findByIdOptional(id);
+            if (personOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+
+            List<Title> titleList = titleService.listSorted();
+            List<Gender> genderList = genderService.listSorted();
+            List<IdType> idTypeList = idTypeService.listSorted();
+
+            String errorMessage = "An unexpected error occurred while updating the person. Please try again.";
+            String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList, errorMessage).render();
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
         }
     }
 
