@@ -165,6 +165,65 @@ class GenderCrudTest extends BaseSelenideTest {
         updatedRow.$$("td").get(6).$(".badge").shouldHave(text("Inactive"));
     }
 
+    @Test
+    @DisplayName("Should delete an existing gender")
+    void shouldDeleteExistingGender() {
+        // First create a new gender to ensure we have something to delete
+        // Navigate to genders page
+        genderPage.openPage();
+
+        // Click Create button
+        genderPage.clickCreateButton();
+
+        // Generate unique code and description for the test
+        String uniqueCode = findUniqueCode();
+        String description = "Delete Test " + System.currentTimeMillis();
+
+        // Fill in the form
+        genderPage.enterCode(uniqueCode)
+                .enterDescription(description);
+
+        // Submit the form
+        genderPage.clickSubmitCreateButton();
+
+        // Verify the new gender appears in the table
+        genderPage.getGenderTable().should(exist);
+        assertTrue(genderPage.hasGenderWithCode(uniqueCode),
+                "Newly created gender with code " + uniqueCode + " should exist before deletion");
+
+        // Get the row and extract the ID for deletion
+        SelenideElement targetRow = genderPage.getRowByCode(uniqueCode);
+        assertNotNull(targetRow, "Target row should not be null");
+
+        // Extract gender ID from the delete button
+        SelenideElement deleteButton = targetRow.$("button[id^='delete-btn-']");
+        Long genderId = Long.parseLong(deleteButton.getAttribute("id").replace("delete-btn-", ""));
+
+        // Click Delete button
+        genderPage.clickDeleteButton(genderId);
+
+        // Verify delete confirmation page loads
+        genderPage.getContentArea().should(exist);
+        $(".card-header.bg-danger").should(exist);
+        $(".card-header.bg-danger").should(have(text("Delete Gender")));
+        $(".alert.alert-warning").should(exist);
+        $("#confirm-delete-btn").should(exist);
+        $("#cancel-delete-btn").should(exist);
+
+        // Verify the correct code and description are shown
+        $(".badge.bg-primary.fs-6").should(have(text(uniqueCode)));
+
+        // Click Confirm Delete button
+        genderPage.clickConfirmDeleteButton();
+
+        // Verify return to list
+        genderPage.getGenderTable().should(exist);
+
+        // Verify the gender is no longer in the table
+        assertFalse(genderPage.hasGenderWithCode(uniqueCode),
+                "Gender with code " + uniqueCode + " should not exist after deletion");
+    }
+
     /**
      * Helper method to find a unique single-character code not in the table
      *
