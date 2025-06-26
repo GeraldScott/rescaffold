@@ -138,17 +138,17 @@ public class PersonRouter {
             Person createdPerson = personService.createPerson(person);
             log.debugf("Person created successfully with ID: %s", createdPerson.id);
 
-            // Redirect to the main persons list page
-            return Response.status(Response.Status.SEE_OTHER)
-                    .header("Location", "/persons-ui")
-                    .build();
+            // Return the updated table directly instead of redirecting
+            List<Person> personList = personService.listSorted();
+            String html = Templates.table(personList).render();
+            return Response.ok(html).build();
 
         } catch (IllegalArgumentException e) {
             log.error("Validation error creating person: " + e.getMessage());
-            // For now, redirect back to the list with the error - we could enhance this to show validation messages
-            return Response.status(Response.Status.SEE_OTHER)
-                    .header("Location", "/persons-ui")
-                    .build();
+            if (e.getMessage().contains("already exists")) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (Exception e) {
             log.error("Error creating person: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -215,10 +215,10 @@ public class PersonRouter {
             Person updatedPerson = personService.updatePerson(id, updates);
             log.debugf("Person updated successfully with ID: %s", updatedPerson.id);
 
-            // Redirect to the main persons list page
-            return Response.status(Response.Status.SEE_OTHER)
-                    .header("Location", "/persons-ui")
-                    .build();
+            // Return the updated table directly instead of redirecting
+            List<Person> personList = personService.listSorted();
+            String html = Templates.table(personList).render();
+            return Response.ok(html).build();
 
         } catch (IllegalArgumentException e) {
             log.error("Validation error updating person: " + e.getMessage());
@@ -268,10 +268,10 @@ public class PersonRouter {
             personService.deletePerson(id);
             log.debugf("Person soft deleted successfully with ID: %s", id);
 
-            // Redirect to the main persons list page
-            return Response.status(Response.Status.SEE_OTHER)
-                    .header("Location", "/persons-ui")
-                    .build();
+            // Return the updated table directly instead of redirecting
+            List<Person> personList = personService.listSorted();
+            String html = Templates.table(personList).render();
+            return Response.ok(html).build();
 
         } catch (IllegalArgumentException e) {
             log.error("Error deleting person: " + e.getMessage());
