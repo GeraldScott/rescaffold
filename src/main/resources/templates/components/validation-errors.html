@@ -1,12 +1,13 @@
-{#if validationErrors && !validationErrors.isEmpty()}
+{@java.util.List<java.lang.String> validationErrors}
+{#if validationErrors?? && !validationErrors.isEmpty()}
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <h6 class="alert-heading">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         Validation Errors
     </h6>
     <ul class="mb-0">
-        {#for entry in validationErrors}
-        <li>{entry.value}</li>
+        {#for error in validationErrors}
+        <li>{error}</li>
         {/for}
     </ul>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
