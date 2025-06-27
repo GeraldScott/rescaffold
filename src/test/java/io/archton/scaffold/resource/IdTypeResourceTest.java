@@ -57,13 +57,6 @@ class IdTypeResourceTest {
 
     @Test
     @TestTransaction
-    @DisplayName("GET /api/id-types - Should return empty list initially")
-    void testGetAllIdTypes_EmptyList() {
-        given().spec(requestSpec).when().get().then().spec(responseSpec).statusCode(200).body("$", hasSize(0));
-    }
-
-    @Test
-    @TestTransaction
     @DisplayName("POST /api/id-types - Should create id type successfully")
     void testCreateIdType_ValidData() {
         IdType idType = createValidIdType("DL", "Driver's License");

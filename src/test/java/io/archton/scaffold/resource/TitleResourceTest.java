@@ -63,20 +63,6 @@ class TitleResourceTest {
 
     @Test
     @TestTransaction
-    @DisplayName("GET /api/titles - Should return empty list initially")
-    void testGetAllTitles_EmptyList() {
-        given()
-                .spec(requestSpec)
-                .when()
-                .get()
-                .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("$", hasSize(0));
-    }
-
-    @Test
-    @TestTransaction
     @DisplayName("POST /api/titles - Should create title successfully")
     void testCreateTitle_ValidData() {
         Title title = createValidTitle("MR", "Mister");

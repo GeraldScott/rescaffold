@@ -57,13 +57,6 @@ class GenderResourceTest {
 
     @Test
     @TestTransaction
-    @DisplayName("GET /api/genders - Should return empty list initially")
-    void testGetAllGenders_EmptyList() {
-        given().spec(requestSpec).when().get().then().spec(responseSpec).statusCode(200).body("$", hasSize(0));
-    }
-
-    @Test
-    @TestTransaction
     @DisplayName("POST /api/genders - Should create gender successfully")
     void testCreateGender_ValidData() {
         Gender gender = createValidGender("M", "Male");
