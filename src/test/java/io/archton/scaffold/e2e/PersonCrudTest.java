@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.sleep;
@@ -81,7 +83,7 @@ class PersonCrudTest extends BaseSelenideTest {
 
         // Get the row and its ID
         SelenideElement personRow = personPage.getRowByEmail(uniqueEmail);
-        long personId = Long.parseLong(personRow.getAttribute("data-person-id"));
+        long personId = Long.parseLong(Objects.requireNonNull(personRow.getAttribute("data-person-id")));
 
         // Click View button
         personPage.clickViewButton(personId);
@@ -109,7 +111,7 @@ class PersonCrudTest extends BaseSelenideTest {
 
         // Get the row and its ID
         SelenideElement personRow = personPage.getRowByEmail(originalEmail);
-        long personId = Long.parseLong(personRow.getAttribute("data-person-id"));
+        long personId = Long.parseLong(Objects.requireNonNull(personRow.getAttribute("data-person-id")));
 
         // Click Edit button
         personPage.clickEditButton(personId);
@@ -145,7 +147,7 @@ class PersonCrudTest extends BaseSelenideTest {
 
         // Get the row and its ID
         SelenideElement personRow = personPage.getRowByEmail(uniqueEmail);
-        long personId = Long.parseLong(personRow.getAttribute("data-person-id"));
+        long personId = Long.parseLong(Objects.requireNonNull(personRow.getAttribute("data-person-id")));
 
         // Click Delete button
         personPage.clickDeleteButton(personId);
@@ -229,7 +231,7 @@ class PersonCrudTest extends BaseSelenideTest {
 
         // Get person 2 and try to update its email to person 1's email
         SelenideElement person2Row = personPage.getRowByEmail(email2);
-        long person2Id = Long.parseLong(person2Row.getAttribute("data-person-id"));
+        long person2Id = Long.parseLong(Objects.requireNonNull(person2Row.getAttribute("data-person-id")));
 
         personPage.clickEditButton(person2Id);
         personPage.getContentArea().should(exist);

@@ -40,15 +40,15 @@ public class PersonService {
     @Transactional
     public Person createPerson(Person person) {
         log.debugf("Creating person with email: %s", person.email);
-        
+
         if (person.id != null) {
             throw new ValidationException("id", "ID must not be included in POST request");
         }
-        
+
         validatePersonData(person);
         normalizePersonData(person);
         checkDuplicateEmail(person.email);
-        
+
         person.persist();
         return person;
     }
@@ -56,7 +56,7 @@ public class PersonService {
     @Transactional
     public Person updatePerson(Long id, Person updates) {
         log.debugf("Updating person id: %s", id);
-        
+
         Person existing = Person.findById(id);
         if (existing == null) {
             throw new EntityNotFoundException("Person", id);
@@ -66,28 +66,28 @@ public class PersonService {
             normalizeFirstName(updates);
             existing.firstName = updates.firstName;
         }
-        
+
         if (updates.lastName != null && !updates.lastName.trim().isEmpty()) {
             normalizeLastName(updates);
             existing.lastName = updates.lastName;
         }
-        
+
         if (updates.email != null) {
             normalizeEmail(updates);
             checkDuplicateEmailForUpdate(updates.email, id);
             existing.email = updates.email;
         }
-        
+
         if (updates.idNumber != null) {
             normalizeIdNumber(updates);
             existing.idNumber = updates.idNumber;
         }
-        
+
         // Update relationships
         existing.title = updates.title;
         existing.gender = updates.gender;
         existing.idType = updates.idType;
-        
+
         // Update isActive field
         existing.isActive = updates.isActive;
 
@@ -97,23 +97,21 @@ public class PersonService {
 
     @Transactional
     public void deletePerson(Long id) {
-        log.debugf("Soft deleting person id: %s", id);
-        
+        log.debugf("Deleting person id: %s", id);
+
         Person person = Person.findById(id);
         if (person == null) {
             throw new EntityNotFoundException("Person", id);
         }
-        
-        // Soft delete by setting isActive to false
-        person.isActive = false;
-        person.persist();
+
+        person.delete();
     }
 
     private void validatePersonData(Person person) {
         if (person.lastName == null || person.lastName.trim().isEmpty()) {
             throw new ValidationException("lastName", "Last name is required");
         }
-        
+
         if (person.email != null && !person.email.trim().isEmpty()) {
             if (!isValidEmail(person.email)) {
                 throw new ValidationException("email", "Invalid email format");

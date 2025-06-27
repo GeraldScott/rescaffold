@@ -56,13 +56,13 @@ class PersonResourceTest {
             gender = new Gender("F", "Female");
             gender.persist();
         }
-        
+
         Title title = Title.findByCode("MS");
         if (title == null) {
             title = new Title("MS", "Ms.");
             title.persist();
         }
-        
+
         IdType idType = IdType.findByCode("ID");
         if (idType == null) {
             idType = new IdType("ID", "Identity Document");
@@ -104,9 +104,9 @@ class PersonResourceTest {
     void testGetAllPersons_Successfully() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("$", hasSize(greaterThanOrEqualTo(0)));
@@ -121,9 +121,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(201)
                 .body("id", notNullValue())
@@ -144,9 +144,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(201)
                 .body("id", notNullValue())
@@ -168,9 +168,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -183,9 +183,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -198,9 +198,9 @@ class PersonResourceTest {
         Integer createdId = given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -208,9 +208,9 @@ class PersonResourceTest {
         // Then retrieve it by ID
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/{id}", createdId)
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("id", equalTo(createdId))
@@ -225,9 +225,9 @@ class PersonResourceTest {
     void testGetPersonById_NotFound() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/{id}", 99999L)
-        .then()
+                .then()
                 .statusCode(404);
     }
 
@@ -240,9 +240,9 @@ class PersonResourceTest {
         Integer createdId = given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -254,9 +254,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .put("/{id}", createdId)
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("firstName", equalTo("Robert"))
@@ -274,44 +274,42 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .put("/{id}", 99999L)
-        .then()
+                .then()
                 .statusCode(404);
     }
 
     @Test
     @TestTransaction
-    @DisplayName("DELETE /api/persons/{id} - Should soft delete person")
-    void testDeletePerson_SoftDelete() {
+    @DisplayName("DELETE /api/persons/{id} - Should delete person")
+    void testDeletePerson_HardDelete() {
         // First create a person via API
         Person person = createValidPerson("Charlie", "Brown", "charlie.brown.delete@example.com");
         Integer createdId = given()
                 .spec(requestSpec)
                 .body(person)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
 
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .delete("/{id}", createdId)
-        .then()
+                .then()
                 .statusCode(204);
 
-        // Verify person is soft deleted (isActive = false)
+        // Verify person is deleted
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/{id}", createdId)
-        .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("isActive", equalTo(false));
+                .then()
+                .statusCode(404);
     }
 
     @Test
@@ -320,9 +318,9 @@ class PersonResourceTest {
     void testDeletePerson_NotFound() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .delete("/{id}", 99999L)
-        .then()
+                .then()
                 .statusCode(404);
     }
 
@@ -333,9 +331,9 @@ class PersonResourceTest {
         // Get initial count
         int initialCount = given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get()
-        .then()
+                .then()
                 .statusCode(200)
                 .extract()
                 .jsonPath()
@@ -346,26 +344,26 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person1)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201);
 
         Person person2 = createValidPerson("Emma", "Davis", "emma.davis.list2@example.com");
         given()
                 .spec(requestSpec)
                 .body(person2)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201);
 
         // Verify that we now have the initial count plus our 2 new persons
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("$", hasSize(initialCount + 2));
@@ -380,9 +378,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person1)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201);
 
         // Try to create second person with same email
@@ -391,9 +389,9 @@ class PersonResourceTest {
         given()
                 .spec(requestSpec)
                 .body(person2)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(409); // Conflict due to unique constraint
     }
 }
