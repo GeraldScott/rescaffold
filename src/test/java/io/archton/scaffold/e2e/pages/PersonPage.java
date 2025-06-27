@@ -12,7 +12,7 @@ public class PersonPage {
     private final SelenideElement contentArea = $("#content-area");
     private final SelenideElement pageTitle = $("h1");
     private final SelenideElement personTable = $("table.table");
-    private final SelenideElement createButton = $("#create-new-btn");
+    private final SelenideElement createButton = $("[data-testid='create-new-btn']");
 
     // Table headers
     private final ElementsCollection tableHeaders = $$("table.table thead th");
@@ -29,25 +29,25 @@ public class PersonPage {
     private final SelenideElement genderSelect = $("#genderId");
     private final SelenideElement idTypeSelect = $("#idTypeId");
     private final SelenideElement isActiveCheckbox = $("#isActive");
-    private final SelenideElement submitCreateButton = $("#submit-create-btn");
-    private final SelenideElement cancelCreateButton = $("#cancel-create-btn");
-    private final SelenideElement submitEditButton = $("#submit-edit-btn");
-    private final SelenideElement cancelEditButton = $("#cancel-edit-btn");
+    private final SelenideElement submitCreateButton = $("[data-testid='submit-create-btn']");
+    private final SelenideElement cancelCreateButton = $("[data-testid='cancel-create-btn']");
+    private final SelenideElement submitEditButton = $("[data-testid='submit-edit-btn']");
+    private final SelenideElement cancelEditButton = $("[data-testid='cancel-edit-btn']");
     private final SelenideElement saveButton = $("button[type='submit']");
 
     // View page elements
     private final SelenideElement firstNameValue = $("#firstName-value");
     private final SelenideElement lastNameValue = $("#lastName-value");
     private final SelenideElement emailValue = $("#email-value");
-    private final SelenideElement backButton = $("button:has(.bi-arrow-left)");
+    private final SelenideElement backButton = $("[data-testid='back-btn']");
 
     // Delete modal elements
     private final SelenideElement deleteModal = $("#deleteModal");
-    private final SelenideElement confirmDeleteButton = $("#confirm-delete-btn");
-    private final SelenideElement cancelDeleteButton = $("#cancel-delete-btn");
+    private final SelenideElement confirmDeleteButton = $("[data-testid='confirm-delete-btn']");
+    private final SelenideElement cancelDeleteButton = $("[data-testid='cancel-delete-btn']");
 
     // Alert messages
-    private final SelenideElement alertMessage = $(".alert");
+    private final SelenideElement errorAlert = $(".alert-danger");
     private final ElementsCollection validationErrors = $$(".invalid-feedback");
 
     public PersonPage openPage() {
@@ -63,18 +63,18 @@ public class PersonPage {
         return this;
     }
 
-    public PersonPage clickViewButton(Long personId) {
-        $("#view-btn-" + personId).click();
+    public PersonPage clickViewButton(long personId) {
+        getRowById(personId).$("[data-testid='view-btn']").click();
         return this;
     }
 
-    public PersonPage clickEditButton(Long personId) {
-        $("#edit-btn-" + personId).click();
+    public PersonPage clickEditButton(long personId) {
+        getRowById(personId).$("[data-testid='edit-btn']").click();
         return this;
     }
 
-    public PersonPage clickDeleteButton(Long personId) {
-        $("#delete-btn-" + personId).click();
+    public PersonPage clickDeleteButton(long personId) {
+        getRowById(personId).$("[data-testid='delete-btn']").click();
         return this;
     }
 
@@ -178,12 +178,16 @@ public class PersonPage {
         return tableRows.filterBy(text(email)).size() > 0;
     }
 
+    public boolean hasPersonWithLastName(String lastName) {
+        return tableRows.filterBy(text(lastName)).size() > 0;
+    }
+
     public SelenideElement getRowByEmail(String email) {
         return tableRows.filterBy(text(email)).first();
     }
 
-    public SelenideElement getRowById(Long personId) {
-        return $("tr[data-person-id='" + personId + "']");
+    public SelenideElement getRowById(long personId) {
+        return personTable.$("tr[data-person-id='" + personId + "']");
     }
 
     public ElementsCollection getRowsByEmail(String email) {
@@ -194,6 +198,10 @@ public class PersonPage {
         emailInput.clear();
         emailInput.sendKeys(email);
         return this;
+    }
+    
+    public SelenideElement getCreateButton() {
+        return createButton;
     }
 
     // Getter methods
@@ -249,8 +257,8 @@ public class PersonPage {
         return deleteModal;
     }
 
-    public SelenideElement getAlertMessage() {
-        return alertMessage;
+    public SelenideElement getErrorAlert() {
+        return errorAlert;
     }
 
     // Validation methods
@@ -264,7 +272,7 @@ public class PersonPage {
     }
 
     public boolean hasValidationErrors() {
-        return validationErrors.size() > 0 || alertMessage.exists();
+        return validationErrors.size() > 0 || errorAlert.exists();
     }
 
     public String getPersonTableText() {

@@ -21,7 +21,7 @@ public class PersonService {
     }
 
     public List<Person> listSorted() {
-        return Person.listSorted();
+        return Person.list("isActive = true order by lastName, firstName");
     }
 
     public Person findById(Long id) {

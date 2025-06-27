@@ -28,6 +28,7 @@
                         <td>
                             <button type="button"
                                     id="view-btn-{person.id}"
+                                    data-testid="view-btn"
                                     class="btn btn-sm btn-outline-primary"
                                     hx-get="/persons-ui/{person.id}/view"
                                     hx-target="#content-area"
@@ -36,6 +37,7 @@
                             </button>
                             <button type="button"
                                     id="edit-btn-{person.id}"
+                                    data-testid="edit-btn"
                                     class="btn btn-sm btn-outline-dark"
                                     hx-get="/persons-ui/{person.id}/edit"
                                     hx-target="#content-area"
@@ -44,6 +46,7 @@
                             </button>
                             <button type="button"
                                     id="delete-btn-{person.id}"
+                                    data-testid="delete-btn"
                                     class="btn btn-sm btn-outline-danger"
                                     hx-get="/persons-ui/{person.id}/delete"
                                     hx-target="#content-area"
@@ -61,6 +64,7 @@
         <div class="d-flex gap-2">
             <button type="button"
                     id="create-new-btn"
+                    data-testid="create-new-btn"
                     class="btn btn-outline-success btn-sm"
                     hx-get="/persons-ui/create"
                     hx-target="#content-area"

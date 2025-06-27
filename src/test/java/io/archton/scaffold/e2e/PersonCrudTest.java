@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Person CRUD E2E Tests")
@@ -30,26 +30,23 @@ class PersonCrudTest extends BaseSelenideTest {
     @DisplayName("Should display person list table with correct headers")
     void shouldDisplayPersonListTable() {
         // Verify table exists and is visible
-        personPage.getPersonTable().should(exist);
-        personPage.getPersonTable().should(be(visible));
+        personPage.getPersonTable().should(exist).should(be(visible));
         assertTrue(personPage.isTableVisible(), "Person table should be visible");
 
-        // Verify table headers (Title, LastName, FirstName, Gender, IDType, IDNumber, Email, Actions)
+        // Verify table headers
         var headers = personPage.getTableHeaders();
-        headers.shouldHave(size(8)); // 7 data columns + 1 actions column
-        headers.get(0).should(have(text("Title")));
-        headers.get(1).should(have(text("Last Name")));
-        headers.get(2).should(have(text("First Name")));
-        headers.get(3).should(have(text("Gender")));
-        headers.get(4).should(have(text("ID Type")));
-        headers.get(5).should(have(text("ID Number")));
-        headers.get(6).should(have(text("Email")));
-        headers.get(7).should(have(text("Actions")));
+        headers.shouldHave(size(8));
+        headers.get(0).shouldHave(text("Title"));
+        headers.get(1).shouldHave(text("Last Name"));
+        headers.get(2).shouldHave(text("First Name"));
+        headers.get(3).shouldHave(text("Gender"));
+        headers.get(4).shouldHave(text("ID Type"));
+        headers.get(5).shouldHave(text("ID Number"));
+        headers.get(6).shouldHave(text("Email"));
+        headers.get(7).shouldHave(text("Actions"));
 
         // Verify Create button exists
-        $("#create-new-btn").should(exist);
-        $("#create-new-btn").should(be(visible));
-        $("#create-new-btn").should(have(text("Create")));
+        personPage.getCreateButton().should(exist).should(be(visible)).shouldHave(text("Create"));
     }
 
     @Test
@@ -60,40 +57,34 @@ class PersonCrudTest extends BaseSelenideTest {
         String firstName = "John";
         String lastName = "TestPerson" + System.currentTimeMillis();
 
-        // Create a new person using the extracted method
+        // Create a new person
         createPerson(firstName, lastName, uniqueEmail);
 
         // Verify the new person appears in the table
-        assertTrue(personPage.hasPersonWithEmail(uniqueEmail),
-                "Newly created person with email " + uniqueEmail + " should exist");
+        assertTrue(personPage.hasPersonWithEmail(uniqueEmail), "Newly created person should exist");
 
         // Get the row and verify the data
         SelenideElement newRow = personPage.getRowByEmail(uniqueEmail);
         assertNotNull(newRow, "New person row should not be null");
-
-        // Verify first name (column 2)
-        newRow.$$("td").get(2).shouldHave(text(firstName));
-
-        // Verify last name (column 1)
         newRow.$$("td").get(1).shouldHave(text(lastName));
-
-        // Verify email (column 6)
+        newRow.$$("td").get(2).shouldHave(text(firstName));
         newRow.$$("td").get(6).shouldHave(text(uniqueEmail));
     }
 
     @Test
     @DisplayName("Should view person details")
     void shouldViewPersonDetails() {
-        // Find first row and get its ID
-        var firstRow = personPage.getTableRows().first();
-        firstRow.should(exist);
+        // Create a person to view
+        String uniqueEmail = "view.test." + System.currentTimeMillis() + "@example.com";
+        createPerson("View", "Person", uniqueEmail);
+        assertTrue(personPage.hasPersonWithEmail(uniqueEmail), "Person to be viewed should exist");
 
-        // Extract person ID from the view button
-        var viewButton = firstRow.$("button[id^='view-btn-']");
-        var personId = viewButton.getAttribute("id").replace("view-btn-", "");
+        // Get the row and its ID
+        SelenideElement personRow = personPage.getRowByEmail(uniqueEmail);
+        long personId = Long.parseLong(personRow.getAttribute("data-person-id"));
 
         // Click View button
-        personPage.clickViewButton(Long.parseLong(personId));
+        personPage.clickViewButton(personId);
 
         // Verify view form loads
         personPage.getContentArea().should(exist);
@@ -105,29 +96,27 @@ class PersonCrudTest extends BaseSelenideTest {
         assertTrue(personPage.isViewMode(), "View form should be in read-only mode");
 
         // Verify Back button exists
-        personPage.getBackButton().should(exist);
-        personPage.getBackButton().should(be(visible));
+        personPage.getBackButton().should(exist).should(be(visible));
     }
 
     @Test
     @DisplayName("Should edit person successfully")
     void shouldEditPersonSuccessfully() {
-        // Find first row and get its ID
-        var firstRow = personPage.getTableRows().first();
-        firstRow.should(exist);
+        // Create a person to edit
+        String originalEmail = "edit.test." + System.currentTimeMillis() + "@example.com";
+        createPerson("Edit", "Person", originalEmail);
+        assertTrue(personPage.hasPersonWithEmail(originalEmail), "Person to be edited should exist");
 
-        // Extract person ID from the edit button
-        var editButton = firstRow.$("button[id^='edit-btn-']");
-        var personId = editButton.getAttribute("id").replace("edit-btn-", "");
+        // Get the row and its ID
+        SelenideElement personRow = personPage.getRowByEmail(originalEmail);
+        long personId = Long.parseLong(personRow.getAttribute("data-person-id"));
 
         // Click Edit button
-        personPage.clickEditButton(Long.parseLong(personId));
+        personPage.clickEditButton(personId);
 
         // Verify edit form loads
         personPage.getContentArea().should(exist);
         personPage.getFirstNameField().should(exist);
-        personPage.getLastNameField().should(exist);
-        personPage.getEmailField().should(exist);
 
         // Update the first name
         String updatedFirstName = "Updated" + System.currentTimeMillis();
@@ -140,7 +129,7 @@ class PersonCrudTest extends BaseSelenideTest {
         personPage.getPersonTable().should(exist);
 
         // Verify the person was updated
-        var updatedRow = personPage.getRowById(Long.parseLong(personId));
+        SelenideElement updatedRow = personPage.getRowById(personId);
         updatedRow.$$("td").get(2).shouldHave(text(updatedFirstName));
     }
 
@@ -149,211 +138,128 @@ class PersonCrudTest extends BaseSelenideTest {
     void shouldDeletePersonSuccessfully() {
         // Create a person specifically for deletion
         String uniqueEmail = "delete.test." + System.currentTimeMillis() + "@example.com";
-        String firstName = "DeleteMe";
-        String lastName = "TestPerson";
-
-        createPerson(firstName, lastName, uniqueEmail);
+        createPerson("DeleteMe", "TestPerson", uniqueEmail);
 
         // Verify the person exists
-        assertTrue(personPage.hasPersonWithEmail(uniqueEmail),
-                "Person to be deleted should exist");
+        assertTrue(personPage.hasPersonWithEmail(uniqueEmail), "Person to be deleted should exist");
 
-        // Get the row for the person we just created
+        // Get the row and its ID
         SelenideElement personRow = personPage.getRowByEmail(uniqueEmail);
-        assertNotNull(personRow, "Person row should exist before deletion");
-
-        // Extract person ID from the delete button
-        var deleteButton = personRow.$("button[id^='delete-btn-']");
-        var personId = deleteButton.getAttribute("id").replace("delete-btn-", "");
+        long personId = Long.parseLong(personRow.getAttribute("data-person-id"));
 
         // Click Delete button
-        personPage.clickDeleteButton(Long.parseLong(personId));
+        personPage.clickDeleteButton(personId);
 
         // Verify delete confirmation dialog
-        personPage.getDeleteModal().should(exist);
-        personPage.getDeleteModal().should(be(visible));
+        personPage.getDeleteModal().should(exist).should(be(visible));
 
         // Confirm deletion
         personPage.clickConfirmDeleteButton();
 
-        // Verify the person is no longer in the active list (soft delete)
-        // Note: This depends on whether the list shows inactive records or not
-        // If it's a soft delete, the person might still appear but marked as inactive
-        // If the list filters out inactive records, the person should not appear
-        
-        // Wait for the modal to disappear
+        // Wait for the modal to disappear and verify person is gone
         personPage.getDeleteModal().shouldNot(exist);
-
-        // Verify we're back to the list page
         personPage.getPersonTable().should(exist);
+        assertFalse(personPage.hasPersonWithEmail(uniqueEmail), "Deleted person should not be in the list");
     }
 
     @Test
-    @DisplayName("Should handle form submission with minimal data")
-    void shouldHandleFormSubmissionWithMinimalData() {
+    @DisplayName("Should create person with minimal required data")
+    void shouldCreatePersonWithMinimalData() {
         // Click Create button
         personPage.clickCreateButton();
-
-        // Verify create form loads
         personPage.getContentArea().should(exist);
-        personPage.getFirstNameField().should(exist);
-        personPage.getLastNameField().should(exist);
-        personPage.getEmailField().should(exist);
 
         // Fill only the required field (last name)
-        personPage.typeLastName("TestLastName" + System.currentTimeMillis());
+        String lastName = "TestLastName" + System.currentTimeMillis();
+        personPage.typeLastName(lastName);
 
-        // Try to save with minimal data
+        // Save
         personPage.clickSaveButton();
 
-        // Should redirect back to the list page (whether successful or not)
+        // Assert successful creation
         personPage.getPersonTable().should(exist);
+        assertTrue(personPage.hasPersonWithLastName(lastName), "Person with minimal data should be created");
     }
 
     @Test
     @DisplayName("Should reject duplicate email on create")
     void shouldRejectDuplicateEmailOnCreate() {
-        // Create first person with unique email
-        String duplicateEmail = "duplicate.test." + System.currentTimeMillis() + "@example.com";
-        String firstName1 = "John";
-        String lastName1 = "FirstPerson";
+        // Create first person
+        String duplicateEmail = "duplicate.create." + System.currentTimeMillis() + "@example.com";
+        createPerson("John", "FirstPerson", duplicateEmail);
+        assertTrue(personPage.hasPersonWithEmail(duplicateEmail), "First person should exist");
 
-        createPerson(firstName1, lastName1, duplicateEmail);
-
-        // Verify first person was created successfully
-        assertTrue(personPage.hasPersonWithEmail(duplicateEmail),
-                "First person with email " + duplicateEmail + " should exist");
-
-        // Now try to create second person with same email
-        String firstName2 = "Jane";
-        String lastName2 = "SecondPerson";
-
-        // Click Create button
+        // Attempt to create second person with the same email
         personPage.clickCreateButton();
-
-        // Verify create form loads
         personPage.getContentArea().should(exist);
 
-        // Fill the form with duplicate email
+        String firstName2 = "Jane";
+        String lastName2 = "SecondPerson";
         personPage.typeFirstName(firstName2);
         personPage.typeLastName(lastName2);
         personPage.typeEmail(duplicateEmail);
-
-        // Save the person
         personPage.clickSaveButton();
 
-        // Verify we stay on the create form with error message
+        // Verify error message and preserved data
         personPage.getContentArea().should(exist);
-        
-        // Check for error message in the form
-        $(".alert-danger").should(exist);
-        $(".alert-danger").should(be(visible));
-        $(".alert-danger").shouldHave(anyOf(
+        personPage.getErrorAlert().should(exist).should(be(visible)).shouldHave(anyOf(
                 text("A person with this email address already exists. Please use a different email."),
                 text("Another person already has this email address. Please use a different email.")
         ));
+        personPage.getEmailField().shouldHave(cssClass("is-invalid"));
+        personPage.getFirstNameField().shouldHave(value(firstName2));
+        personPage.getLastNameField().shouldHave(value(lastName2));
 
-        // Verify email field is marked as invalid
-        $("#email").shouldHave(cssClass("is-invalid"));
-
-        // Verify form preserves entered data
-        $("#firstName").shouldHave(value(firstName2));
-        $("#lastName").shouldHave(value(lastName2));
-        $("#email").shouldHave(value(duplicateEmail));
-
-        // Cancel and go back to list
-        $("#cancel-create-btn").click();
+        // Cancel and verify only one person exists
+        personPage.clickCancelCreateButton();
         personPage.getPersonTable().should(exist);
-
-        // Verify only the first person exists, not the duplicate
-        assertTrue(personPage.hasPersonWithEmail(duplicateEmail),
-                "Original person should still exist");
-        
-        // Count persons with the duplicate email (should be only 1)
-        var personsWithEmail = personPage.getRowsByEmail(duplicateEmail);
-        assertEquals(1, personsWithEmail.size(), 
-                "Should have exactly one person with the duplicate email");
+        assertEquals(1, personPage.getRowsByEmail(duplicateEmail).size(), "Should have only one person with the duplicate email");
     }
 
     @Test
     @DisplayName("Should reject duplicate email on edit")
     void shouldRejectDuplicateEmailOnEdit() {
-        // Create two persons with different emails
-        String email1 = "person1." + System.currentTimeMillis() + "@example.com";
-        String email2 = "person2." + System.currentTimeMillis() + "@example.com";
-        
+        // Create two persons
+        String email1 = "person1.edit." + System.currentTimeMillis() + "@example.com";
+        String email2 = "person2.edit." + System.currentTimeMillis() + "@example.com";
         createPerson("John", "Person1", email1);
         createPerson("Jane", "Person2", email2);
-
-        // Verify both persons exist
         assertTrue(personPage.hasPersonWithEmail(email1), "Person 1 should exist");
         assertTrue(personPage.hasPersonWithEmail(email2), "Person 2 should exist");
 
-        // Get the second person's row and edit it
+        // Get person 2 and try to update its email to person 1's email
         SelenideElement person2Row = personPage.getRowByEmail(email2);
-        var editButton = person2Row.$("button[id^='edit-btn-']");
-        var person2Id = editButton.getAttribute("id").replace("edit-btn-", "");
+        long person2Id = Long.parseLong(person2Row.getAttribute("data-person-id"));
 
-        // Click Edit button for person 2
-        personPage.clickEditButton(Long.parseLong(person2Id));
-
-        // Verify edit form loads
+        personPage.clickEditButton(person2Id);
         personPage.getContentArea().should(exist);
-        personPage.getEmailField().should(exist);
-
-        // Change email to match person 1's email (duplicate)
         personPage.clearAndTypeEmail(email1);
-
-        // Save the changes
         personPage.clickSaveButton();
 
-        // Verify we stay on the edit form with error message
+        // Verify error message and preserved data
         personPage.getContentArea().should(exist);
-        
-        // Check for error message in the form
-        $(".alert-danger").should(exist);
-        $(".alert-danger").should(be(visible));
-        $(".alert-danger").shouldHave(anyOf(
+        personPage.getErrorAlert().should(exist).should(be(visible)).shouldHave(anyOf(
                 text("A person with this email address already exists. Please use a different email."),
                 text("Another person already has this email address. Please use a different email.")
         ));
+        personPage.getEmailField().shouldHave(cssClass("is-invalid")).shouldHave(value(email1));
 
-        // Verify email field is marked as invalid
-        $("#email").shouldHave(cssClass("is-invalid"));
-
-        // Verify form shows the duplicate email that user tried to enter
-        $("#email").shouldHave(value(email1));
-
-        // Cancel and go back to list
-        $("#cancel-edit-btn").click();
+        // Cancel and verify original data is unchanged
+        personPage.clickCancelEditButton();
         personPage.getPersonTable().should(exist);
 
-        // Verify person 2 still has their original email (not changed)
-        SelenideElement updatedPerson2Row = personPage.getRowById(Long.parseLong(person2Id));
+        SelenideElement updatedPerson2Row = personPage.getRowById(person2Id);
         updatedPerson2Row.$$("td").get(6).shouldHave(text(email2)); // Email should be unchanged
-
-        // Verify both persons still exist with their original emails
-        assertTrue(personPage.hasPersonWithEmail(email1), "Person 1 should still exist with original email");
-        assertTrue(personPage.hasPersonWithEmail(email2), "Person 2 should still exist with original email");
     }
 
     // Helper method to create a person
     private void createPerson(String firstName, String lastName, String email) {
-        // Click Create button
         personPage.clickCreateButton();
-
-        // Verify create form loads
         personPage.getContentArea().should(exist);
-
-        // Fill the form
         personPage.typeFirstName(firstName);
         personPage.typeLastName(lastName);
         personPage.typeEmail(email);
-
-        // Save the person
         personPage.clickSaveButton();
-
-        // Verify we're back to the list page
         personPage.getPersonTable().should(exist);
     }
 }

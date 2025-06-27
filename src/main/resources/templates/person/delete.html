@@ -64,6 +64,7 @@
         <div class="d-flex gap-2">
             <button type="button"
                     id="cancel-delete-btn"
+                    data-testid="cancel-delete-btn"
                     class="btn btn-outline-secondary btn-sm"
                     hx-get="/persons-ui/table"
                     hx-target="#content-area"
@@ -72,6 +73,7 @@
             </button>
             <button type="button"
                     id="confirm-delete-btn"
+                    data-testid="confirm-delete-btn"
                     class="btn btn-danger btn-sm"
                     hx-post="/persons-ui/{person.id}/delete"
                     hx-target="#content-area"
