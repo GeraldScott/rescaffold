@@ -210,6 +210,133 @@ class PersonCrudTest extends BaseSelenideTest {
         personPage.getPersonTable().should(exist);
     }
 
+    @Test
+    @DisplayName("Should reject duplicate email on create")
+    void shouldRejectDuplicateEmailOnCreate() {
+        // Create first person with unique email
+        String duplicateEmail = "duplicate.test." + System.currentTimeMillis() + "@example.com";
+        String firstName1 = "John";
+        String lastName1 = "FirstPerson";
+
+        createPerson(firstName1, lastName1, duplicateEmail);
+
+        // Verify first person was created successfully
+        assertTrue(personPage.hasPersonWithEmail(duplicateEmail),
+                "First person with email " + duplicateEmail + " should exist");
+
+        // Now try to create second person with same email
+        String firstName2 = "Jane";
+        String lastName2 = "SecondPerson";
+
+        // Click Create button
+        personPage.clickCreateButton();
+
+        // Verify create form loads
+        personPage.getContentArea().should(exist);
+
+        // Fill the form with duplicate email
+        personPage.typeFirstName(firstName2);
+        personPage.typeLastName(lastName2);
+        personPage.typeEmail(duplicateEmail);
+
+        // Save the person
+        personPage.clickSaveButton();
+
+        // Verify we stay on the create form with error message
+        personPage.getContentArea().should(exist);
+        
+        // Check for error message in the form
+        $(".alert-danger").should(exist);
+        $(".alert-danger").should(be(visible));
+        $(".alert-danger").shouldHave(anyOf(
+                text("A person with this email address already exists. Please use a different email."),
+                text("Another person already has this email address. Please use a different email.")
+        ));
+
+        // Verify email field is marked as invalid
+        $("#email").shouldHave(cssClass("is-invalid"));
+
+        // Verify form preserves entered data
+        $("#firstName").shouldHave(value(firstName2));
+        $("#lastName").shouldHave(value(lastName2));
+        $("#email").shouldHave(value(duplicateEmail));
+
+        // Cancel and go back to list
+        $("#cancel-create-btn").click();
+        personPage.getPersonTable().should(exist);
+
+        // Verify only the first person exists, not the duplicate
+        assertTrue(personPage.hasPersonWithEmail(duplicateEmail),
+                "Original person should still exist");
+        
+        // Count persons with the duplicate email (should be only 1)
+        var personsWithEmail = personPage.getRowsByEmail(duplicateEmail);
+        assertEquals(1, personsWithEmail.size(), 
+                "Should have exactly one person with the duplicate email");
+    }
+
+    @Test
+    @DisplayName("Should reject duplicate email on edit")
+    void shouldRejectDuplicateEmailOnEdit() {
+        // Create two persons with different emails
+        String email1 = "person1." + System.currentTimeMillis() + "@example.com";
+        String email2 = "person2." + System.currentTimeMillis() + "@example.com";
+        
+        createPerson("John", "Person1", email1);
+        createPerson("Jane", "Person2", email2);
+
+        // Verify both persons exist
+        assertTrue(personPage.hasPersonWithEmail(email1), "Person 1 should exist");
+        assertTrue(personPage.hasPersonWithEmail(email2), "Person 2 should exist");
+
+        // Get the second person's row and edit it
+        SelenideElement person2Row = personPage.getRowByEmail(email2);
+        var editButton = person2Row.$("button[id^='edit-btn-']");
+        var person2Id = editButton.getAttribute("id").replace("edit-btn-", "");
+
+        // Click Edit button for person 2
+        personPage.clickEditButton(Long.parseLong(person2Id));
+
+        // Verify edit form loads
+        personPage.getContentArea().should(exist);
+        personPage.getEmailField().should(exist);
+
+        // Change email to match person 1's email (duplicate)
+        personPage.clearAndTypeEmail(email1);
+
+        // Save the changes
+        personPage.clickSaveButton();
+
+        // Verify we stay on the edit form with error message
+        personPage.getContentArea().should(exist);
+        
+        // Check for error message in the form
+        $(".alert-danger").should(exist);
+        $(".alert-danger").should(be(visible));
+        $(".alert-danger").shouldHave(anyOf(
+                text("A person with this email address already exists. Please use a different email."),
+                text("Another person already has this email address. Please use a different email.")
+        ));
+
+        // Verify email field is marked as invalid
+        $("#email").shouldHave(cssClass("is-invalid"));
+
+        // Verify form shows the duplicate email that user tried to enter
+        $("#email").shouldHave(value(email1));
+
+        // Cancel and go back to list
+        $("#cancel-edit-btn").click();
+        personPage.getPersonTable().should(exist);
+
+        // Verify person 2 still has their original email (not changed)
+        SelenideElement updatedPerson2Row = personPage.getRowById(Long.parseLong(person2Id));
+        updatedPerson2Row.$$("td").get(6).shouldHave(text(email2)); // Email should be unchanged
+
+        // Verify both persons still exist with their original emails
+        assertTrue(personPage.hasPersonWithEmail(email1), "Person 1 should still exist with original email");
+        assertTrue(personPage.hasPersonWithEmail(email2), "Person 2 should still exist with original email");
+    }
+
     // Helper method to create a person
     private void createPerson(String firstName, String lastName, String email) {
         // Click Create button

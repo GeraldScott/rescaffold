@@ -186,6 +186,16 @@ public class PersonPage {
         return $("tr[data-person-id='" + personId + "']");
     }
 
+    public ElementsCollection getRowsByEmail(String email) {
+        return tableRows.filterBy(text(email));
+    }
+
+    public PersonPage clearAndTypeEmail(String email) {
+        emailInput.clear();
+        emailInput.sendKeys(email);
+        return this;
+    }
+
     // Getter methods
     public SelenideElement getContentArea() {
         return contentArea;

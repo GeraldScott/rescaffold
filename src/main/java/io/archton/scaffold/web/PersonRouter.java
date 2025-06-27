@@ -180,6 +180,10 @@ public class PersonRouter {
             }
 
             String errorMessage = e.getMessage();
+            // Make email duplicate error more user-friendly
+            if (errorMessage != null && errorMessage.contains("already exists")) {
+                errorMessage = "A person with this email address already exists. Please use a different email.";
+            }
             String html = Templates.create(titleList, genderList, idTypeList, errorMessage, enteredData).render();
 
             // Return HTTP 200 with the form containing the error message
@@ -323,6 +327,10 @@ public class PersonRouter {
             List<IdType> idTypeList = idTypeService.listSorted();
 
             String errorMessage = e.getMessage();
+            // Make email duplicate error more user-friendly
+            if (errorMessage != null && errorMessage.contains("already exists")) {
+                errorMessage = "Another person already has this email address. Please use a different email.";
+            }
             String html = Templates.edit(person, titleList, genderList, idTypeList, errorMessage).render();
 
             // Return HTTP 200 with the form containing the error message
