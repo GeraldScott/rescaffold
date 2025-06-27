@@ -52,13 +52,6 @@ class TitleResourceTest {
         return title;
     }
 
-    private Title createInvalidTitleWithLowercaseCode() {
-        Title title = new Title();
-        title.code = "mr"; // Will be normalized to uppercase
-        title.description = "Lowercase Test";
-        return title;
-    }
-
     private Title createInvalidTitleWithNumericCode() {
         Title title = new Title();
         title.code = "DR1"; // Invalid: must contain only letters
@@ -66,36 +59,20 @@ class TitleResourceTest {
         return title;
     }
 
-    private Title createTitleWithWhitespace() {
-        Title title = new Title();
-        title.code = " MRS "; // Should be trimmed and normalized
-        title.description = "  Whitespace Test  "; // Should be trimmed
-        return title;
-    }
-
-    private Title createValidTitleForNormalization() {
-        Title title = new Title();
-        title.code = "PROF"; // Valid uppercase letters
-        title.description = "Normalization Test";
-        return title;
-    }
-
     // CRUD operation tests
 
     @Test
     @TestTransaction
-    @DisplayName("GET /api/titles - Should return list of titles")
-    void testGetAllTitles_List() {
-        // Note: This test may see existing data from other tests or migrations
-        // We'll just verify it returns a list successfully
+    @DisplayName("GET /api/titles - Should return empty list initially")
+    void testGetAllTitles_EmptyList() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
-                .body("$", notNullValue());
+                .body("$", hasSize(0));
     }
 
     @Test
@@ -107,9 +84,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(201)
                 .body("id", notNullValue())
@@ -131,9 +108,9 @@ class TitleResourceTest {
         Integer createdId = given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -141,9 +118,9 @@ class TitleResourceTest {
         // Then retrieve it by ID
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/{id}", createdId)
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("id", equalTo(createdId))
@@ -161,17 +138,17 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201);
 
         // Then retrieve it by code
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/code/{code}", "DR")
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("code", equalTo("DR"))
@@ -188,9 +165,9 @@ class TitleResourceTest {
         Integer createdId = given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -200,9 +177,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(updatedTitle)
-        .when()
+                .when()
                 .put("/{id}", createdId)
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("id", equalTo(createdId))
@@ -221,9 +198,9 @@ class TitleResourceTest {
         Integer createdId = given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201)
                 .extract()
                 .path("id");
@@ -231,17 +208,17 @@ class TitleResourceTest {
         // Then delete it
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .delete("/{id}", createdId)
-        .then()
+                .then()
                 .statusCode(204);
 
         // Verify it's deleted
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/{id}", createdId)
-        .then()
+                .then()
                 .statusCode(404);
     }
 
@@ -257,9 +234,9 @@ class TitleResourceTest {
         // Verify list contains our created titles (size may vary due to test isolation issues)
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("$", hasSize(greaterThanOrEqualTo(3)))
@@ -280,9 +257,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -297,9 +274,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -312,9 +289,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -327,9 +304,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -344,9 +321,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -361,9 +338,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -378,9 +355,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400);
     }
 
@@ -394,9 +371,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(400)
                 .body("error", containsString("ID must not be included"));
     }
@@ -410,9 +387,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(first)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201);
 
         // Try to create second with same code
@@ -420,9 +397,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(duplicate)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(409)
                 .body("error", containsString("already exists"));
     }
@@ -436,9 +413,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(first)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(201);
 
         // Try to create second with same description
@@ -446,9 +423,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(duplicate)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .statusCode(409)
                 .body("error", containsString("already exists"));
     }
@@ -462,9 +439,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .post()
-        .then()
+                .then()
                 .spec(responseSpec)
                 .statusCode(201)
                 .body("code", equalTo("UPPER"))
@@ -479,9 +456,9 @@ class TitleResourceTest {
     void testGetTitleById_NotFound() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/{id}", 99999L)
-        .then()
+                .then()
                 .statusCode(404)
                 .body("error", containsString("Entity not found"));
     }
@@ -492,9 +469,9 @@ class TitleResourceTest {
     void testGetTitleByCode_NotFound() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .get("/code/{code}", "XXXXX")
-        .then()
+                .then()
                 .statusCode(404)
                 .body("error", containsString("Entity not found"));
     }
@@ -508,9 +485,9 @@ class TitleResourceTest {
         given()
                 .spec(requestSpec)
                 .body(title)
-        .when()
+                .when()
                 .put("/{id}", 99999L)
-        .then()
+                .then()
                 .statusCode(404)
                 .body("error", containsString("Entity not found"));
     }
@@ -520,28 +497,20 @@ class TitleResourceTest {
     @DisplayName("PUT /api/titles/{id} - Should return 409 for duplicate code")
     void testUpdateTitle_DuplicateCode() {
         // Create two titles with unique codes for this test
-        // Use unique codes to avoid conflicts with other test runs
-        // Generate a unique letter suffix (A-Z) based on current time
-        long time = System.currentTimeMillis();
-        char suffix1 = (char) ('A' + (time % 26));
-        char suffix2 = (char) ('A' + ((time / 26) % 26));
-        String uniqueCode1 = "UC" + suffix1 + suffix2;
-        String uniqueCode2 = "UD" + suffix1 + suffix2;
-        
-        Title first = createValidTitle(uniqueCode1, "Update Code Test First " + time);
+        Title first = createValidTitle("UPC1", "Update Code Test First");
         Integer firstId = given().spec(requestSpec).body(first).when().post().then().statusCode(201).extract().path("id");
 
-        Title second = createValidTitle(uniqueCode2, "Update Code Test Second " + time);
-        Integer secondId = given().spec(requestSpec).body(second).when().post().then().statusCode(201).extract().path("id");
+        Title second = createValidTitle("UPC2", "Update Code Test Second");
+        given().spec(requestSpec).body(second).when().post().then().statusCode(201);
 
         // Try to update first with second's code
-        Title update = createValidTitle(uniqueCode2, "Updated First");
+        Title update = createValidTitle("UPC2", "Updated First");
         given()
                 .spec(requestSpec)
                 .body(update)
-        .when()
+                .when()
                 .put("/{id}", firstId)
-        .then()
+                .then()
                 .statusCode(409)
                 .body("error", containsString("already exists"));
     }
@@ -551,30 +520,20 @@ class TitleResourceTest {
     @DisplayName("PUT /api/titles/{id} - Should return 409 for duplicate description")
     void testUpdateTitle_DuplicateDescription() {
         // Create two titles with unique data for this test
-        // Use unique data to avoid conflicts with other test runs
-        // Generate unique letter suffixes based on current time
-        long time = System.currentTimeMillis();
-        char suffix1 = (char) ('A' + (time % 26));
-        char suffix2 = (char) ('A' + ((time / 26) % 26));
-        String uniqueCode1 = "UE" + suffix1 + suffix2;
-        String uniqueCode2 = "UF" + suffix1 + suffix2;
-        String uniqueDesc1 = "Update Desc Test First " + time;
-        String uniqueDesc2 = "Update Desc Test Second " + time;
-        
-        Title first = createValidTitle(uniqueCode1, uniqueDesc1);
+        Title first = createValidTitle("UPD1", "Update Desc Test First");
         Integer firstId = given().spec(requestSpec).body(first).when().post().then().statusCode(201).extract().path("id");
 
-        Title second = createValidTitle(uniqueCode2, uniqueDesc2);
-        Integer secondId = given().spec(requestSpec).body(second).when().post().then().statusCode(201).extract().path("id");
+        Title second = createValidTitle("UPD2", "Update Desc Test Second");
+        given().spec(requestSpec).body(second).when().post().then().statusCode(201);
 
         // Try to update first with second's description
-        Title update = createValidTitle(uniqueCode1, uniqueDesc2);
+        Title update = createValidTitle("UPD1", "Update Desc Test Second");
         given()
                 .spec(requestSpec)
                 .body(update)
-        .when()
+                .when()
                 .put("/{id}", firstId)
-        .then()
+                .then()
                 .statusCode(409)
                 .body("error", containsString("already exists"));
     }
@@ -585,9 +544,9 @@ class TitleResourceTest {
     void testDeleteTitle_NotFound() {
         given()
                 .spec(requestSpec)
-        .when()
+                .when()
                 .delete("/{id}", 99999L)
-        .then()
+                .then()
                 .statusCode(404)
                 .body("error", containsString("Entity not found"));
     }
