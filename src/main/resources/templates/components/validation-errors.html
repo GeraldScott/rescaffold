@@ -5,8 +5,8 @@
         Validation Errors
     </h6>
     <ul class="mb-0">
-        {#for error in validationErrors}
-        <li>{error.value}</li>
+        {#for entry in validationErrors}
+        <li>{entry.value}</li>
         {/for}
     </ul>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
