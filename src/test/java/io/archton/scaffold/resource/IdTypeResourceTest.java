@@ -279,14 +279,14 @@ class IdTypeResourceTest {
     @DisplayName("PUT /api/id-types/{id} - Should return 409 for duplicate code")
     void testUpdateIdType_DuplicateCode() {
         // Create two id types with unique codes for this test
-        IdType first = createValidIdType("UPC1", "Update Code Test First");
+        IdType first = createValidIdType("UPCA", "Update Code Test First");
         Integer firstId = given().spec(requestSpec).body(first).when().post().then().statusCode(201).extract().path("id");
 
-        IdType second = createValidIdType("UPC2", "Update Code Test Second");
+        IdType second = createValidIdType("UPCB", "Update Code Test Second");
         given().spec(requestSpec).body(second).when().post().then().statusCode(201);
 
         // Try to update first with second's code
-        IdType update = createValidIdType("UPC2", "Updated First");
+        IdType update = createValidIdType("UPCB", "Updated First");
         given().spec(requestSpec).body(update).when().put("/{id}", firstId).then().statusCode(409).body("error", containsString("already exists"));
     }
 
@@ -295,14 +295,14 @@ class IdTypeResourceTest {
     @DisplayName("PUT /api/id-types/{id} - Should return 409 for duplicate description")
     void testUpdateIdType_DuplicateDescription() {
         // Create two id types with unique data for this test
-        IdType first = createValidIdType("UPD1", "Update Desc Test First");
+        IdType first = createValidIdType("UPDA", "Update Desc Test First");
         Integer firstId = given().spec(requestSpec).body(first).when().post().then().statusCode(201).extract().path("id");
 
-        IdType second = createValidIdType("UPD2", "Update Desc Test Second");
+        IdType second = createValidIdType("UPDB", "Update Desc Test Second");
         given().spec(requestSpec).body(second).when().post().then().statusCode(201);
 
         // Try to update first with second's description
-        IdType update = createValidIdType("UPD1", "Update Desc Test Second");
+        IdType update = createValidIdType("UPDA", "Update Desc Test Second");
         given().spec(requestSpec).body(update).when().put("/{id}", firstId).then().statusCode(409).body("error", containsString("already exists"));
     }
 

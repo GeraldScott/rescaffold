@@ -483,14 +483,14 @@ class TitleResourceTest {
     @DisplayName("PUT /api/titles/{id} - Should return 409 for duplicate code")
     void testUpdateTitle_DuplicateCode() {
         // Create two titles with unique codes for this test
-        Title first = createValidTitle("UPC1", "Update Code Test First");
+        Title first = createValidTitle("UPCA", "Update Code Test First");
         Integer firstId = given().spec(requestSpec).body(first).when().post().then().statusCode(201).extract().path("id");
 
-        Title second = createValidTitle("UPC2", "Update Code Test Second");
+        Title second = createValidTitle("UPCB", "Update Code Test Second");
         given().spec(requestSpec).body(second).when().post().then().statusCode(201);
 
         // Try to update first with second's code
-        Title update = createValidTitle("UPC2", "Updated First");
+        Title update = createValidTitle("UPCB", "Updated First");
         given()
                 .spec(requestSpec)
                 .body(update)
@@ -506,14 +506,14 @@ class TitleResourceTest {
     @DisplayName("PUT /api/titles/{id} - Should return 409 for duplicate description")
     void testUpdateTitle_DuplicateDescription() {
         // Create two titles with unique data for this test
-        Title first = createValidTitle("UPD1", "Update Desc Test First");
+        Title first = createValidTitle("UPDA", "Update Desc Test First");
         Integer firstId = given().spec(requestSpec).body(first).when().post().then().statusCode(201).extract().path("id");
 
-        Title second = createValidTitle("UPD2", "Update Desc Test Second");
+        Title second = createValidTitle("UPDB", "Update Desc Test Second");
         given().spec(requestSpec).body(second).when().post().then().statusCode(201);
 
         // Try to update first with second's description
-        Title update = createValidTitle("UPD1", "Update Desc Test Second");
+        Title update = createValidTitle("UPDA", "Update Desc Test Second");
         given()
                 .spec(requestSpec)
                 .body(update)
