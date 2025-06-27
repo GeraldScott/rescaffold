@@ -25,16 +25,10 @@ class GenderResourceTest {
     @BeforeEach
     void setUp() {
         // Common request specification for all tests
-        requestSpec = new RequestSpecBuilder()
-                .setBasePath("/api/genders")
-                .setContentType(ContentType.JSON)
-                .setAccept(ContentType.JSON)
-                .build();
+        requestSpec = new RequestSpecBuilder().setBasePath("/api/genders").setContentType(ContentType.JSON).setAccept(ContentType.JSON).build();
 
         // Common response specification for successful responses
-        responseSpec = new ResponseSpecBuilder()
-                .expectContentType(ContentType.JSON)
-                .build();
+        responseSpec = new ResponseSpecBuilder().expectContentType(ContentType.JSON).build();
     }
 
     // Helper methods for creating test data
@@ -52,31 +46,10 @@ class GenderResourceTest {
         return gender;
     }
 
-    private Gender createInvalidGenderWithLowercaseCode() {
-        Gender gender = new Gender();
-        gender.code = "m"; // Will be normalized to uppercase
-        gender.description = "Lowercase Test";
-        return gender;
-    }
-
     private Gender createInvalidGenderWithNumericCode() {
         Gender gender = new Gender();
         gender.code = "1"; // Invalid: must be alphabetic
         gender.description = "Numeric Code";
-        return gender;
-    }
-
-    private Gender createGenderWithWhitespace() {
-        Gender gender = new Gender();
-        gender.code = " A "; // Should be trimmed and normalized
-        gender.description = "  Whitespace Test  "; // Should be trimmed
-        return gender;
-    }
-
-    private Gender createValidGenderForNormalization() {
-        Gender gender = new Gender();
-        gender.code = "N"; // Valid uppercase letter
-        gender.description = "Normalization Test";
         return gender;
     }
 
@@ -86,14 +59,7 @@ class GenderResourceTest {
     @TestTransaction
     @DisplayName("GET /api/genders - Should return empty list initially")
     void testGetAllGenders_EmptyList() {
-        given()
-                .spec(requestSpec)
-        .when()
-                .get()
-        .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("$", hasSize(0));
+        given().spec(requestSpec).when().get().then().spec(responseSpec).statusCode(200).body("$", hasSize(0));
     }
 
     @Test
@@ -102,22 +68,7 @@ class GenderResourceTest {
     void testCreateGender_ValidData() {
         Gender gender = createValidGender("M", "Male");
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .spec(responseSpec)
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("code", equalTo("M"))
-                .body("description", equalTo("Male"))
-                .body("isActive", equalTo(true))
-                .body("createdBy", equalTo("system"))
-                .body("createdAt", notNullValue())
-                .body("updatedBy", nullValue())
-                .body("updatedAt", nullValue());
+        given().spec(requestSpec).body(gender).when().post().then().spec(responseSpec).statusCode(201).body("id", notNullValue()).body("code", equalTo("M")).body("description", equalTo("Male")).body("isActive", equalTo(true)).body("createdBy", equalTo("system")).body("createdAt", notNullValue()).body("updatedBy", nullValue()).body("updatedAt", nullValue());
     }
 
     @Test
@@ -126,28 +77,10 @@ class GenderResourceTest {
     void testGetGenderById_ValidId() {
         // First create a gender
         Gender gender = createValidGender("F", "Female");
-        Integer createdId = given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(201)
-                .extract()
-                .path("id");
+        Integer createdId = given().spec(requestSpec).body(gender).when().post().then().statusCode(201).extract().path("id");
 
         // Then retrieve it by ID
-        given()
-                .spec(requestSpec)
-        .when()
-                .get("/{id}", createdId)
-        .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("id", equalTo(createdId))
-                .body("code", equalTo("F"))
-                .body("description", equalTo("Female"))
-                .body("isActive", equalTo(true));
+        given().spec(requestSpec).when().get("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("F")).body("description", equalTo("Female")).body("isActive", equalTo(true));
     }
 
     @Test
@@ -156,25 +89,10 @@ class GenderResourceTest {
     void testGetGenderByCode_ValidCode() {
         // First create a gender
         Gender gender = createValidGender("O", "Other");
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(201);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(201);
 
         // Then retrieve it by code
-        given()
-                .spec(requestSpec)
-        .when()
-                .get("/code/{code}", "O")
-        .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("code", equalTo("O"))
-                .body("description", equalTo("Other"))
-                .body("isActive", equalTo(true));
+        given().spec(requestSpec).when().get("/code/{code}", "O").then().spec(responseSpec).statusCode(200).body("code", equalTo("O")).body("description", equalTo("Other")).body("isActive", equalTo(true));
     }
 
     @Test
@@ -183,31 +101,11 @@ class GenderResourceTest {
     void testUpdateGender_ValidData() {
         // First create a gender
         Gender gender = createValidGender("X", "Original");
-        Integer createdId = given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(201)
-                .extract()
-                .path("id");
+        Integer createdId = given().spec(requestSpec).body(gender).when().post().then().statusCode(201).extract().path("id");
 
         // Then update it
         Gender updatedGender = createValidGender("Y", "Updated");
-        given()
-                .spec(requestSpec)
-                .body(updatedGender)
-        .when()
-                .put("/{id}", createdId)
-        .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("id", equalTo(createdId))
-                .body("code", equalTo("Y"))
-                .body("description", equalTo("Updated"))
-                .body("isActive", equalTo(true))
-                .body("updatedAt", notNullValue());
+        given().spec(requestSpec).body(updatedGender).when().put("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("Y")).body("description", equalTo("Updated")).body("isActive", equalTo(true)).body("updatedAt", notNullValue());
     }
 
     @Test
@@ -216,31 +114,13 @@ class GenderResourceTest {
     void testDeleteGender_ValidId() {
         // First create a gender
         Gender gender = createValidGender("Z", "To Delete");
-        Integer createdId = given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(201)
-                .extract()
-                .path("id");
+        Integer createdId = given().spec(requestSpec).body(gender).when().post().then().statusCode(201).extract().path("id");
 
         // Then delete it
-        given()
-                .spec(requestSpec)
-        .when()
-                .delete("/{id}", createdId)
-        .then()
-                .statusCode(204);
+        given().spec(requestSpec).when().delete("/{id}", createdId).then().statusCode(204);
 
         // Verify it's deleted
-        given()
-                .spec(requestSpec)
-        .when()
-                .get("/{id}", createdId)
-        .then()
-                .statusCode(404);
+        given().spec(requestSpec).when().get("/{id}", createdId).then().statusCode(404);
     }
 
     @Test
@@ -253,16 +133,7 @@ class GenderResourceTest {
         given().spec(requestSpec).body(createValidGender("L", "List Test Charlie")).when().post().then().statusCode(201);
 
         // Verify list contains our created genders (size may vary due to test isolation issues)
-        given()
-                .spec(requestSpec)
-        .when()
-                .get()
-        .then()
-                .spec(responseSpec)
-                .statusCode(200)
-                .body("$", hasSize(greaterThanOrEqualTo(3)))
-                .body("code", hasItems("J", "K", "L"))
-                .body("description", hasItems("List Test Alpha", "List Test Beta", "List Test Charlie"));
+        given().spec(requestSpec).when().get().then().spec(responseSpec).statusCode(200).body("$", hasSize(greaterThanOrEqualTo(3))).body("code", hasItems("J", "K", "L")).body("description", hasItems("List Test Alpha", "List Test Beta", "List Test Charlie"));
     }
 
     // Data validation tests
@@ -275,13 +146,7 @@ class GenderResourceTest {
         gender.code = null;
         gender.description = "No Code";
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -292,13 +157,7 @@ class GenderResourceTest {
         gender.code = "";
         gender.description = "Empty Code";
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -307,13 +166,7 @@ class GenderResourceTest {
     void testCreateGender_MultiCharCode() {
         Gender gender = createInvalidGenderWithMultiCharCode();
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -322,13 +175,7 @@ class GenderResourceTest {
     void testCreateGender_NumericCode() {
         Gender gender = createInvalidGenderWithNumericCode();
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -339,13 +186,7 @@ class GenderResourceTest {
         gender.code = "T";
         gender.description = null;
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -356,13 +197,7 @@ class GenderResourceTest {
         gender.code = "T";
         gender.description = "";
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -373,13 +208,7 @@ class GenderResourceTest {
         gender.code = "T";
         gender.description = "   ";
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
     }
 
     @Test
@@ -389,14 +218,7 @@ class GenderResourceTest {
         Gender gender = createValidGender("I", "With ID");
         gender.id = 999L; // Should not be provided in POST
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .statusCode(400)
-                .body("error", containsString("ID must not be included"));
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("ID must not be included"));
     }
 
     @Test
@@ -405,24 +227,11 @@ class GenderResourceTest {
     void testCreateGender_DuplicateCode() {
         // Create first gender with unique code for this test
         Gender first = createValidGender("Q", "Duplicate Code Test First");
-        given()
-                .spec(requestSpec)
-                .body(first)
-        .when()
-                .post()
-        .then()
-                .statusCode(201);
+        given().spec(requestSpec).body(first).when().post().then().statusCode(201);
 
         // Try to create second with same code
         Gender duplicate = createValidGender("Q", "Duplicate Code Test Second");
-        given()
-                .spec(requestSpec)
-                .body(duplicate)
-        .when()
-                .post()
-        .then()
-                .statusCode(409)
-                .body("error", containsString("already exists"));
+        given().spec(requestSpec).body(duplicate).when().post().then().statusCode(409).body("error", containsString("already exists"));
     }
 
     @Test
@@ -431,24 +240,11 @@ class GenderResourceTest {
     void testCreateGender_DuplicateDescription() {
         // Create first gender with unique data for this test
         Gender first = createValidGender("T", "Duplicate Desc Test Unique");
-        given()
-                .spec(requestSpec)
-                .body(first)
-        .when()
-                .post()
-        .then()
-                .statusCode(201);
+        given().spec(requestSpec).body(first).when().post().then().statusCode(201);
 
         // Try to create second with same description
         Gender duplicate = createValidGender("Y", "Duplicate Desc Test Unique");
-        given()
-                .spec(requestSpec)
-                .body(duplicate)
-        .when()
-                .post()
-        .then()
-                .statusCode(409)
-                .body("error", containsString("already exists"));
+        given().spec(requestSpec).body(duplicate).when().post().then().statusCode(409).body("error", containsString("already exists"));
     }
 
     @Test
@@ -457,16 +253,7 @@ class GenderResourceTest {
     void testCreateGender_ValidUppercaseCode() {
         Gender gender = createValidGender("U", "Uppercase");
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .post()
-        .then()
-                .spec(responseSpec)
-                .statusCode(201)
-                .body("code", equalTo("U"))
-                .body("description", equalTo("Uppercase"));
+        given().spec(requestSpec).body(gender).when().post().then().spec(responseSpec).statusCode(201).body("code", equalTo("U")).body("description", equalTo("Uppercase"));
     }
 
     // Error handling tests
@@ -475,26 +262,14 @@ class GenderResourceTest {
     @TestTransaction
     @DisplayName("GET /api/genders/{id} - Should return 404 for non-existent ID")
     void testGetGenderById_NotFound() {
-        given()
-                .spec(requestSpec)
-        .when()
-                .get("/{id}", 99999L)
-        .then()
-                .statusCode(404)
-                .body("error", containsString("Entity not found"));
+        given().spec(requestSpec).when().get("/{id}", 99999L).then().statusCode(404).body("error", containsString("Entity not found"));
     }
 
     @Test
     @TestTransaction
     @DisplayName("GET /api/genders/code/{code} - Should return 404 for non-existent code")
     void testGetGenderByCode_NotFound() {
-        given()
-                .spec(requestSpec)
-        .when()
-                .get("/code/{code}", "X")
-        .then()
-                .statusCode(404)
-                .body("error", containsString("Entity not found"));
+        given().spec(requestSpec).when().get("/code/{code}", "X").then().statusCode(404).body("error", containsString("Entity not found"));
     }
 
     @Test
@@ -503,14 +278,7 @@ class GenderResourceTest {
     void testUpdateGender_NotFound() {
         Gender gender = createValidGender("U", "Update Non-Existent");
 
-        given()
-                .spec(requestSpec)
-                .body(gender)
-        .when()
-                .put("/{id}", 99999L)
-        .then()
-                .statusCode(404)
-                .body("error", containsString("Entity not found"));
+        given().spec(requestSpec).body(gender).when().put("/{id}", 99999L).then().statusCode(404).body("error", containsString("Entity not found"));
     }
 
     @Test
@@ -526,14 +294,7 @@ class GenderResourceTest {
 
         // Try to update first with second's code
         Gender update = createValidGender("S", "Updated First");
-        given()
-                .spec(requestSpec)
-                .body(update)
-        .when()
-                .put("/{id}", firstId)
-        .then()
-                .statusCode(409)
-                .body("error", containsString("already exists"));
+        given().spec(requestSpec).body(update).when().put("/{id}", firstId).then().statusCode(409).body("error", containsString("already exists"));
     }
 
     @Test
@@ -549,26 +310,13 @@ class GenderResourceTest {
 
         // Try to update first with second's description
         Gender update = createValidGender("V", "Update Desc Test Second");
-        given()
-                .spec(requestSpec)
-                .body(update)
-        .when()
-                .put("/{id}", firstId)
-        .then()
-                .statusCode(409)
-                .body("error", containsString("already exists"));
+        given().spec(requestSpec).body(update).when().put("/{id}", firstId).then().statusCode(409).body("error", containsString("already exists"));
     }
 
     @Test
     @TestTransaction
     @DisplayName("DELETE /api/genders/{id} - Should return 404 for non-existent ID")
     void testDeleteGender_NotFound() {
-        given()
-                .spec(requestSpec)
-        .when()
-                .delete("/{id}", 99999L)
-        .then()
-                .statusCode(404)
-                .body("error", containsString("Entity not found"));
+        given().spec(requestSpec).when().delete("/{id}", 99999L).then().statusCode(404).body("error", containsString("Entity not found"));
     }
 }
