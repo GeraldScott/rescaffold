@@ -60,9 +60,11 @@ Run all tests:
 ./mvnw test
 ```
 
-Run specific test:
+Run specific test(s):
 ```bash
 ./mvnw test -Dtest=TestClassName
+./mvnw test -Dtest="*ResourceTest"
+./mvnw test -Dtest="*CrudTest"
 ```
 
 Run integration tests:

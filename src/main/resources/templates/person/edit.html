@@ -8,12 +8,7 @@
         <h5 class="mb-0">Edit Person</h5>
     </div>
     <div class="card-body">
-        {#if errorMessage}
-        <div class="alert alert-danger" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            {errorMessage}
-        </div>
-        {/if}
+        {#include components/error-alert.html /}
 
         <form id="edit-form"
               hx-post="/persons-ui/{person.id}/edit"

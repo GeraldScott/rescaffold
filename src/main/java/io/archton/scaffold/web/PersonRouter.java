@@ -4,10 +4,14 @@ import io.archton.scaffold.domain.Person;
 import io.archton.scaffold.domain.Gender;
 import io.archton.scaffold.domain.Title;
 import io.archton.scaffold.domain.IdType;
+import io.archton.scaffold.exception.DuplicateEntityException;
+import io.archton.scaffold.exception.EntityNotFoundException;
+import io.archton.scaffold.exception.ValidationException;
 import io.archton.scaffold.service.PersonService;
 import io.archton.scaffold.service.GenderService;
 import io.archton.scaffold.service.TitleService;
 import io.archton.scaffold.service.IdTypeService;
+import io.archton.scaffold.util.WebErrorHandler;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -87,7 +91,7 @@ public class PersonRouter {
             String html = Templates.view(personOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving person for view: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving person for view", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -143,8 +147,9 @@ public class PersonRouter {
             String html = Templates.table(personList).render();
             return Response.ok(html).build();
 
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error creating person: " + e.getMessage());
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error creating person", e);
+            
             List<Title> titleList = titleService.listSorted();
             List<Gender> genderList = genderService.listSorted();
             List<IdType> idTypeList = idTypeService.listSorted();
@@ -179,33 +184,10 @@ public class PersonRouter {
                 }
             }
 
-            String errorMessage = e.getMessage();
-            // Make email duplicate error more user-friendly
-            if (errorMessage != null && errorMessage.contains("already exists")) {
-                errorMessage = "A person with this email address already exists. Please use a different email.";
-            }
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
             String html = Templates.create(titleList, genderList, idTypeList, errorMessage, enteredData).render();
 
-            // Return HTTP 200 with the form containing the error message
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            log.error("Error creating person: " + e.getMessage());
-
-            List<Title> titleList = titleService.listSorted();
-            List<Gender> genderList = genderService.listSorted();
-            List<IdType> idTypeList = idTypeService.listSorted();
-
-            // Create a temporary person object to preserve entered data
-            Person enteredData = new Person();
-            enteredData.firstName = firstName;
-            enteredData.lastName = lastName;
-            enteredData.email = email;
-            enteredData.idNumber = idNumber;
-
-            String errorMessage = "An unexpected error occurred while creating the person. Please try again.";
-            String html = Templates.create(titleList, genderList, idTypeList, errorMessage, enteredData).render();
-
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
+            return WebErrorHandler.createErrorResponse(html, e);
         }
     }
 
@@ -227,7 +209,7 @@ public class PersonRouter {
             String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList, null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving person for edit: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving person for edit", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -274,8 +256,8 @@ public class PersonRouter {
             String html = Templates.table(personList).render();
             return Response.ok(html).build();
 
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error updating person: " + e.getMessage());
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error updating person", e);
 
             // Get the original person record
             Optional<Person> personOpt = personService.findByIdOptional(id);
@@ -326,32 +308,10 @@ public class PersonRouter {
             List<Gender> genderList = genderService.listSorted();
             List<IdType> idTypeList = idTypeService.listSorted();
 
-            String errorMessage = e.getMessage();
-            // Make email duplicate error more user-friendly
-            if (errorMessage != null && errorMessage.contains("already exists")) {
-                errorMessage = "Another person already has this email address. Please use a different email.";
-            }
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
             String html = Templates.edit(person, titleList, genderList, idTypeList, errorMessage).render();
 
-            // Return HTTP 200 with the form containing the error message
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            log.error("Error updating person: " + e.getMessage());
-
-            // Get the original person
-            Optional<Person> personOpt = personService.findByIdOptional(id);
-            if (personOpt.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            List<Title> titleList = titleService.listSorted();
-            List<Gender> genderList = genderService.listSorted();
-            List<IdType> idTypeList = idTypeService.listSorted();
-
-            String errorMessage = "An unexpected error occurred while updating the person. Please try again.";
-            String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList, errorMessage).render();
-
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
+            return WebErrorHandler.createErrorResponse(html, e);
         }
     }
 
@@ -370,7 +330,7 @@ public class PersonRouter {
             String html = Templates.delete(personOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving person for delete: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving person for delete", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -391,11 +351,11 @@ public class PersonRouter {
             String html = Templates.table(personList).render();
             return Response.ok(html).build();
 
-        } catch (IllegalArgumentException e) {
-            log.error("Error deleting person: " + e.getMessage());
+        } catch (EntityNotFoundException e) {
+            WebErrorHandler.logError("Error deleting person", e);
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (Exception e) {
-            log.error("Error deleting person: " + e.getMessage());
+            WebErrorHandler.logError("Error deleting person", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

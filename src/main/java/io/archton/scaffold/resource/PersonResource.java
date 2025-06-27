@@ -1,6 +1,9 @@
 package io.archton.scaffold.resource;
 
 import io.archton.scaffold.domain.Person;
+import io.archton.scaffold.exception.DuplicateEntityException;
+import io.archton.scaffold.exception.EntityNotFoundException;
+import io.archton.scaffold.exception.ValidationException;
 import io.archton.scaffold.service.PersonService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -14,7 +17,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 
 import java.util.List;
-import java.util.Map;
 
 @Path("/api/persons")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,25 +29,14 @@ public class PersonResource {
     @Inject
     PersonService personService;
 
-    private Map<String, String> createErrorResponse(String message) {
-        return Map.of("error", message);
-    }
-
     @GET
     @Operation(summary = "Get all persons", description = "Retrieves a list of all persons sorted by last name")
     @APIResponse(responseCode = "200", description = "List of persons retrieved successfully")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response getAllPersons() {
         log.debug("GET /api/persons");
-        try {
-            List<Person> persons = personService.listSorted();
-            return Response.ok(persons).build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        }
+        List<Person> persons = personService.listSorted();
+        return Response.ok(persons).build();
     }
 
     @GET
@@ -56,20 +47,11 @@ public class PersonResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response getPersonById(@Parameter(description = "Person ID") @PathParam("id") Long id) {
         log.debugf("GET /api/persons/%s", id);
-        try {
-            Person person = personService.findById(id);
-            if (person == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(createErrorResponse("Entity not found with id: " + id))
-                        .build();
-            }
-            return Response.ok(person).build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
+        Person person = personService.findById(id);
+        if (person == null) {
+            throw new EntityNotFoundException("Person", id);
         }
+        return Response.ok(person).build();
     }
 
     @GET
@@ -80,20 +62,11 @@ public class PersonResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response getPersonByEmail(@Parameter(description = "Person email") @PathParam("email") String email) {
         log.debugf("GET /api/persons/email/%s", email);
-        try {
-            Person person = personService.findByEmail(email);
-            if (person == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(createErrorResponse("Entity not found with email: " + email))
-                        .build();
-            }
-            return Response.ok(person).build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
+        Person person = personService.findByEmail(email);
+        if (person == null) {
+            throw new EntityNotFoundException("Person", email);
         }
+        return Response.ok(person).build();
     }
 
     @POST
@@ -104,26 +77,8 @@ public class PersonResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response createPerson(@Valid Person person) {
         log.debugf("POST /api/persons - create with email: %s", person.email);
-
-        try {
-            Person created = personService.createPerson(person);
-            return Response.status(Response.Status.CREATED).entity(created).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error creating person: " + e.getMessage());
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity(createErrorResponse(e.getMessage()))
-                        .build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        }
+        Person created = personService.createPerson(person);
+        return Response.status(Response.Status.CREATED).entity(created).build();
     }
 
     @PUT
@@ -135,31 +90,8 @@ public class PersonResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response updatePerson(@Parameter(description = "Person ID") @PathParam("id") Long id, @Valid Person newPerson) {
         log.debugf("PUT /api/persons/%s - update with email: %s", id, newPerson.email);
-
-        try {
-            Person updated = personService.updatePerson(id, newPerson);
-            return Response.ok(updated).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error updating person: " + e.getMessage());
-            if (e.getMessage().contains("not found")) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(createErrorResponse(e.getMessage()))
-                        .build();
-            }
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity(createErrorResponse(e.getMessage()))
-                        .build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        }
+        Person updated = personService.updatePerson(id, newPerson);
+        return Response.ok(updated).build();
     }
 
     @DELETE
@@ -170,20 +102,7 @@ public class PersonResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response deletePerson(@Parameter(description = "Person ID") @PathParam("id") Long id) {
         log.debugf("DELETE /api/persons/%s", id);
-
-        try {
-            personService.deletePerson(id);
-            return Response.noContent().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error deleting person: " + e.getMessage());
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(createErrorResponse(e.getMessage()))
-                    .build();
-        }
+        personService.deletePerson(id);
+        return Response.noContent().build();
     }
 }

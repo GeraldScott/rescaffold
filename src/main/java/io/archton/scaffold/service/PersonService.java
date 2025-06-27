@@ -1,6 +1,9 @@
 package io.archton.scaffold.service;
 
 import io.archton.scaffold.domain.Person;
+import io.archton.scaffold.exception.DuplicateEntityException;
+import io.archton.scaffold.exception.EntityNotFoundException;
+import io.archton.scaffold.exception.ValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
@@ -39,7 +42,7 @@ public class PersonService {
         log.debugf("Creating person with email: %s", person.email);
         
         if (person.id != null) {
-            throw new IllegalArgumentException("ID must not be included in POST request");
+            throw new ValidationException("id", "ID must not be included in POST request");
         }
         
         validatePersonData(person);
@@ -56,7 +59,7 @@ public class PersonService {
         
         Person existing = Person.findById(id);
         if (existing == null) {
-            throw new IllegalArgumentException("Entity not found with id: " + id);
+            throw new EntityNotFoundException("Person", id);
         }
 
         if (updates.firstName != null) {
@@ -98,7 +101,7 @@ public class PersonService {
         
         Person person = Person.findById(id);
         if (person == null) {
-            throw new IllegalArgumentException("Entity not found with id: " + id);
+            throw new EntityNotFoundException("Person", id);
         }
         
         // Soft delete by setting isActive to false
@@ -108,12 +111,12 @@ public class PersonService {
 
     private void validatePersonData(Person person) {
         if (person.lastName == null || person.lastName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Last name is required");
+            throw new ValidationException("lastName", "Last name is required");
         }
         
         if (person.email != null && !person.email.trim().isEmpty()) {
             if (!isValidEmail(person.email)) {
-                throw new IllegalArgumentException("Invalid email format");
+                throw new ValidationException("email", "Invalid email format");
             }
         }
     }
@@ -161,7 +164,7 @@ public class PersonService {
     private void checkDuplicateEmail(String email) {
         if (email != null && !email.trim().isEmpty()) {
             if (Person.findByEmail(email) != null) {
-                throw new IllegalArgumentException("Person with email '" + email + "' already exists");
+                throw new DuplicateEntityException("Person", "email", email);
             }
         }
     }
@@ -170,7 +173,7 @@ public class PersonService {
         if (email != null && !email.trim().isEmpty()) {
             Person existing = Person.find("email = ?1 and id != ?2", email, excludeId).firstResult();
             if (existing != null) {
-                throw new IllegalArgumentException("Another person with email '" + email + "' already exists");
+                throw new DuplicateEntityException("Person", "email", email, "update");
             }
         }
     }
