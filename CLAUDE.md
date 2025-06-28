@@ -75,26 +75,26 @@ This is a Quarkus + HTMX scaffold application following a layered architecture p
 ### Core Stack
 - **Quarkus 3.22.3** with Java 17
 - **PostgreSQL** database with Flyway migrations
-- **Hibernate ORM with Panache** for data persistence
+- **Hibernate ORM with Panache Repository Pattern** for data persistence
 - **Qute** templating engine for server-side rendering
 - **HTMX** for dynamic frontend interactions
 - **Quarkus REST** (REST-Easy Reactive) for API endpoints
 
 ### Package Structure
-- `domain/` - Entity classes using Panache Active Record pattern
+- `domain/` - Plain JPA entity classes with validation annotations
+- `repository/` - Data access layer implementing PanacheRepository pattern
+- `service/` - Business logic layer with transaction management and validation
 - `resource/` - REST API endpoints (`/api/*` paths)
 - `web/` - HTML UI controllers (`/*-ui` paths) using Qute templates
-- `repository/` - Data access layer with custom queries and business logic
 - `util/` - Utility classes like TemplateGlobals for global template variables
-- `service/` - Business logic layer
 - `health/` - Health check endpoints (currently empty, uses Quarkus SmallRye Health)
 
 ### Dual API Pattern
 The application provides both REST API and HTML UI for entities:
 - **REST Resources** (`resource/` package): JSON API endpoints at `/api/*`
 - **Web Routers** (`web/` package): HTML UI endpoints at `/*-ui` with Qute templates
-- Currently implemented for: Gender entity
-- Pattern ready for: Title and future entities
+- **Full Implementation**: Gender, Title, IdType, Person entities
+- **Repository Pattern**: Clean separation between data access and business logic
 
 ### Database Configuration
 - Uses profile-based configuration (`%dev`, `%test`, `%prod`)
@@ -114,12 +114,14 @@ The application provides both REST API and HTML UI for entities:
 - Refer to https://quarkus.io/guides/qute-reference for guidance on templates
 
 ### Entity Pattern
-Entities use Hibernate Panache Active Record pattern:
-- Extend `PanacheEntityBase` with manual ID management
-- Business logic methods directly on entity classes
-- Repository classes for complex queries and sorting
+Entities use Plain JPA with Panache Repository pattern:
+- Pure JPA entities with no inheritance from Panache classes
+- Focus solely on data structure with validation annotations
+- Repository classes implementing `PanacheRepository<Entity>` handle all database operations
+- Service layer manages business logic and explicit timestamp updates
 - Audit fields: `created_at`, `updated_at`, `created_by`, `updated_by`
-- Refer to https://quarkus.io/guides/hibernate-orm-panache for guidance
+- Manual timestamp management in service layer for better control
+- Refer to https://quarkus.io/guides/hibernate-orm-panache#solution-2-using-the-repository-pattern
 
 ### Form Handling
 - HTML forms use `@FormParam` for parameter binding
@@ -224,24 +226,32 @@ erDiagram
 ## Current Implementation Status
 
 ### ✅ Completed Features
-- **Gender Entity**: Full CRUD operations with REST API and HTML UI
-- **Title Entity**: Domain model and database schema (UI pending)
+- **Repository Pattern Architecture**: Full migration from Active Record to Repository pattern
+- **Gender Entity**: Complete CRUD operations with REST API and HTML UI
+- **Title Entity**: Complete CRUD operations with REST API and HTML UI
+- **IdType Entity**: Complete CRUD operations with REST API and HTML UI
+- **Person Entity**: Complete CRUD operations with REST API and HTML UI
 - **Database Setup**: PostgreSQL with Flyway migrations
 - **Template System**: Qute templates with HTMX integration
 - **Development Environment**: Hot reload, DevUI, Swagger documentation
+- **Clean Architecture**: Proper separation of concerns across all layers
 
 ### 🚧 In Progress / Planned
-- **Title Entity**: REST API and HTML UI implementation
-- **Person Entity**: Complete implementation per ERD
 - **User Management**: User, Role, UserRole entities and authentication
+- **Security**: Authentication and authorization implementation
 - **Additional Features**: As defined in entity relationship diagram
 
-### 🏗️ Architecture Scaffold Ready
-- Dual API pattern (REST + HTML UI) established
-- Audit trail fields on all entities
-- Form validation and error handling
-- Bootstrap responsive design
-- HTMX dynamic interactions
+### 🏗️ Architecture Benefits Achieved
+- **Repository Pattern**: Clean separation between entities and data access
+- **Plain JPA Entities**: Focused solely on data structure and validation
+- **Explicit Transaction Management**: Manual timestamp updates in service layer
+- **Better Testability**: Repository interfaces can be mocked for unit testing
+- **Dual API Pattern**: REST + HTML UI established for all entities
+- **Audit Trail**: Consistent audit fields across all entities
+- **Exception Handling**: Proper HTTP status codes and error responses
+- **Form Validation**: Jakarta Bean Validation with custom business rules
+- **Bootstrap Responsive Design**: Mobile-first UI implementation
+- **HTMX Dynamic Interactions**: Seamless partial page updates
 
 ## Screenshot Location
 - Look in folder /home/geraldo/Pictures/Screenshots/ for screenshots
