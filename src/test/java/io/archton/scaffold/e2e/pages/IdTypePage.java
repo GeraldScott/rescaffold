@@ -23,7 +23,6 @@ public class IdTypePage {
     // Form elements (for create/edit)
     private final SelenideElement codeInput = $("#code");
     private final SelenideElement descriptionInput = $("#description");
-    private final SelenideElement isActiveCheckbox = $("#isActive");
     private final SelenideElement submitCreateButton = $("#submit-create-btn");
     private final SelenideElement cancelCreateButton = $("#cancel-create-btn");
     private final SelenideElement submitEditButton = $("#submit-edit-btn");
@@ -112,13 +111,6 @@ public class IdTypePage {
         return this;
     }
 
-    public IdTypePage setActive(boolean active) {
-        if (active != isActiveCheckbox.isSelected()) {
-            isActiveCheckbox.click();
-        }
-        return this;
-    }
-
     // Getter methods for assertions
     public SelenideElement getContentArea() {
         return contentArea;
@@ -146,10 +138,6 @@ public class IdTypePage {
 
     public SelenideElement getDescriptionInput() {
         return descriptionInput;
-    }
-
-    public SelenideElement getIsActiveCheckbox() {
-        return isActiveCheckbox;
     }
 
     public SelenideElement getAlertMessage() {

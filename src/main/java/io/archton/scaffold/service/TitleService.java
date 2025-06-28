@@ -72,9 +72,6 @@ public class TitleService {
             existing.description = updates.description;
         }
         
-        // Update isActive field
-        existing.isActive = updates.isActive;
-
         existing.persist();
         return existing;
     }

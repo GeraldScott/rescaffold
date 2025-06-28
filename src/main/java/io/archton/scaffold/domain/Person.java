@@ -49,9 +49,6 @@ public class Person extends PanacheEntityBase {
     @JoinColumn(name = "title_id")
     public Title title;
 
-    @Column(name = "is_active", nullable = false)
-    public Boolean isActive = true;
-
     @Column(name = "created_by", nullable = false)
     public String createdBy = "system";
 

@@ -118,7 +118,7 @@ Entities use Hibernate Panache Active Record pattern:
 - Extend `PanacheEntityBase` with manual ID management
 - Business logic methods directly on entity classes
 - Repository classes for complex queries and sorting
-- Audit fields: `created_at`, `updated_at`, `created_by`, `updated_by`, `is_active`
+- Audit fields: `created_at`, `updated_at`, `created_by`, `updated_by`
 - Refer to https://quarkus.io/guides/hibernate-orm-panache for guidance
 
 ### Form Handling
@@ -135,7 +135,6 @@ erDiagram
         bigint id PK
         varchar code UK
         text description UK
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
@@ -146,7 +145,6 @@ erDiagram
         bigint id PK
         varchar code UK
         text description UK
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
@@ -157,7 +155,6 @@ erDiagram
         bigint id PK
         varchar code UK
         text description UK
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
@@ -173,7 +170,6 @@ erDiagram
         bigint id_type_id FK
         bigint gender_id FK
         bigint title_id FK
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
@@ -185,7 +181,6 @@ erDiagram
         bigint person_id FK
         varchar username UK
         varchar password_hash
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp last_login
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
@@ -197,7 +192,6 @@ erDiagram
         bigint id PK
         varchar name UK
         text description UK
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
@@ -208,7 +202,6 @@ erDiagram
         bigint user_id FK
         bigint role_id FK
         timestamp assigned_at
-        boolean is_active "NOT NULL DEFAULT true"
         timestamp created_at "NOT NULL DEFAULT now()"
         timestamp updated_at "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"

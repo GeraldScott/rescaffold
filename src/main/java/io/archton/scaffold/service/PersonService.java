@@ -21,7 +21,7 @@ public class PersonService {
     }
 
     public List<Person> listSorted() {
-        return Person.list("isActive = true order by lastName, firstName");
+        return Person.list("order by lastName, firstName");
     }
 
     public Person findById(Long id) {
@@ -87,9 +87,6 @@ public class PersonService {
         existing.title = updates.title;
         existing.gender = updates.gender;
         existing.idType = updates.idType;
-
-        // Update isActive field
-        existing.isActive = updates.isActive;
 
         existing.persist();
         return existing;

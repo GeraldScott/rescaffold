@@ -11,7 +11,6 @@
                     <th>Created At</th>
                     <th>Updated By</th>
                     <th>Updated At</th>
-                    <th>Active</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -24,13 +23,6 @@
                         <td>{#if title.createdAt}{title.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
                         <td>{#if title.updatedBy}{title.updatedBy}{#else}-{/if}</td>
                         <td>{#if title.updatedAt}{title.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}</td>
-                        <td>
-                            {#if title.isActive}
-                                <span class="badge bg-success">Active</span>
-                            {#else}
-                                <span class="badge bg-danger">Inactive</span>
-                            {/if}
-                        </td>
                         <td>
                             <button type="button"
                                     id="view-btn-{title.id}"

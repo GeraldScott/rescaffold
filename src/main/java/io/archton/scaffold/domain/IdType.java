@@ -30,9 +30,6 @@ public class IdType extends PanacheEntityBase {
     @NotBlank(message = "Description cannot be blank")
     public String description;
 
-    @Column(name = "is_active", nullable = false)
-    public Boolean isActive = true;
-
     @Column(name = "created_by", nullable = false)
     public String createdBy = "system";
 

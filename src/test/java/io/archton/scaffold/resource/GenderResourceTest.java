@@ -61,7 +61,7 @@ class GenderResourceTest {
     void testCreateGender_ValidData() {
         Gender gender = createValidGender("M", "Male");
 
-        given().spec(requestSpec).body(gender).when().post().then().spec(responseSpec).statusCode(201).body("id", notNullValue()).body("code", equalTo("M")).body("description", equalTo("Male")).body("isActive", equalTo(true)).body("createdBy", equalTo("system")).body("createdAt", notNullValue()).body("updatedBy", nullValue()).body("updatedAt", nullValue());
+        given().spec(requestSpec).body(gender).when().post().then().spec(responseSpec).statusCode(201).body("id", notNullValue()).body("code", equalTo("M")).body("description", equalTo("Male")).body("createdBy", equalTo("system")).body("createdAt", notNullValue()).body("updatedBy", nullValue()).body("updatedAt", nullValue());
     }
 
     @Test
@@ -73,7 +73,7 @@ class GenderResourceTest {
         Integer createdId = given().spec(requestSpec).body(gender).when().post().then().statusCode(201).extract().path("id");
 
         // Then retrieve it by ID
-        given().spec(requestSpec).when().get("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("F")).body("description", equalTo("Female")).body("isActive", equalTo(true));
+        given().spec(requestSpec).when().get("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("F")).body("description", equalTo("Female"));
     }
 
     @Test
@@ -85,7 +85,7 @@ class GenderResourceTest {
         given().spec(requestSpec).body(gender).when().post().then().statusCode(201);
 
         // Then retrieve it by code
-        given().spec(requestSpec).when().get("/code/{code}", "O").then().spec(responseSpec).statusCode(200).body("code", equalTo("O")).body("description", equalTo("Other")).body("isActive", equalTo(true));
+        given().spec(requestSpec).when().get("/code/{code}", "O").then().spec(responseSpec).statusCode(200).body("code", equalTo("O")).body("description", equalTo("Other"));
     }
 
     @Test
@@ -98,7 +98,7 @@ class GenderResourceTest {
 
         // Then update it
         Gender updatedGender = createValidGender("Y", "Updated");
-        given().spec(requestSpec).body(updatedGender).when().put("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("Y")).body("description", equalTo("Updated")).body("isActive", equalTo(true)).body("updatedAt", notNullValue());
+        given().spec(requestSpec).body(updatedGender).when().put("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("Y")).body("description", equalTo("Updated")).body("updatedAt", notNullValue());
     }
 
     @Test

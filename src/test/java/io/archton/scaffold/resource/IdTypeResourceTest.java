@@ -61,7 +61,7 @@ class IdTypeResourceTest {
     void testCreateIdType_ValidData() {
         IdType idType = createValidIdType("DL", "Driver's License");
 
-        given().spec(requestSpec).body(idType).when().post().then().spec(responseSpec).statusCode(201).body("id", notNullValue()).body("code", equalTo("DL")).body("description", equalTo("Driver's License")).body("isActive", equalTo(true)).body("createdBy", equalTo("system")).body("createdAt", notNullValue()).body("updatedBy", nullValue()).body("updatedAt", nullValue());
+        given().spec(requestSpec).body(idType).when().post().then().spec(responseSpec).statusCode(201).body("id", notNullValue()).body("code", equalTo("DL")).body("description", equalTo("Driver's License")).body("createdBy", equalTo("system")).body("createdAt", notNullValue()).body("updatedBy", nullValue()).body("updatedAt", nullValue());
     }
 
     @Test
@@ -73,7 +73,7 @@ class IdTypeResourceTest {
         Integer createdId = given().spec(requestSpec).body(idType).when().post().then().statusCode(201).extract().path("id");
 
         // Then retrieve it by ID
-        given().spec(requestSpec).when().get("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("SSN")).body("description", equalTo("Social Security Number")).body("isActive", equalTo(true));
+        given().spec(requestSpec).when().get("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("SSN")).body("description", equalTo("Social Security Number"));
     }
 
     @Test
@@ -85,7 +85,7 @@ class IdTypeResourceTest {
         given().spec(requestSpec).body(idType).when().post().then().statusCode(201);
 
         // Then retrieve it by code
-        given().spec(requestSpec).when().get("/code/{code}", "VIN").then().spec(responseSpec).statusCode(200).body("code", equalTo("VIN")).body("description", equalTo("Vehicle Identification Number")).body("isActive", equalTo(true));
+        given().spec(requestSpec).when().get("/code/{code}", "VIN").then().spec(responseSpec).statusCode(200).body("code", equalTo("VIN")).body("description", equalTo("Vehicle Identification Number"));
     }
 
     @Test
@@ -98,7 +98,7 @@ class IdTypeResourceTest {
 
         // Then update it
         IdType updatedIdType = createValidIdType("EIN", "Employer Identification Number");
-        given().spec(requestSpec).body(updatedIdType).when().put("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("EIN")).body("description", equalTo("Employer Identification Number")).body("isActive", equalTo(true)).body("updatedAt", notNullValue());
+        given().spec(requestSpec).body(updatedIdType).when().put("/{id}", createdId).then().spec(responseSpec).statusCode(200).body("id", equalTo(createdId)).body("code", equalTo("EIN")).body("description", equalTo("Employer Identification Number")).body("updatedAt", notNullValue());
     }
 
     @Test

@@ -141,15 +141,13 @@ public class TitleRouter {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response updateTitleFromForm(@PathParam("id") Long id,
                                        @FormParam("code") String code,
-                                       @FormParam("description") String description,
-                                       @FormParam("isActive") Boolean isActive) {
+                                       @FormParam("description") String description) {
         log.debugf("PUT /titles-ui/%s - update with code: %s", id, code);
 
         try {
             Title updateTitle = new Title();
             updateTitle.code = code;
             updateTitle.description = description;
-            updateTitle.isActive = isActive != null ? isActive : false;
 
             titleService.updateTitle(id, updateTitle);
 

@@ -141,15 +141,13 @@ public class IdTypeRouter {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response updateIdTypeFromForm(@PathParam("id") Long id,
                                         @FormParam("code") String code,
-                                        @FormParam("description") String description,
-                                        @FormParam("isActive") Boolean isActive) {
+                                        @FormParam("description") String description) {
         log.debugf("PUT /id-types-ui/%s - update with code: %s", id, code);
 
         try {
             IdType updateIdType = new IdType();
             updateIdType.code = code;
             updateIdType.description = description;
-            updateIdType.isActive = isActive != null ? isActive : false;
 
             idTypeService.updateIdType(id, updateIdType);
 

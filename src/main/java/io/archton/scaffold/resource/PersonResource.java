@@ -96,7 +96,7 @@ public class PersonResource {
 
     @DELETE
     @Path("/{id}")
-    @Operation(summary = "Delete a person", description = "Soft deletes an existing person record by setting isActive to false")
+    @Operation(summary = "Delete a person", description = "Deletes an existing person record")
     @APIResponse(responseCode = "204", description = "Person deleted successfully")
     @APIResponse(responseCode = "404", description = "Person not found")
     @APIResponse(responseCode = "500", description = "Internal server error")

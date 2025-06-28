@@ -130,7 +130,6 @@ class PersonResourceTest {
                 .body("firstName", equalTo("John"))
                 .body("lastName", equalTo("Doe"))
                 .body("email", equalTo("john.doe@example.com"))
-                .body("isActive", equalTo(true))
                 .body("createdAt", notNullValue())
                 .body("createdBy", equalTo("system"));
     }

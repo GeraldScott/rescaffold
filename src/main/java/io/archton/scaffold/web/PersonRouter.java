@@ -225,8 +225,7 @@ public class PersonRouter {
                                          @FormParam("idNumber") String idNumber,
                                          @FormParam("titleId") Long titleId,
                                          @FormParam("genderId") Long genderId,
-                                         @FormParam("idTypeId") Long idTypeId,
-                                         @FormParam("isActive") Boolean isActive) {
+                                         @FormParam("idTypeId") Long idTypeId) {
         log.debugf("POST /persons-ui/%s/edit - update with email: %s", id, email);
 
         try {
@@ -235,7 +234,6 @@ public class PersonRouter {
             updates.lastName = lastName;
             updates.email = email;
             updates.idNumber = idNumber;
-            updates.isActive = isActive != null ? isActive : true;
 
             // Set relationships
             if (titleId != null) {
@@ -271,7 +269,6 @@ public class PersonRouter {
             person.lastName = lastName;
             person.email = email;
             person.idNumber = idNumber;
-            person.isActive = isActive != null ? isActive : true;
 
             // Set relationships
             if (titleId != null) {

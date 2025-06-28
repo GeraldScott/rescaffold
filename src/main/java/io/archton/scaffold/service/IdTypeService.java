@@ -72,9 +72,6 @@ public class IdTypeService {
             existing.description = updates.description;
         }
         
-        // Update isActive field
-        existing.isActive = updates.isActive;
-
         existing.persist();
         return existing;
     }

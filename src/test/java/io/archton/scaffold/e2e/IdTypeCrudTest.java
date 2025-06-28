@@ -36,15 +36,14 @@ class IdTypeCrudTest extends BaseSelenideTest {
 
         // Verify table headers
         var headers = idTypePage.getTableHeaders();
-        headers.shouldHave(size(8));
+        headers.shouldHave(size(7));
         headers.get(0).should(have(text("Code")));
         headers.get(1).should(have(text("Description")));
         headers.get(2).should(have(text("Created By")));
         headers.get(3).should(have(text("Created At")));
         headers.get(4).should(have(text("Updated By")));
         headers.get(5).should(have(text("Updated At")));
-        headers.get(6).should(have(text("Active")));
-        headers.get(7).should(have(text("Actions")));
+        headers.get(6).should(have(text("Actions")));
 
         // Verify Create button exists
         $("#create-new-btn").should(exist);
@@ -60,21 +59,19 @@ class IdTypeCrudTest extends BaseSelenideTest {
         String description = "Test IdType " + System.currentTimeMillis();
 
         // Create a new id type using the extracted method
-        createIdType(uniqueCode, description, true);
+        createIdType(uniqueCode, description);
 
         // Verify the new id type appears in the table
         assertTrue(idTypePage.hasIdTypeWithCode(uniqueCode),
                 "Newly created id type with code " + uniqueCode + " should exist");
 
-        // Get the row and verify the description and active status
+        // Get the row and verify the description
         SelenideElement newRow = idTypePage.getRowByCode(uniqueCode);
         assertNotNull(newRow, "New id type row should not be null");
 
         // Verify description
         newRow.$$("td").get(1).shouldHave(text(description));
 
-        // Verify active status
-        newRow.$$("td").get(6).$(".badge").shouldHave(text("Active"));
 
         // Verify creation details
         newRow.$$("td").get(2).shouldHave(text("system")); // Created by
@@ -138,8 +135,7 @@ class IdTypeCrudTest extends BaseSelenideTest {
 
         // Make changes
         idTypePage.enterCode(newCode)
-                .enterDescription(newDescription)
-                .setActive(false);
+                .enterDescription(newDescription);
 
         // Submit changes
         idTypePage.clickSubmitEditButton();
@@ -156,8 +152,6 @@ class IdTypeCrudTest extends BaseSelenideTest {
         // Verify description was updated
         updatedRow.$$("td").get(1).shouldHave(text(newDescription));
 
-        // Verify active status
-        updatedRow.$$("td").get(6).$(".badge").shouldHave(text("Inactive"));
     }
 
     @Test
@@ -168,7 +162,7 @@ class IdTypeCrudTest extends BaseSelenideTest {
         String description = "Delete Test " + System.currentTimeMillis();
 
         // Create the id type using the extracted method
-        createIdType(uniqueCode, description, true);
+        createIdType(uniqueCode, description);
 
         // Verify the new id type appears in the table
         assertTrue(idTypePage.hasIdTypeWithCode(uniqueCode),
@@ -212,9 +206,8 @@ class IdTypeCrudTest extends BaseSelenideTest {
      *
      * @param code The id type code (uppercase characters)
      * @param description The id type description
-     * @param isActive Whether the id type should be active
      */
-    private void createIdType(String code, String description, boolean isActive) {
+    private void createIdType(String code, String description) {
         // Click Create button
         idTypePage.clickCreateButton();
 
@@ -225,11 +218,6 @@ class IdTypeCrudTest extends BaseSelenideTest {
         // Fill in the form
         idTypePage.enterCode(code)
                 .enterDescription(description);
-
-        // Set active status if needed (active by default)
-        if (!isActive) {
-            idTypePage.setActive(false);
-        }
 
         // Submit the form
         idTypePage.clickSubmitCreateButton();

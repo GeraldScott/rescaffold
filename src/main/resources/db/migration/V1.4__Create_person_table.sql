@@ -7,7 +7,6 @@ create table person (
     id_type_id bigint,
     gender_id bigint,
     title_id bigint,
-    is_active boolean not null default true,
     created_by varchar not null default 'system',
     created_at timestamp not null default now(),
     updated_by varchar,
@@ -32,7 +31,6 @@ comment on column person.id_number is 'Person identification number';
 comment on column person.id_type_id is 'Foreign key to id_type table';
 comment on column person.gender_id is 'Foreign key to gender table';
 comment on column person.title_id is 'Foreign key to title table';
-comment on column person.is_active is 'Indicator to manage logical deletion';
 comment on column person.created_by is 'User who created the record';
 comment on column person.created_at is 'Record creation timestamp';
 comment on column person.updated_by is 'User who last updated the record';

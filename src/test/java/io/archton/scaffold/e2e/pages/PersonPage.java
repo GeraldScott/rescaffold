@@ -28,7 +28,6 @@ public class PersonPage {
     private final SelenideElement titleSelect = $("#titleId");
     private final SelenideElement genderSelect = $("#genderId");
     private final SelenideElement idTypeSelect = $("#idTypeId");
-    private final SelenideElement isActiveCheckbox = $("#isActive");
     private final SelenideElement submitCreateButton = $("[data-testid='submit-create-btn']");
     private final SelenideElement cancelCreateButton = $("[data-testid='cancel-create-btn']");
     private final SelenideElement submitEditButton = $("[data-testid='submit-edit-btn']");
@@ -164,18 +163,9 @@ public class PersonPage {
         return this;
     }
 
-    public PersonPage setActive(boolean active) {
-        if (active) {
-            isActiveCheckbox.setSelected(true);
-        } else {
-            isActiveCheckbox.setSelected(false);
-        }
-        return this;
-    }
-
     // Table interaction methods
     public boolean hasPersonWithEmail(String email) {
-        return tableRows.filterBy(text(email)).size() > 0;
+        return !tableRows.filterBy(text(email)).isEmpty();
     }
 
     public boolean hasPersonWithLastName(String lastName) {

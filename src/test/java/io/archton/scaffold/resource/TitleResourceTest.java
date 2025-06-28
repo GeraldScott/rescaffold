@@ -78,7 +78,6 @@ class TitleResourceTest {
                 .body("id", notNullValue())
                 .body("code", equalTo("MR"))
                 .body("description", equalTo("Mister"))
-                .body("isActive", equalTo(true))
                 .body("createdBy", equalTo("system"))
                 .body("createdAt", notNullValue())
                 .body("updatedBy", nullValue())
@@ -111,8 +110,7 @@ class TitleResourceTest {
                 .statusCode(200)
                 .body("id", equalTo(createdId))
                 .body("code", equalTo("MS"))
-                .body("description", equalTo("Miss"))
-                .body("isActive", equalTo(true));
+                .body("description", equalTo("Miss"));
     }
 
     @Test
@@ -138,8 +136,7 @@ class TitleResourceTest {
                 .spec(responseSpec)
                 .statusCode(200)
                 .body("code", equalTo("DR"))
-                .body("description", equalTo("Doctor"))
-                .body("isActive", equalTo(true));
+                .body("description", equalTo("Doctor"));
     }
 
     @Test
@@ -171,7 +168,6 @@ class TitleResourceTest {
                 .body("id", equalTo(createdId))
                 .body("code", equalTo("PROF"))
                 .body("description", equalTo("Professor"))
-                .body("isActive", equalTo(true))
                 .body("updatedAt", notNullValue());
     }
 
