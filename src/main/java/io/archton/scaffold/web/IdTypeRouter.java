@@ -2,6 +2,7 @@ package io.archton.scaffold.web;
 
 import io.archton.scaffold.domain.IdType;
 import io.archton.scaffold.service.IdTypeService;
+import io.archton.scaffold.util.WebErrorHandler;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -71,7 +72,7 @@ public class IdTypeRouter {
             String html = Templates.view(idTypeOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving id type for view: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving id type for view", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -103,17 +104,11 @@ public class IdTypeRouter {
             List<IdType> idTypeList = idTypeService.listSorted();
             String html = Templates.table(idTypeList).render();
             return Response.ok(html).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error creating id type: " + e.getMessage());
-            String html = Templates.create(e.getMessage()).render();
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).entity(html).build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
-            log.error("Error creating id type: " + e.getMessage());
-            String html = Templates.create("An unexpected error occurred. Please try again.").render();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
+            WebErrorHandler.logError("Error creating id type", e);
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.create(errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
         }
     }
 
@@ -132,7 +127,7 @@ public class IdTypeRouter {
             String html = Templates.edit(idTypeOpt.get(), null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving id type for edit: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving id type for edit", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -156,25 +151,8 @@ public class IdTypeRouter {
             List<IdType> idTypeList = idTypeService.listSorted();
             String html = Templates.table(idTypeList).render();
             return Response.ok(html).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error updating id type: " + e.getMessage());
-            
-            // Create entity with submitted form data to preserve user input
-            IdType formData = new IdType();
-            formData.id = id;
-            formData.code = code;
-            formData.description = description;
-            
-            String html = Templates.edit(formData, e.getMessage()).render();
-            if (e.getMessage().contains("not found")) {
-                return Response.status(Response.Status.NOT_FOUND).entity(html).build();
-            }
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).entity(html).build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
-            log.error("Error updating id type: " + e.getMessage());
+            WebErrorHandler.logError("Error updating id type", e);
             
             // Create entity with submitted form data to preserve user input
             IdType formData = new IdType();
@@ -182,8 +160,9 @@ public class IdTypeRouter {
             formData.code = code;
             formData.description = description;
             
-            String html = Templates.edit(formData, "An unexpected error occurred. Please try again.").render();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.edit(formData, errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
         }
     }
 
@@ -202,7 +181,7 @@ public class IdTypeRouter {
             String html = Templates.delete(idTypeOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving id type for delete: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving id type for delete", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -219,11 +198,11 @@ public class IdTypeRouter {
             List<IdType> idTypeList = idTypeService.listSorted();
             String html = Templates.table(idTypeList).render();
             return Response.ok(html).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error deleting id type: " + e.getMessage());
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (Exception e) {
-            log.error("Error deleting id type: " + e.getMessage());
+            WebErrorHandler.logError("Error deleting id type", e);
+            if (e instanceof IllegalArgumentException && e.getMessage().contains("not found")) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

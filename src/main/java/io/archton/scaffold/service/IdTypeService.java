@@ -62,6 +62,12 @@ public class IdTypeService {
 
         if (updates.code != null && !updates.code.trim().isEmpty()) {
             normalizeCode(updates);
+            if (updates.code.length() < 1 || updates.code.length() > 5) {
+                throw new IllegalArgumentException("ID type code must be between 1 and 5 characters");
+            }
+            if (!updates.code.matches("[A-Z]+")) {
+                throw new IllegalArgumentException("ID type code must contain only uppercase letters");
+            }
             checkDuplicateCodeForUpdate(updates.code, id);
             existing.code = updates.code;
         }
@@ -90,6 +96,12 @@ public class IdTypeService {
     private void validateIdTypeData(IdType idType) {
         if (idType.code == null || idType.code.trim().isEmpty()) {
             throw new IllegalArgumentException("ID type code is required");
+        }
+        if (idType.code.length() < 1 || idType.code.length() > 5) {
+            throw new IllegalArgumentException("ID type code must be between 1 and 5 characters");
+        }
+        if (!idType.code.matches("[A-Z]+")) {
+            throw new IllegalArgumentException("ID type code must contain only uppercase letters");
         }
         if (idType.description == null || idType.description.trim().isEmpty()) {
             throw new IllegalArgumentException("ID type description is required");

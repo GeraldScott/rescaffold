@@ -2,6 +2,7 @@ package io.archton.scaffold.web;
 
 import io.archton.scaffold.domain.Gender;
 import io.archton.scaffold.service.GenderService;
+import io.archton.scaffold.util.WebErrorHandler;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -71,7 +72,7 @@ public class GenderRouter {
             String html = Templates.view(genderOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving gender for view: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving gender for view", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -103,17 +104,11 @@ public class GenderRouter {
             List<Gender> genderList = genderService.listSorted();
             String html = Templates.table(genderList).render();
             return Response.ok(html).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error creating gender: " + e.getMessage());
-            String html = Templates.create(e.getMessage()).render();
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).entity(html).build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
-            log.error("Error creating gender: " + e.getMessage());
-            String html = Templates.create("An unexpected error occurred. Please try again.").render();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
+            WebErrorHandler.logError("Error creating gender", e);
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.create(errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
         }
     }
 
@@ -132,7 +127,7 @@ public class GenderRouter {
             String html = Templates.edit(genderOpt.get(), null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving gender for edit: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving gender for edit", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -156,25 +151,8 @@ public class GenderRouter {
             List<Gender> genderList = genderService.listSorted();
             String html = Templates.table(genderList).render();
             return Response.ok(html).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error updating gender: " + e.getMessage());
-            
-            // Create entity with submitted form data to preserve user input
-            Gender formData = new Gender();
-            formData.id = id;
-            formData.code = code;
-            formData.description = description;
-            
-            String html = Templates.edit(formData, e.getMessage()).render();
-            if (e.getMessage().contains("not found")) {
-                return Response.status(Response.Status.NOT_FOUND).entity(html).build();
-            }
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).entity(html).build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
-            log.error("Error updating gender: " + e.getMessage());
+            WebErrorHandler.logError("Error updating gender", e);
             
             // Create entity with submitted form data to preserve user input
             Gender formData = new Gender();
@@ -182,8 +160,9 @@ public class GenderRouter {
             formData.code = code;
             formData.description = description;
             
-            String html = Templates.edit(formData, "An unexpected error occurred. Please try again.").render();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.edit(formData, errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
         }
     }
 
@@ -202,7 +181,7 @@ public class GenderRouter {
             String html = Templates.delete(genderOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
-            log.error("Error retrieving gender for delete: " + e.getMessage());
+            WebErrorHandler.logError("Error retrieving gender for delete", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -219,11 +198,11 @@ public class GenderRouter {
             List<Gender> genderList = genderService.listSorted();
             String html = Templates.table(genderList).render();
             return Response.ok(html).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error deleting gender: " + e.getMessage());
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (Exception e) {
-            log.error("Error deleting gender: " + e.getMessage());
+            WebErrorHandler.logError("Error deleting gender", e);
+            if (e instanceof IllegalArgumentException && e.getMessage().contains("not found")) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
