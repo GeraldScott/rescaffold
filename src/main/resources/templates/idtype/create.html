@@ -3,6 +3,7 @@
         <h5 class="mb-0">Create new ID Type</h5>
     </div>
     <div class="card-body">
+        {#include components/error-alert errorMessage=errorMessage /}
         <form id="create-form"
               hx-post="/id-types-ui"
               hx-target="#content-area"

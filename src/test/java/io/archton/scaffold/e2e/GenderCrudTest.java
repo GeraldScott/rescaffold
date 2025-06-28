@@ -226,6 +226,56 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getGenderTable().should(exist);
     }
 
+    @Test
+    @DisplayName("Should reject creating gender with duplicate code")
+    void shouldRejectDuplicateCode() {
+        // First ensure we have at least one gender in the list
+        var existingRows = genderPage.getTableRows();
+        if (existingRows.size() == 0) {
+            // Create a gender first if none exist
+            String initialCode = "X";
+            String initialDescription = "Initial Gender " + System.currentTimeMillis();
+            createGender(initialCode, initialDescription);
+        }
+
+        // Get the first existing gender code
+        var firstRow = genderPage.getTableRows().first();
+        firstRow.should(exist);
+        String existingCode = firstRow.$("td.fw-bold").getText();
+
+        // Try to create a new gender with the same code
+        genderPage.clickCreateButton();
+
+        // Verify create form loads
+        genderPage.getCodeInput().should(exist);
+        genderPage.getDescriptionInput().should(exist);
+
+        // Fill in the form with the existing code
+        String duplicateDescription = "Duplicate Test " + System.currentTimeMillis();
+        genderPage.enterCode(existingCode)
+                .enterDescription(duplicateDescription);
+
+        // Submit the form
+        genderPage.clickSubmitCreateButton();
+
+        // Verify we get an error message and stay on create form
+        $(".alert.alert-danger").should(exist);
+        $(".alert.alert-danger").should(have(text("already exists")));
+        
+        // Verify we're still on the create form with the code input visible
+        genderPage.getCodeInput().should(exist);
+        genderPage.getDescriptionInput().should(exist);
+
+        // Go back to list to verify no duplicate was created
+        genderPage.clickBackButton();
+        genderPage.getGenderTable().should(exist);
+        
+        // Count how many genders have this code (should still be exactly 1)
+        var rowsWithCode = genderPage.getTableRows().filter(text(existingCode));
+        assertEquals(1, rowsWithCode.size(), 
+            "Should have exactly one gender with code " + existingCode + " after duplicate attempt");
+    }
+
     /**
      * Helper method to find a unique single-character code not in the table
      *

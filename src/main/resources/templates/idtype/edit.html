@@ -4,6 +4,7 @@
         <h5 class="mb-0">Edit ID Type</h5>
     </div>
     <div class="card-body">
+        {#include components/error-alert errorMessage=errorMessage /}
         <form id="edit-form"
               hx-put="/id-types-ui/{idType.id}"
               hx-target="#content-area"

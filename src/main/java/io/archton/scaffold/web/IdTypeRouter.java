@@ -30,9 +30,9 @@ public class IdTypeRouter {
 
         public static native TemplateInstance view(IdType idType);
 
-        public static native TemplateInstance create();
+        public static native TemplateInstance create(String errorMessage);
 
-        public static native TemplateInstance edit(IdType idType);
+        public static native TemplateInstance edit(IdType idType, String errorMessage);
 
         public static native TemplateInstance delete(IdType idType);
 
@@ -82,7 +82,7 @@ public class IdTypeRouter {
     public Response getIdTypeCreate() {
         log.debug("GET /id-types-ui/create");
 
-        String html = Templates.create().render();
+        String html = Templates.create(null).render();
         return Response.ok(html).build();
     }
 
@@ -105,13 +105,15 @@ public class IdTypeRouter {
             return Response.ok(html).build();
         } catch (IllegalArgumentException e) {
             log.error("Error creating id type: " + e.getMessage());
+            String html = Templates.create(e.getMessage()).render();
             if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).build();
+                return Response.status(Response.Status.CONFLICT).entity(html).build();
             }
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
             log.error("Error creating id type: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String html = Templates.create("An unexpected error occurred. Please try again.").render();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
         }
     }
 
@@ -127,7 +129,7 @@ public class IdTypeRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.edit(idTypeOpt.get()).render();
+            String html = Templates.edit(idTypeOpt.get(), null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             log.error("Error retrieving id type for edit: " + e.getMessage());
@@ -156,16 +158,32 @@ public class IdTypeRouter {
             return Response.ok(html).build();
         } catch (IllegalArgumentException e) {
             log.error("Error updating id type: " + e.getMessage());
+            
+            // Create entity with submitted form data to preserve user input
+            IdType formData = new IdType();
+            formData.id = id;
+            formData.code = code;
+            formData.description = description;
+            
+            String html = Templates.edit(formData, e.getMessage()).render();
             if (e.getMessage().contains("not found")) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(html).build();
             }
             if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT).build();
+                return Response.status(Response.Status.CONFLICT).entity(html).build();
             }
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(html).build();
         } catch (Exception e) {
             log.error("Error updating id type: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            
+            // Create entity with submitted form data to preserve user input
+            IdType formData = new IdType();
+            formData.id = id;
+            formData.code = code;
+            formData.description = description;
+            
+            String html = Templates.edit(formData, "An unexpected error occurred. Please try again.").render();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(html).build();
         }
     }
 
