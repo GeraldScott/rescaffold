@@ -1,10 +1,13 @@
 package io.archton.scaffold.service;
 
 import io.archton.scaffold.domain.IdType;
+import io.archton.scaffold.repository.IdTypeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,25 +16,28 @@ public class IdTypeService {
 
     private static final Logger log = Logger.getLogger(IdTypeService.class);
 
+    @Inject
+    IdTypeRepository idTypeRepository;
+
     public List<IdType> listAll() {
-        return IdType.listAll();
+        return idTypeRepository.listAll();
     }
 
     public List<IdType> listSorted() {
-        return IdType.listSorted();
+        return idTypeRepository.listSorted();
     }
 
     public IdType findById(Long id) {
-        return IdType.findById(id);
+        return idTypeRepository.findById(id);
     }
 
     public Optional<IdType> findByIdOptional(Long id) {
-        IdType idType = IdType.findById(id);
+        IdType idType = idTypeRepository.findById(id);
         return Optional.ofNullable(idType);
     }
 
     public IdType findByCode(String code) {
-        return IdType.findByCode(code);
+        return idTypeRepository.findByCode(code);
     }
 
     @Transactional
@@ -47,7 +53,7 @@ public class IdTypeService {
         checkDuplicateCode(idType.code);
         checkDuplicateDescription(idType.description);
         
-        idType.persist();
+        idTypeRepository.persist(idType);
         return idType;
     }
 
@@ -55,7 +61,7 @@ public class IdTypeService {
     public IdType updateIdType(Long id, IdType updates) {
         log.debugf("Updating id type id: %s", id);
         
-        IdType existing = IdType.findById(id);
+        IdType existing = idTypeRepository.findById(id);
         if (existing == null) {
             throw new IllegalArgumentException("Entity not found with id: " + id);
         }
@@ -78,7 +84,8 @@ public class IdTypeService {
             existing.description = updates.description;
         }
         
-        existing.persist();
+        existing.updatedAt = LocalDateTime.now();
+        idTypeRepository.persist(existing);
         return existing;
     }
 
@@ -86,11 +93,11 @@ public class IdTypeService {
     public void deleteIdType(Long id) {
         log.debugf("Deleting id type id: %s", id);
         
-        IdType idType = IdType.findById(id);
+        IdType idType = idTypeRepository.findById(id);
         if (idType == null) {
             throw new IllegalArgumentException("Entity not found with id: " + id);
         }
-        idType.delete();
+        idTypeRepository.delete(idType);
     }
 
     private void validateIdTypeData(IdType idType) {
@@ -126,27 +133,27 @@ public class IdTypeService {
     }
 
     private void checkDuplicateCode(String code) {
-        if (IdType.findByCode(code) != null) {
+        if (idTypeRepository.findByCode(code) != null) {
             throw new IllegalArgumentException("ID type with code '" + code + "' already exists");
         }
     }
 
     private void checkDuplicateDescription(String description) {
-        IdType existing = IdType.find("description", description).firstResult();
+        IdType existing = idTypeRepository.findByDescription(description);
         if (existing != null) {
             throw new IllegalArgumentException("ID type with description '" + description + "' already exists");
         }
     }
 
     private void checkDuplicateCodeForUpdate(String code, Long excludeId) {
-        IdType existing = IdType.find("code = ?1 and id != ?2", code, excludeId).firstResult();
+        IdType existing = idTypeRepository.findByCodeExcludingId(code, excludeId);
         if (existing != null) {
             throw new IllegalArgumentException("Another ID type with code '" + code + "' already exists");
         }
     }
 
     private void checkDuplicateDescriptionForUpdate(String description, Long excludeId) {
-        IdType existing = IdType.find("description = ?1 and id != ?2", description, excludeId).firstResult();
+        IdType existing = idTypeRepository.findByDescriptionExcludingId(description, excludeId);
         if (existing != null) {
             throw new IllegalArgumentException("Another ID type with description '" + description + "' already exists");
         }

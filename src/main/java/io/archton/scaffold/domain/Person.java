@@ -1,18 +1,15 @@
 package io.archton.scaffold.domain;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import io.quarkus.panache.common.Sort;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "person")
-public class Person extends PanacheEntityBase {
+public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,34 +69,6 @@ public class Person extends PanacheEntityBase {
         this.email = email;
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public static Person findByEmail(String email) {
-        return find("email", email).firstResult();
-    }
-
-    public static List<Person> listSorted() {
-        return listAll(Sort.by("lastName", "firstName"));
-    }
-
-    public static List<Person> findByLastName(String lastName) {
-        return find("lastName", lastName).list();
-    }
-
-    public static List<Person> findByGender(Gender gender) {
-        return find("gender", gender).list();
-    }
-
-    public static List<Person> findByTitle(Title title) {
-        return find("title", title).list();
-    }
-
-    public static List<Person> findByIdType(IdType idType) {
-        return find("idType", idType).list();
-    }
 
     public String getFullName() {
         if (firstName != null && !firstName.trim().isEmpty()) {

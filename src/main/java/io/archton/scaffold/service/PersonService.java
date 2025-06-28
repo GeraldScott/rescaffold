@@ -1,13 +1,16 @@
 package io.archton.scaffold.service;
 
 import io.archton.scaffold.domain.Person;
+import io.archton.scaffold.repository.PersonRepository;
 import io.archton.scaffold.exception.DuplicateEntityException;
 import io.archton.scaffold.exception.EntityNotFoundException;
 import io.archton.scaffold.exception.ValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,25 +19,28 @@ public class PersonService {
 
     private static final Logger log = Logger.getLogger(PersonService.class);
 
+    @Inject
+    PersonRepository personRepository;
+
     public List<Person> listAll() {
-        return Person.listAll();
+        return personRepository.listAll();
     }
 
     public List<Person> listSorted() {
-        return Person.list("order by lastName, firstName");
+        return personRepository.listSorted();
     }
 
     public Person findById(Long id) {
-        return Person.findById(id);
+        return personRepository.findById(id);
     }
 
     public Optional<Person> findByIdOptional(Long id) {
-        Person person = Person.findById(id);
+        Person person = personRepository.findById(id);
         return Optional.ofNullable(person);
     }
 
     public Person findByEmail(String email) {
-        return Person.findByEmail(email);
+        return personRepository.findByEmail(email);
     }
 
     @Transactional
@@ -49,7 +55,7 @@ public class PersonService {
         normalizePersonData(person);
         checkDuplicateEmail(person.email);
 
-        person.persist();
+        personRepository.persist(person);
         return person;
     }
 
@@ -57,7 +63,7 @@ public class PersonService {
     public Person updatePerson(Long id, Person updates) {
         log.debugf("Updating person id: %s", id);
 
-        Person existing = Person.findById(id);
+        Person existing = personRepository.findById(id);
         if (existing == null) {
             throw new EntityNotFoundException("Person", id);
         }
@@ -100,7 +106,8 @@ public class PersonService {
         existing.gender = updates.gender;
         existing.idType = updates.idType;
 
-        existing.persist();
+        existing.updatedAt = LocalDateTime.now();
+        personRepository.persist(existing);
         return existing;
     }
 
@@ -108,12 +115,12 @@ public class PersonService {
     public void deletePerson(Long id) {
         log.debugf("Deleting person id: %s", id);
 
-        Person person = Person.findById(id);
+        Person person = personRepository.findById(id);
         if (person == null) {
             throw new EntityNotFoundException("Person", id);
         }
 
-        person.delete();
+        personRepository.delete(person);
     }
 
     private void validatePersonData(Person person) {
@@ -182,7 +189,7 @@ public class PersonService {
 
     private void checkDuplicateEmail(String email) {
         if (email != null && !email.trim().isEmpty()) {
-            if (Person.findByEmail(email) != null) {
+            if (personRepository.findByEmail(email) != null) {
                 throw new DuplicateEntityException("Person", "email", email);
             }
         }
@@ -190,7 +197,7 @@ public class PersonService {
 
     private void checkDuplicateEmailForUpdate(String email, Long excludeId) {
         if (email != null && !email.trim().isEmpty()) {
-            Person existing = Person.find("email = ?1 and id != ?2", email, excludeId).firstResult();
+            Person existing = personRepository.findByEmailExcludingId(email, excludeId);
             if (existing != null) {
                 throw new DuplicateEntityException("Person", "email", email, "update");
             }

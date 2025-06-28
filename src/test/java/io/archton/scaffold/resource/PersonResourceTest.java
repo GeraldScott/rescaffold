@@ -4,6 +4,9 @@ import io.archton.scaffold.domain.Person;
 import io.archton.scaffold.domain.Gender;
 import io.archton.scaffold.domain.Title;
 import io.archton.scaffold.domain.IdType;
+import io.archton.scaffold.repository.GenderRepository;
+import io.archton.scaffold.repository.TitleRepository;
+import io.archton.scaffold.repository.IdTypeRepository;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.builder.RequestSpecBuilder;
@@ -14,6 +17,7 @@ import io.restassured.specification.ResponseSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -21,6 +25,15 @@ import static org.hamcrest.Matchers.*;
 @QuarkusTest
 @DisplayName("Person Resource REST API Tests")
 class PersonResourceTest {
+
+    @Inject
+    GenderRepository genderRepository;
+
+    @Inject
+    TitleRepository titleRepository;
+
+    @Inject
+    IdTypeRepository idTypeRepository;
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -51,22 +64,22 @@ class PersonResourceTest {
 
     private Person createPersonWithRelations() {
         // Find or create related entities
-        Gender gender = Gender.findByCode("F");
+        Gender gender = genderRepository.findByCode("F");
         if (gender == null) {
             gender = new Gender("F", "Female");
-            gender.persist();
+            genderRepository.persist(gender);
         }
 
-        Title title = Title.findByCode("MS");
+        Title title = titleRepository.findByCode("MS");
         if (title == null) {
             title = new Title("MS", "Ms.");
-            title.persist();
+            titleRepository.persist(title);
         }
 
-        IdType idType = IdType.findByCode("ID");
+        IdType idType = idTypeRepository.findByCode("ID");
         if (idType == null) {
             idType = new IdType("ID", "Identity Document");
-            idType.persist();
+            idTypeRepository.persist(idType);
         }
 
         Person person = new Person();

@@ -1,10 +1,13 @@
 package io.archton.scaffold.service;
 
 import io.archton.scaffold.domain.Gender;
+import io.archton.scaffold.repository.GenderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,25 +16,28 @@ public class GenderService {
 
     private static final Logger log = Logger.getLogger(GenderService.class);
 
+    @Inject
+    GenderRepository genderRepository;
+
     public List<Gender> listAll() {
-        return Gender.listAll();
+        return genderRepository.listAll();
     }
 
     public List<Gender> listSorted() {
-        return Gender.listSorted();
+        return genderRepository.listSorted();
     }
 
     public Gender findById(Long id) {
-        return Gender.findById(id);
+        return genderRepository.findById(id);
     }
 
     public Optional<Gender> findByIdOptional(Long id) {
-        Gender gender = Gender.findById(id);
+        Gender gender = genderRepository.findById(id);
         return Optional.ofNullable(gender);
     }
 
     public Gender findByCode(String code) {
-        return Gender.findByCode(code);
+        return genderRepository.findByCode(code);
     }
 
     @Transactional
@@ -47,7 +53,7 @@ public class GenderService {
         checkDuplicateCode(gender.code);
         checkDuplicateDescription(gender.description);
         
-        gender.persist();
+        genderRepository.persist(gender);
         return gender;
     }
 
@@ -55,7 +61,7 @@ public class GenderService {
     public Gender updateGender(Long id, Gender updates) {
         log.debugf("Updating gender id: %s", id);
         
-        Gender existing = Gender.findById(id);
+        Gender existing = genderRepository.findById(id);
         if (existing == null) {
             throw new IllegalArgumentException("Entity not found with id: " + id);
         }
@@ -78,7 +84,8 @@ public class GenderService {
             existing.description = updates.description;
         }
         
-        existing.persist();
+        existing.updatedAt = LocalDateTime.now();
+        genderRepository.persist(existing);
         return existing;
     }
 
@@ -86,11 +93,11 @@ public class GenderService {
     public void deleteGender(Long id) {
         log.debugf("Deleting gender id: %s", id);
         
-        Gender gender = Gender.findById(id);
+        Gender gender = genderRepository.findById(id);
         if (gender == null) {
             throw new IllegalArgumentException("Entity not found with id: " + id);
         }
-        gender.delete();
+        genderRepository.delete(gender);
     }
 
     private void validateGenderData(Gender gender) {
@@ -126,27 +133,27 @@ public class GenderService {
     }
 
     private void checkDuplicateCode(String code) {
-        if (Gender.findByCode(code) != null) {
+        if (genderRepository.findByCode(code) != null) {
             throw new IllegalArgumentException("Gender with code '" + code + "' already exists");
         }
     }
 
     private void checkDuplicateDescription(String description) {
-        Gender existing = Gender.find("description", description).firstResult();
+        Gender existing = genderRepository.findByDescription(description);
         if (existing != null) {
             throw new IllegalArgumentException("Gender with description '" + description + "' already exists");
         }
     }
 
     private void checkDuplicateCodeForUpdate(String code, Long excludeId) {
-        Gender existing = Gender.find("code = ?1 and id != ?2", code, excludeId).firstResult();
+        Gender existing = genderRepository.findByCodeExcludingId(code, excludeId);
         if (existing != null) {
             throw new IllegalArgumentException("Another gender with code '" + code + "' already exists");
         }
     }
 
     private void checkDuplicateDescriptionForUpdate(String description, Long excludeId) {
-        Gender existing = Gender.find("description = ?1 and id != ?2", description, excludeId).firstResult();
+        Gender existing = genderRepository.findByDescriptionExcludingId(description, excludeId);
         if (existing != null) {
             throw new IllegalArgumentException("Another gender with description '" + description + "' already exists");
         }

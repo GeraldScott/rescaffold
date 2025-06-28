@@ -1,10 +1,13 @@
 package io.archton.scaffold.service;
 
 import io.archton.scaffold.domain.Title;
+import io.archton.scaffold.repository.TitleRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,25 +16,28 @@ public class TitleService {
 
     private static final Logger log = Logger.getLogger(TitleService.class);
 
+    @Inject
+    TitleRepository titleRepository;
+
     public List<Title> listAll() {
-        return Title.listAll();
+        return titleRepository.listAll();
     }
 
     public List<Title> listSorted() {
-        return Title.listSorted();
+        return titleRepository.listSorted();
     }
 
     public Title findById(Long id) {
-        return Title.findById(id);
+        return titleRepository.findById(id);
     }
 
     public Optional<Title> findByIdOptional(Long id) {
-        Title title = Title.findById(id);
+        Title title = titleRepository.findById(id);
         return Optional.ofNullable(title);
     }
 
     public Title findByCode(String code) {
-        return Title.findByCode(code);
+        return titleRepository.findByCode(code);
     }
 
     @Transactional
@@ -47,7 +53,7 @@ public class TitleService {
         checkDuplicateCode(title.code);
         checkDuplicateDescription(title.description);
         
-        title.persist();
+        titleRepository.persist(title);
         return title;
     }
 
@@ -55,7 +61,7 @@ public class TitleService {
     public Title updateTitle(Long id, Title updates) {
         log.debugf("Updating title id: %s", id);
         
-        Title existing = Title.findById(id);
+        Title existing = titleRepository.findById(id);
         if (existing == null) {
             throw new IllegalArgumentException("Entity not found with id: " + id);
         }
@@ -78,7 +84,8 @@ public class TitleService {
             existing.description = updates.description;
         }
         
-        existing.persist();
+        existing.updatedAt = LocalDateTime.now();
+        titleRepository.persist(existing);
         return existing;
     }
 
@@ -86,11 +93,11 @@ public class TitleService {
     public void deleteTitle(Long id) {
         log.debugf("Deleting title id: %s", id);
         
-        Title title = Title.findById(id);
+        Title title = titleRepository.findById(id);
         if (title == null) {
             throw new IllegalArgumentException("Entity not found with id: " + id);
         }
-        title.delete();
+        titleRepository.delete(title);
     }
 
     private void validateTitleData(Title title) {
@@ -126,27 +133,27 @@ public class TitleService {
     }
 
     private void checkDuplicateCode(String code) {
-        if (Title.findByCode(code) != null) {
+        if (titleRepository.findByCode(code) != null) {
             throw new IllegalArgumentException("Title with code '" + code + "' already exists");
         }
     }
 
     private void checkDuplicateDescription(String description) {
-        Title existing = Title.find("description", description).firstResult();
+        Title existing = titleRepository.findByDescription(description);
         if (existing != null) {
             throw new IllegalArgumentException("Title with description '" + description + "' already exists");
         }
     }
 
     private void checkDuplicateCodeForUpdate(String code, Long excludeId) {
-        Title existing = Title.find("code = ?1 and id != ?2", code, excludeId).firstResult();
+        Title existing = titleRepository.findByCodeExcludingId(code, excludeId);
         if (existing != null) {
             throw new IllegalArgumentException("Another title with code '" + code + "' already exists");
         }
     }
 
     private void checkDuplicateDescriptionForUpdate(String description, Long excludeId) {
-        Title existing = Title.find("description = ?1 and id != ?2", description, excludeId).firstResult();
+        Title existing = titleRepository.findByDescriptionExcludingId(description, excludeId);
         if (existing != null) {
             throw new IllegalArgumentException("Another title with description '" + description + "' already exists");
         }

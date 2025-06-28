@@ -1,18 +1,15 @@
 package io.archton.scaffold.domain;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
-import java.util.List;
-import io.quarkus.panache.common.Sort;
 
 @Entity
 @Table(name = "id_type")
-public class IdType extends PanacheEntityBase {
+public class IdType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,16 +49,4 @@ public class IdType extends PanacheEntityBase {
         this.description = description;
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public static IdType findByCode(String code) {
-        return find("code", code).firstResult();
-    }
-
-    public static List<IdType> listSorted() {
-        return listAll(Sort.ascending("description"));
-    }
 }

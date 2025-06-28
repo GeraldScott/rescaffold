@@ -111,14 +111,14 @@ public class PersonResource {
         try {
             Person created = personService.createPerson(person);
             return Response.status(Response.Status.CREATED).entity(created).build();
-        } catch (IllegalArgumentException e) {
+        } catch (ValidationException e) {
             log.error("Validation error creating person: " + e.getMessage());
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity(createErrorResponse(e.getMessage()))
-                        .build();
-            }
             return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(createErrorResponse(e.getMessage()))
+                    .build();
+        } catch (DuplicateEntityException e) {
+            log.error("Person with email '" + e.getFieldValue() + "' already exists");
+            return Response.status(Response.Status.CONFLICT)
                     .entity(createErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
@@ -142,19 +142,19 @@ public class PersonResource {
         try {
             Person updated = personService.updatePerson(id, newPerson);
             return Response.ok(updated).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error updating person: " + e.getMessage());
-            if (e.getMessage().contains("not found")) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(createErrorResponse(e.getMessage()))
-                        .build();
-            }
-            if (e.getMessage().contains("already exists")) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity(createErrorResponse(e.getMessage()))
-                        .build();
-            }
+        } catch (EntityNotFoundException e) {
+            log.error("Person not found with id: " + id);
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(createErrorResponse(e.getMessage()))
+                    .build();
+        } catch (ValidationException e) {
+            log.error("Validation error updating person: " + e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(createErrorResponse(e.getMessage()))
+                    .build();
+        } catch (DuplicateEntityException e) {
+            log.error("Person with email '" + e.getFieldValue() + "' already exists");
+            return Response.status(Response.Status.CONFLICT)
                     .entity(createErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
@@ -177,8 +177,8 @@ public class PersonResource {
         try {
             personService.deletePerson(id);
             return Response.noContent().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error deleting person: " + e.getMessage());
+        } catch (EntityNotFoundException e) {
+            log.error("Person not found with id: " + id);
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(createErrorResponse(e.getMessage()))
                     .build();
