@@ -132,48 +132,48 @@ Entities use Hibernate Panache Active Record pattern:
 ```mermaid
 erDiagram
     Gender {
-        bigint id PK
-        varchar code UK
-        text description UK
-        timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at "NULL"
+        bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
+        varchar(1) code UK "NOT NULL"
+        text description UK "NOT NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
+        timestamp created_at "NOT NULL DEFAULT now()"
         varchar updated_by "NULL"
+        timestamp updated_at "NULL"
     }
     
     Title {
-        bigint id PK
-        varchar code UK
-        text description UK
-        timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at "NULL"
+        bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
+        varchar(5) code UK "NOT NULL"
+        text description UK "NOT NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
+        timestamp created_at "NOT NULL DEFAULT now()"
         varchar updated_by "NULL"
+        timestamp updated_at "NULL"
     }
     
     IdType {
-        bigint id PK
-        varchar code UK
-        text description UK
-        timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at "NULL"
+        bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
+        varchar(5) code UK "NOT NULL"
+        text description UK "NOT NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
+        timestamp created_at "NOT NULL DEFAULT now()"
         varchar updated_by "NULL"
+        timestamp updated_at "NULL"
     }
     
     Person {
-        bigint id PK
-        varchar first_name
+        bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
+        varchar first_name "NULL"
         varchar last_name "NOT NULL"
-        varchar email UK
-        varchar id_number
-        bigint id_type_id FK
-        bigint gender_id FK
-        bigint title_id FK
-        timestamp created_at "NOT NULL DEFAULT now()"
-        timestamp updated_at "NULL"
+        varchar email UK "NULL"
+        varchar id_number "NULL"
+        bigint id_type_id FK "NULL"
+        bigint gender_id FK "NULL"
+        bigint title_id FK "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
+        timestamp created_at "NOT NULL DEFAULT now()"
         varchar updated_by "NULL"
+        timestamp updated_at "NULL"
     }
     
     User {
@@ -208,9 +208,9 @@ erDiagram
         varchar updated_by "NULL"
     }
     
-    Gender ||--o{ Person : "has"
-    Title ||--o{ Person : "has"
-    IdType ||--o{ Person : "has"
+    Gender ||--o{ Person : "fk_person_gender"
+    Title ||--o{ Person : "fk_person_title"
+    IdType ||--o{ Person : "fk_person_id_type"
     Person ||--o| User : "becomes"
     User ||--o{ UserRole : "has"
     Role ||--o{ UserRole : "assigned to"
