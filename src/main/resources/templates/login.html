@@ -1,0 +1,67 @@
+{#include base}
+    {#title}Login{/title}
+    {#content}
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Login</h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="error-message" class="alert alert-danger d-none" role="alert">
+                                Invalid username or password
+                            </div>
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('login-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Store token in localStorage
+                        localStorage.setItem('token', data.accessToken);
+                        localStorage.setItem('tokenExpiry', new Date().getTime() + (data.expiresIn * 1000));
+                        
+                        // Redirect to home page
+                        window.location.href = '/';
+                    } else {
+                        // Show error message
+                        document.getElementById('error-message').classList.remove('d-none');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    document.getElementById('error-message').classList.remove('d-none');
+                }
+            });
+        </script>
+    {/content}
+{/include}

@@ -1,0 +1,213 @@
+package io.archton.scaffold.web;
+
+import io.archton.scaffold.domain.IdType;
+import io.archton.scaffold.service.IdTypeService;
+import io.archton.scaffold.util.WebErrorHandler;
+import io.quarkus.qute.CheckedTemplate;
+import io.quarkus.qute.TemplateInstance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
+
+import java.util.List;
+import java.util.Optional;
+
+@Path("/id-types-ui")
+public class IdTypeRouter {
+
+    private static final Logger log = Logger.getLogger(IdTypeRouter.class);
+
+    @Inject
+    IdTypeService idTypeService;
+
+
+    @CheckedTemplate(basePath = "idtype")
+    public static class Templates {
+        public static native TemplateInstance idtypes(List<IdType> idTypes);
+
+        public static native TemplateInstance table(List<IdType> idTypes);
+
+        public static native TemplateInstance view(IdType idType);
+
+        public static native TemplateInstance create(IdType idType, String errorMessage);
+
+        public static native TemplateInstance edit(IdType idType, String errorMessage);
+
+        public static native TemplateInstance delete(IdType idType);
+
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String get() {
+        log.debug("GET /id-types-ui");
+        List<IdType> idTypeList = idTypeService.listSorted();
+        return Templates.idtypes(idTypeList).render();
+    }
+
+    @GET
+    @Path("/table")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getIdTypeTable() {
+        log.debug("GET /id-types-ui/table");
+        List<IdType> idTypeList = idTypeService.listSorted();
+        String html = Templates.table(idTypeList).render();
+        return Response.ok(html).build();
+    }
+
+    @GET
+    @Path("/{id}/view")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getIdTypeView(@PathParam("id") Long id) {
+        log.debugf("GET /id-types-ui/%s/view", id);
+
+        try {
+            Optional<IdType> idTypeOpt = idTypeService.findByIdOptional(id);
+            if (idTypeOpt.isEmpty()) {
+                return WebErrorHandler.createNotFoundResponse();
+            }
+
+            String html = Templates.view(idTypeOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error retrieving id type for view", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Path("/create")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getIdTypeCreate() {
+        log.debug("GET /id-types-ui/create");
+
+        String html = Templates.create(null, null).render();
+        return Response.ok(html).build();
+    }
+
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response createIdTypeFromForm(@FormParam("code") String code,
+                                        @FormParam("description") String description) {
+        log.debugf("POST /id-types-ui - create with code: %s", code);
+
+        try {
+            IdType idType = new IdType();
+            idType.code = code;
+            idType.description = description;
+
+            idTypeService.createIdType(idType);
+
+            List<IdType> idTypeList = idTypeService.listSorted();
+            String html = Templates.table(idTypeList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error creating id type", e);
+            
+            // Create entity with submitted form data to preserve user input
+            IdType formData = new IdType();
+            formData.code = code;
+            formData.description = description;
+            
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.create(formData, errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
+        }
+    }
+
+    @GET
+    @Path("/{id}/edit")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getIdTypeEdit(@PathParam("id") Long id) {
+        log.debugf("GET /id-types-ui/%s/edit", id);
+
+        try {
+            Optional<IdType> idTypeOpt = idTypeService.findByIdOptional(id);
+            if (idTypeOpt.isEmpty()) {
+                return WebErrorHandler.createNotFoundResponse();
+            }
+
+            String html = Templates.edit(idTypeOpt.get(), null).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error retrieving id type for edit", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response updateIdTypeFromForm(@PathParam("id") Long id,
+                                        @FormParam("code") String code,
+                                        @FormParam("description") String description) {
+        log.debugf("PUT /id-types-ui/%s - update with code: %s", id, code);
+
+        try {
+            IdType updateIdType = new IdType();
+            updateIdType.code = code;
+            updateIdType.description = description;
+
+            idTypeService.updateIdType(id, updateIdType);
+
+            List<IdType> idTypeList = idTypeService.listSorted();
+            String html = Templates.table(idTypeList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error updating id type", e);
+            
+            // Create entity with submitted form data to preserve user input
+            IdType formData = new IdType();
+            formData.id = id;
+            formData.code = code;
+            formData.description = description;
+            
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.edit(formData, errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
+        }
+    }
+
+    @GET
+    @Path("/{id}/delete")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getIdTypeDelete(@PathParam("id") Long id) {
+        log.debugf("GET /id-types-ui/%s/delete", id);
+
+        try {
+            Optional<IdType> idTypeOpt = idTypeService.findByIdOptional(id);
+            if (idTypeOpt.isEmpty()) {
+                return WebErrorHandler.createNotFoundResponse();
+            }
+
+            String html = Templates.delete(idTypeOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error retrieving id type for delete", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response deleteIdTypeFromForm(@PathParam("id") Long id) {
+        log.debugf("DELETE /id-types-ui/%s", id);
+
+        try {
+            idTypeService.deleteIdType(id);
+
+            List<IdType> idTypeList = idTypeService.listSorted();
+            String html = Templates.table(idTypeList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error deleting id type", e);
+            return WebErrorHandler.createErrorResponse("", e);
+        }
+    }
+
+}

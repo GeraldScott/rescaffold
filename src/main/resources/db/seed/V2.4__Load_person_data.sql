@@ -1,0 +1,8 @@
+INSERT INTO person (first_name, last_name, email, id_number, id_type_id, gender_id, title_id) VALUES
+    ('Thabo', 'Pityana', 'thabo.pityana@example.co.za', '4206145800081', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR')),
+    ('Nkosazana', 'Olifant', 'nkosazana.olifant@example.co.za', '4901275800082', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'DR')),
+    ('Sipho', 'Nkuna', 'sipho.nkuna@example.co.za', '8507145800083', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR')),
+    ('Lerato', 'Mokoena', 'lerato.mokoena@example.co.za', '9203275800084', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'MS')),
+    ('Mandla', 'Van der Merwe', 'mandla.vdm@example.co.za', 'A12345678', (SELECT id FROM id_type WHERE code = 'PASS'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'PROF')),
+    ('Thandiwe', 'Ndlovu', 'thandiwe.ndlovu@example.co.za', '8811125800085', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'MRS')),
+    ('Kagiso', 'Rabade', 'kagiso.rabade@example.co.za', '9505245800086', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR'));

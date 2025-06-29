@@ -1,0 +1,93 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="/images/logo-scaffold-round.png" alt="Rescaffold Logo" height="30" class="d-inline-block align-text-top">
+            Rescaffold
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/persons-ui">People</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="maintenanceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Maintenance
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="maintenanceDropdown">
+                        <li><a class="dropdown-item" href="/genders-ui">Genders</a></li>
+                        <li><a class="dropdown-item" href="/titles-ui">Titles</a></li>
+                        <li><a class="dropdown-item" href="/id-types-ui">ID Types</a></li>
+                        <li class="admin-only"><a class="dropdown-item" href="/users-ui">Users</a></li>
+                        <li class="admin-only"><a class="dropdown-item" href="/roles-ui">Roles</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <div class="logged-out">
+                    <a href="/login" class="btn btn-outline-light">Login</a>
+                </div>
+                <div class="logged-in d-none">
+                    <span class="navbar-text me-3 username"></span>
+                    <button class="btn btn-outline-danger" id="logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        const tokenExpiry = localStorage.getItem('tokenExpiry');
+        
+        if (token && tokenExpiry && new Date().getTime() < parseInt(tokenExpiry)) {
+            // User is logged in
+            document.querySelector('.logged-out').classList.add('d-none');
+            document.querySelector('.logged-in').classList.remove('d-none');
+            
+            // Decode the JWT to get the username
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                document.querySelector('.username').textContent = payload.sub || 'User';
+                
+                // Show admin elements if user has admin role
+                if (payload.groups && payload.groups.includes('ROLE_ADMIN')) {
+                    document.querySelectorAll('.admin-only').forEach(el => {
+                        el.classList.remove('d-none');
+                    });
+                }
+            } catch (e) {
+                console.error('Error decoding JWT', e);
+            }
+        } else {
+            // User is not logged in or token expired
+            document.querySelector('.logged-out').classList.remove('d-none');
+            document.querySelector('.logged-in').classList.add('d-none');
+            
+            // Hide admin elements
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.classList.add('d-none');
+            });
+            
+            // Clear expired token
+            if (token && tokenExpiry && new Date().getTime() >= parseInt(tokenExpiry)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('tokenExpiry');
+            }
+        }
+        
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('tokenExpiry');
+            window.location.href = '/';
+        });
+    });
+</script>

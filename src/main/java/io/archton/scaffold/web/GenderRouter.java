@@ -1,0 +1,213 @@
+package io.archton.scaffold.web;
+
+import io.archton.scaffold.domain.Gender;
+import io.archton.scaffold.service.GenderService;
+import io.archton.scaffold.util.WebErrorHandler;
+import io.quarkus.qute.CheckedTemplate;
+import io.quarkus.qute.TemplateInstance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
+
+import java.util.List;
+import java.util.Optional;
+
+@Path("/genders-ui")
+public class GenderRouter {
+
+    private static final Logger log = Logger.getLogger(GenderRouter.class);
+
+    @Inject
+    GenderService genderService;
+
+
+    @CheckedTemplate(basePath = "gender", requireTypeSafeExpressions = false)
+    public static class Templates {
+        public static native TemplateInstance genders(List<Gender> genders);
+
+        public static native TemplateInstance table(List<Gender> genders);
+
+        public static native TemplateInstance view(Gender gender);
+
+        public static native TemplateInstance create(Gender gender, String errorMessage);
+
+        public static native TemplateInstance edit(Gender gender, String errorMessage);
+
+        public static native TemplateInstance delete(Gender gender);
+
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String get() {
+        log.debug("GET /genders-ui");
+        List<Gender> genderList = genderService.listSorted();
+        return Templates.genders(genderList).render();
+    }
+
+    @GET
+    @Path("/table")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderTable() {
+        log.debug("GET /genders-ui/table");
+        List<Gender> genderList = genderService.listSorted();
+        String html = Templates.table(genderList).render();
+        return Response.ok(html).build();
+    }
+
+    @GET
+    @Path("/{id}/view")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderView(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%s/view", id);
+
+        try {
+            Optional<Gender> genderOpt = genderService.findByIdOptional(id);
+            if (genderOpt.isEmpty()) {
+                return WebErrorHandler.createNotFoundResponse();
+            }
+
+            String html = Templates.view(genderOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error retrieving gender for view", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Path("/create")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderCreate() {
+        log.debug("GET /genders-ui/create");
+
+        String html = Templates.create(null, null).render();
+        return Response.ok(html).build();
+    }
+
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response createGenderFromForm(@FormParam("code") String code,
+                                         @FormParam("description") String description) {
+        log.debugf("POST /genders-ui - create with code: %s", code);
+
+        try {
+            Gender gender = new Gender();
+            gender.code = code;
+            gender.description = description;
+
+            genderService.createGender(gender);
+
+            List<Gender> genderList = genderService.listSorted();
+            String html = Templates.table(genderList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error creating gender", e);
+            
+            // Create entity with submitted form data to preserve user input
+            Gender formData = new Gender();
+            formData.code = code;
+            formData.description = description;
+            
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.create(formData, errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
+        }
+    }
+
+    @GET
+    @Path("/{id}/edit")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderEdit(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%s/edit", id);
+
+        try {
+            Optional<Gender> genderOpt = genderService.findByIdOptional(id);
+            if (genderOpt.isEmpty()) {
+                return WebErrorHandler.createNotFoundResponse();
+            }
+
+            String html = Templates.edit(genderOpt.get(), null).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error retrieving gender for edit", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response updateGenderFromForm(@PathParam("id") Long id,
+                                         @FormParam("code") String code,
+                                         @FormParam("description") String description) {
+        log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
+
+        try {
+            Gender updateGender = new Gender();
+            updateGender.code = code;
+            updateGender.description = description;
+
+            genderService.updateGender(id, updateGender);
+
+            List<Gender> genderList = genderService.listSorted();
+            String html = Templates.table(genderList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error updating gender", e);
+            
+            // Create entity with submitted form data to preserve user input
+            Gender formData = new Gender();
+            formData.id = id;
+            formData.code = code;
+            formData.description = description;
+            
+            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
+            String html = Templates.edit(formData, errorMessage).render();
+            return WebErrorHandler.createErrorResponse(html, e);
+        }
+    }
+
+    @GET
+    @Path("/{id}/delete")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getGenderDelete(@PathParam("id") Long id) {
+        log.debugf("GET /genders-ui/%s/delete", id);
+
+        try {
+            Optional<Gender> genderOpt = genderService.findByIdOptional(id);
+            if (genderOpt.isEmpty()) {
+                return WebErrorHandler.createNotFoundResponse();
+            }
+
+            String html = Templates.delete(genderOpt.get()).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error retrieving gender for delete", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response deleteGenderFromForm(@PathParam("id") Long id) {
+        log.debugf("DELETE /genders-ui/%s", id);
+
+        try {
+            genderService.deleteGender(id);
+
+            List<Gender> genderList = genderService.listSorted();
+            String html = Templates.table(genderList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            WebErrorHandler.logError("Error deleting gender", e);
+            return WebErrorHandler.createErrorResponse("", e);
+        }
+    }
+
+}
