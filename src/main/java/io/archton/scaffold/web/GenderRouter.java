@@ -31,7 +31,7 @@ public class GenderRouter {
 
         public static native TemplateInstance view(Gender gender);
 
-        public static native TemplateInstance create(String errorMessage);
+        public static native TemplateInstance create(Gender gender, String errorMessage);
 
         public static native TemplateInstance edit(Gender gender, String errorMessage);
 
@@ -83,7 +83,7 @@ public class GenderRouter {
     public Response getGenderCreate() {
         log.debug("GET /genders-ui/create");
 
-        String html = Templates.create(null).render();
+        String html = Templates.create(null, null).render();
         return Response.ok(html).build();
     }
 
@@ -107,7 +107,12 @@ public class GenderRouter {
         } catch (Exception e) {
             WebErrorHandler.logError("Error creating gender", e);
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.create(errorMessage).render();
+            // Create entity with submitted form data to preserve user input
+            Gender formData = new Gender();
+            formData.code = code;
+            formData.description = description;
+            
+            String html = Templates.create(formData, errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }

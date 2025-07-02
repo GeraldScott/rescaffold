@@ -31,7 +31,7 @@ public class IdTypeRouter {
 
         public static native TemplateInstance view(IdType idType);
 
-        public static native TemplateInstance create(String errorMessage);
+        public static native TemplateInstance create(IdType idType, String errorMessage);
 
         public static native TemplateInstance edit(IdType idType, String errorMessage);
 
@@ -83,7 +83,7 @@ public class IdTypeRouter {
     public Response getIdTypeCreate() {
         log.debug("GET /id-types-ui/create");
 
-        String html = Templates.create(null).render();
+        String html = Templates.create(null, null).render();
         return Response.ok(html).build();
     }
 
@@ -107,7 +107,12 @@ public class IdTypeRouter {
         } catch (Exception e) {
             WebErrorHandler.logError("Error creating id type", e);
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.create(errorMessage).render();
+            // Create entity with submitted form data to preserve user input
+            IdType formData = new IdType();
+            formData.code = code;
+            formData.description = description;
+            
+            String html = Templates.create(formData, errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }

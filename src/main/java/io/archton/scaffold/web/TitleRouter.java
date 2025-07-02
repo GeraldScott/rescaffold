@@ -31,7 +31,7 @@ public class TitleRouter {
 
         public static native TemplateInstance view(Title title);
 
-        public static native TemplateInstance create(String errorMessage);
+        public static native TemplateInstance create(Title title, String errorMessage);
 
         public static native TemplateInstance edit(Title title, String errorMessage);
 
@@ -83,7 +83,7 @@ public class TitleRouter {
     public Response getTitleCreate() {
         log.debug("GET /titles-ui/create");
 
-        String html = Templates.create(null).render();
+        String html = Templates.create(null, null).render();
         return Response.ok(html).build();
     }
 
@@ -107,7 +107,12 @@ public class TitleRouter {
         } catch (Exception e) {
             WebErrorHandler.logError("Error creating title", e);
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.create(errorMessage).render();
+            // Create entity with submitted form data to preserve user input
+            Title formData = new Title();
+            formData.code = code;
+            formData.description = description;
+            
+            String html = Templates.create(formData, errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }

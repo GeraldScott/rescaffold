@@ -5,6 +5,9 @@
 ### Application settings
 The application settings are in `src/main/resources/application.properties`
 
+### Package name
+All Java code is under the root package `io.archton.scaffold`
+
 ### Start Development Server
 ```bash
 quarkus dev
@@ -104,9 +107,6 @@ For detailed architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITE
 - **HTMX Dynamic Interactions**: Seamless partial page updates
 
 For detailed architecture information, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## Screenshot Location
-- Look in folder /home/geraldo/Pictures/Screenshots/ for screenshots
 
 ## Test Strategy
 - **Resource Testing**: Comprehensive strategy documented in `docs/resource-test-strategy.md`

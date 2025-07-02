@@ -1,3 +1,4 @@
+{! idType : io.archton.scaffold.domain.IdType !}
 <div id="content-area" class="card">
     <div class="card-header bg-success text-white">
         <h5 class="mb-0">Create new ID Type</h5>
@@ -18,6 +19,7 @@
                            class="form-control"
                            id="code"
                            name="code"
+                           value="{idType.code ?: ''}"
                            maxlength="5"
                            pattern="[A-Z]+"
                            required
@@ -35,6 +37,7 @@
                            class="form-control"
                            id="description"
                            name="description"
+                           value="{idType.description ?: ''}"
                            maxlength="256"
                            required
                            placeholder="e.g. Identity Document">
