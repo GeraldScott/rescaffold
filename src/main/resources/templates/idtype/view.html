@@ -1,57 +1,66 @@
 {! idType : io.archton.scaffold.domain.IdType !}
 <div id="content-area" class="card">
     <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-sm-1">
-                <strong>Code:</strong>
+        <div class="row">
+            <div class="col-sm-7">
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Code:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="badge bg-primary fs-6">{idType.code}</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Description:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {idType.description}
+                    </div>
+                </div>
             </div>
-            <div class="col-sm-8">
-                <span class="badge bg-primary fs-6">{idType.code}</span>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-1">
-                <strong>Description:</strong>
-            </div>
-            <div class="col-sm-8">
-                {idType.description}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-1">
-                <strong>Created By:</strong>
-            </div>
-            <div class="col-sm-8">
-                {idType.createdBy}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-1">
-                <strong>Created At:</strong>
-            </div>
-            <div class="col-sm-8">
-                {#if idType.createdAt}{idType.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-1">
-                <strong>Updated By:</strong>
-            </div>
-            <div class="col-sm-8">
-                {#if idType.updatedBy}{idType.updatedBy}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-1">
-                <strong>Updated At:</strong>
-            </div>
-            <div class="col-sm-8">
-                {#if idType.updatedAt}{idType.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-12">
-                <small class="text-muted">Record no.: {idType.id}</small>
+            <div class="col-sm-5">
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Record no.:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {idType.id}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Created by:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {idType.createdBy}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Created at:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {#if idType.createdAt}{idType.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Updated by:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {#if idType.updatedBy}{idType.updatedBy}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Updated at:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {#if idType.updatedAt}{idType.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
