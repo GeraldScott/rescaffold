@@ -1,8 +1,9 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Development Commands
+
+### Application settings
+The application settings are in `src/main/resources/application.properties`
 
 ### Start Development Server
 ```bash
