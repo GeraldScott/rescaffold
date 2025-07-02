@@ -17,28 +17,26 @@ This is a Quarkus + HTMX scaffold application following a layered architecture p
 
 ## Architecture Pattern
 
-### Layered Architecture
-
-The application follows a clean layered architecture with the following layers:
+The application follows a layered architecture:
 
 ```
 ┌─────────────────────────────────────────┐
-│              Presentation Layer          │
+│             Presentation Layer          │
 ├─────────────────┬───────────────────────┤
 │   Web Layer     │    REST API Layer     │
 │   (HTML UI)     │    (JSON API)         │
 │   /*-ui paths   │    /api/* paths       │
 └─────────────────┴───────────────────────┘
 ┌─────────────────────────────────────────┐
-│              Service Layer               │
+│             Service Layer               │
 │        (Business Logic)                 │
 └─────────────────────────────────────────┘
 ┌─────────────────────────────────────────┐
-│            Repository Layer              │
+│           Repository Layer              │
 │        (Data Access)                    │
 └─────────────────────────────────────────┘
 ┌─────────────────────────────────────────┐
-│              Domain Layer                │
+│             Domain Layer                │
 │        (Entities & Models)              │
 └─────────────────────────────────────────┘
 ```
@@ -109,60 +107,6 @@ The application implements a dual API approach providing both REST and HTML inte
   - Production: `PROD_DB_USERNAME`, `PROD_DB_PASSWORD`
 - **Flyway migrations** in `src/main/resources/db/migration/`
 - **Automatic clean/migrate** on startup in dev/test modes
-
-### Entity Relationship Model
-
-```mermaid
-erDiagram
-    Gender {
-        bigint id PK
-        varchar(1) code UK
-        text description UK
-        varchar created_by
-        timestamp created_at
-        varchar updated_by
-        timestamp updated_at
-    }
-    
-    Title {
-        bigint id PK
-        varchar(5) code UK
-        text description UK
-        varchar created_by
-        timestamp created_at
-        varchar updated_by
-        timestamp updated_at
-    }
-    
-    IdType {
-        bigint id PK
-        varchar(5) code UK
-        text description UK
-        varchar created_by
-        timestamp created_at
-        varchar updated_by
-        timestamp updated_at
-    }
-    
-    Person {
-        bigint id PK
-        varchar first_name
-        varchar last_name
-        varchar email UK
-        varchar id_number
-        bigint id_type_id FK
-        bigint gender_id FK
-        bigint title_id FK
-        varchar created_by
-        timestamp created_at
-        varchar updated_by
-        timestamp updated_at
-    }
-    
-    Gender ||--o{ Person : "fk_person_gender"
-    Title ||--o{ Person : "fk_person_title"
-    IdType ||--o{ Person : "fk_person_id_type"
-```
 
 ## Template Architecture
 
