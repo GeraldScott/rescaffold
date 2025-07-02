@@ -1,95 +1,106 @@
 {! person : io.archton.scaffold.domain.Person !}
 <div id="content-area" class="card">
     <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>Full Name:</strong>
+        <div class="row">
+            <div class="col-sm-7">
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Full Name:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="fs-5">{person.displayName}</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Last Name:</strong>
+                    </div>
+                    <div class="col-sm-9" id="lastName-value">
+                        {person.lastName}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>First Name:</strong>
+                    </div>
+                    <div class="col-sm-9" id="firstName-value">
+                        {#if person.firstName}{person.firstName}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Title:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {#if person.title}{person.title.description}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Gender:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {#if person.gender}{person.gender.description}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>National identity document:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {#if person.idNumber}{person.idNumber}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Email:</strong>
+                    </div>
+                    <div class="col-sm-9" id="email-value">
+                        {#if person.email}{person.email}{#else}-{/if}
+                    </div>
+                </div>
             </div>
-            <div class="col-sm-10">
-                <span class="fs-5">{person.displayName}</span>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>First Name:</strong>
-            </div>
-            <div class="col-sm-4" id="firstName-value">
-                {#if person.firstName}{person.firstName}{#else}-{/if}
-            </div>
-            <div class="col-sm-2">
-                <strong>Last Name:</strong>
-            </div>
-            <div class="col-sm-4" id="lastName-value">
-                {person.lastName}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>Email:</strong>
-            </div>
-            <div class="col-sm-10" id="email-value">
-                {#if person.email}{person.email}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>Title:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.title}{person.title.description}{#else}-{/if}
-            </div>
-            <div class="col-sm-2">
-                <strong>Gender:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.gender}{person.gender.description}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>ID Type:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.idType}{person.idType.description}{#else}-{/if}
-            </div>
-            <div class="col-sm-2">
-                <strong>ID Number:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.idNumber}{person.idNumber}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>Created By:</strong>
-            </div>
-            <div class="col-sm-4">
-                {person.createdBy}
-            </div>
-            <div class="col-sm-2">
-                <strong>Created At:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.createdAt}{person.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm-2">
-                <strong>Updated By:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.updatedBy}{person.updatedBy}{#else}-{/if}
-            </div>
-            <div class="col-sm-2">
-                <strong>Updated At:</strong>
-            </div>
-            <div class="col-sm-4">
-                {#if person.updatedAt}{person.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-12">
-                <small class="text-muted">Record no.: {person.id}</small>
+            <div class="col-sm-5">
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Record no.:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {person.id}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Created by:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {person.createdBy}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Created at:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {#if person.createdAt}{person.createdAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Updated by:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {#if person.updatedBy}{person.updatedBy}{#else}-{/if}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <strong>Updated at:</strong>
+                    </div>
+                    <div class="col-sm-7">
+                        {#if person.updatedAt}{person.updatedAt.format('yyyy-MM-dd HH:mm')}{#else}-{/if}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
