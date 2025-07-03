@@ -80,45 +80,28 @@ For detailed architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITE
 
 ### ✅ Completed Features
 - **Repository Pattern Architecture**: Full migration from Active Record to Repository pattern
-- **Gender Entity**: Complete CRUD operations with REST API and HTML UI
-- **Title Entity**: Complete CRUD operations with REST API and HTML UI
-- **IdType Entity**: Complete CRUD operations with REST API and HTML UI
-- **Person Entity**: Complete CRUD operations with REST API and HTML UI
+- **Core Domain Entities**: Complete CRUD operations with REST API and HTML UI
+  - **Gender Entity**: Single character code (M/F/X) with description
+  - **Title Entity**: Personal titles (MR, MS, DR, etc.) with validation
+  - **IdType Entity**: Identification types (ID, PASSPORT, etc.) with validation
+  - **Country Entity**: ISO 2-letter country codes with name and metadata
+  - **Person Entity**: Complete person management with relationships to all lookup entities
+- **User Management System**: Complete authentication and authorization infrastructure
+  - **User Entity**: User accounts with username/password and person association
+  - **Role Entity**: Role-based access control with uppercase naming convention
+  - **Many-to-Many Relationship**: User-Role association via join table
 - **Database Setup**: PostgreSQL with Flyway migrations
 - **Template System**: Qute templates with HTMX integration
 - **Development Environment**: Hot reload, DevUI, Swagger documentation
 - **Clean Architecture**: Proper separation of concerns across all layers
+- **Security Infrastructure**: Authentication resources and services implemented
 
 ### 🚧 In Progress / Planned
-- **User Management**: User, Role, UserRole entities and authentication
-- **Security**: Authentication and authorization implementation
-- **Additional Features**: As defined in entity relationship diagram
+- **Authentication Flow**: Login/logout implementation and session management
+- **Authorization Rules**: Role-based access control enforcement
+- **API Enhancement**: Rate limiting, API versioning, GraphQL support
+- **Monitoring and Observability**: Metrics collection, distributed tracing, health checks enhancement
+- **Scalability Improvements**: Caching layer (Redis), message queuing, microservices decomposition
 
-### 🏗️ Architecture Benefits Achieved
-- **Repository Pattern**: Clean separation between entities and data access
-- **Plain JPA Entities**: Focused solely on data structure and validation
-- **Explicit Transaction Management**: Manual timestamp updates in service layer
-- **Better Testability**: Repository interfaces can be mocked for unit testing
-- **Dual API Pattern**: REST + HTML UI established for all entities
-- **Audit Trail**: Consistent audit fields across all entities
-- **Exception Handling**: Proper HTTP status codes and error responses
-- **Form Validation**: Jakarta Bean Validation with custom business rules
-- **Bootstrap Responsive Design**: Mobile-first UI implementation
-- **HTMX Dynamic Interactions**: Seamless partial page updates
-
-For detailed architecture information, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## Test Strategy
-- **Resource Testing**: Comprehensive strategy documented in `docs/resource-test-strategy.md`
-- **Reference Implementation**: Follow the `GenderResourceTest` pattern for all new REST resource tests
-- **Framework**: Use @QuarkusTest with @TestTransaction for database rollback and REST Assured for API testing
-- **Test Coverage**: CRUD operations, validation rules, error handling, and data processing scenarios
-- **Data Isolation**: Use unique test data per test method to prevent conflicts
-- **Documentation**: https://quarkus.io/guides/getting-started-testing
-- **Database**: PostgreSQL as defined in %test.quarkus.datasource with credentials from .env file
-- **E2E Testing**: Use Selenide for end-to-end browser testing
-- **UI Testing**: Cover critical user journeys across different browsers and screen sizes
- 
 ## HTMX Documentation
 - HTMX documentation is here: https://htmx.org/docs/
-

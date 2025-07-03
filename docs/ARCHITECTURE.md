@@ -50,10 +50,30 @@ io.archton.scaffold/
 ├── service/         # Business logic layer with transaction management
 ├── resource/        # REST API endpoints (/api/* paths)
 ├── web/            # HTML UI controllers (/*-ui paths) using Qute templates
+├── security/        # Authentication and authorization classes
 ├── util/           # Utility classes (TemplateGlobals, WebErrorHandler)
 ├── exception/      # Custom exception classes and global exception mappers
 └── health/         # Health check endpoints
 ```
+
+## Domain Model
+
+The application implements a comprehensive domain model with 7 core entities that support user management, person records, and lookup data. All entities follow consistent patterns for audit trails, validation, and relationships.
+
+### Entity Overview
+
+**Core Entities:**
+- **Person**: Primary entity representing individuals in the system
+- **User**: Authentication entity linked to Person records  
+- **Role**: Authorization entity for access control
+
+**Lookup Entities:**
+- **Gender**: Single character gender codes (M/F/X)
+- **Title**: Personal titles and honorifics (MR, MS, DR, etc.)
+- **IdType**: Identification document types (ID, PASSPORT, etc.)
+- **Country**: ISO 3166-1 alpha-2 country codes and metadata
+
+For detailed entity documentation including field specifications, validation rules, relationships, and database schema details, see [docs/DOMAIN_ENTITIES.md](DOMAIN_ENTITIES.md).
 
 ### Layer Responsibilities
 
@@ -155,13 +175,36 @@ templates/
 - **Input validation** using Jakarta Bean Validation
 - **SQL injection prevention** through parameterized queries
 - **XSS protection** through Qute template escaping
-- **CSRF protection** (to be implemented)
+- **User Management**: Complete User and Role entities with relationship mapping
+- **Authentication Infrastructure**: AuthService and AuthResource implemented
+- **Role-Based Access Control**: User-Role many-to-many relationship
+- **Security Context**: TokenInfo and SecurityContext classes for user session management
+- **Password Security**: Password hashing infrastructure in place
+
+### Authentication System
+- **User Entity**: Stores username, password hash, and person association
+- **Role Entity**: Manages access control with structured naming (e.g., "ROLE_ADMIN", "ROLE_USER")
+- **User-Role Relationship**: ManyToMany mapping via join table for flexible permissions
+- **Last Login Tracking**: User entity tracks authentication history
+- **Person Integration**: Users linked to Person entities for complete profile management
+- **JWT Implementation**: MicroProfile JWT for stateless authentication
+- **AuthService**: Handles authentication flow, password verification, and token generation
+- **SecurityContext**: Request-scoped service providing current user context and role checking
+- **TokenInfo**: DTO for authentication response with token and user details
+
+### JWT Security Features
+- **Stateless Authentication**: JWT tokens eliminate server-side session storage
+- **Role-based Claims**: User roles embedded in JWT for authorization decisions
+- **User Context**: JWT includes userId and personId for complete user context
+- **Token Expiration**: Configurable token duration (default 60 minutes)
+- **MicroProfile JWT**: Standards-based JWT implementation with full ecosystem support
 
 ### Planned Security Features
-- **Authentication**: User/Role-based access control
-- **Authorization**: Method-level security
-- **JWT tokens**: For API authentication
-- **Session management**: For web UI
+- **Session Management**: For web UI authentication flows
+- **Method-level authorization**: Role-based access control on endpoints
+- **CSRF protection**: For form-based operations
+- **Password policies**: Strength requirements and rotation
+- **Refresh tokens**: Long-lived tokens for seamless user experience
 
 ## Testing Strategy
 
@@ -206,29 +249,6 @@ src/test/java/
 - **Static resource optimization** through Quarkus
 - **Template caching** for frequently accessed pages
 - **Responsive design** for mobile optimization
-
-## Future Architecture Enhancements
-
-### Planned Features
-1. **User Management System**
-   - User, Role, UserRole entities
-   - Authentication and authorization
-   - Session management
-
-2. **API Enhancement**
-   - Rate limiting
-   - API versioning
-   - GraphQL support
-
-3. **Monitoring and Observability**
-   - Metrics collection
-   - Distributed tracing
-   - Health checks enhancement
-
-4. **Scalability Improvements**
-   - Caching layer (Redis)
-   - Message queuing (RabbitMQ/Apache Kafka)
-   - Microservices decomposition
 
 ## Development Guidelines
 

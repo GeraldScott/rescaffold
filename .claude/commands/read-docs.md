@@ -3,4 +3,6 @@ Read and process all documentation in the docs/ directory. Analyze the following
 - ./README.md
 - ./CLAUDE.md
 - docs/ARCHITECTURE.md
-- docs/AUTHENTICATION.md
+- docs/DOMAIN_ENTITIES.md
+- docs/SECURITY.md
+- docs/TEST_STRATEGY.md
