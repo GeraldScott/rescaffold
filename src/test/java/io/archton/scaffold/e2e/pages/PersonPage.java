@@ -22,11 +22,8 @@ public class PersonPage {
     private final SelenideElement firstNameInput = $("#firstName");
     private final SelenideElement lastNameInput = $("#lastName");
     private final SelenideElement emailInput = $("#email");
-    private final SelenideElement idNumberInput = $("#idNumber");
-    private final SelenideElement idTypeSelect = $("#idTypeId");
     private final SelenideElement genderSelect = $("#genderId");
     private final SelenideElement titleSelect = $("#titleId");
-    private final SelenideElement countrySelect = $("#countryId");
     private final SelenideElement saveButton = $("button[type='submit']");
     private final SelenideElement cancelButton = $("button.btn-outline-secondary[hx-get='/persons-ui/table']");
     private final SelenideElement errorMessage = $(".alert-danger");
@@ -71,13 +68,6 @@ public class PersonPage {
         return emailInput;
     }
     
-    public SelenideElement getIdNumberInput() {
-        return idNumberInput;
-    }
-    
-    public SelenideElement getIdTypeSelect() {
-        return idTypeSelect;
-    }
     
     public SelenideElement getGenderSelect() {
         return genderSelect;
@@ -87,9 +77,6 @@ public class PersonPage {
         return titleSelect;
     }
     
-    public SelenideElement getCountrySelect() {
-        return countrySelect;
-    }
     
     public SelenideElement getSaveButton() {
         return saveButton;

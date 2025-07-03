@@ -1,8 +1,8 @@
-INSERT INTO person (first_name, last_name, email, id_number, id_type_id, gender_id, title_id, country_id) VALUES
-    ('Thabo', 'Pityana', 'thabo.pityana@example.co.za', '4206145800081', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR'), (SELECT id FROM country WHERE code = 'ZA')),
-    ('Nkosazana', 'Olifant', 'nkosazana.olifant@example.co.za', '4901275004088', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'DR'), (SELECT id FROM country WHERE code = 'ZA')),
-    ('Sipho', 'Nkuna', 'sipho.nkuna@example.co.za', '8507145008088', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR'), (SELECT id FROM country WHERE code = 'ZA')),
-    ('Lerato', 'Mokoena', 'lerato.mokoena@example.co.za', '9203275005081', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'MS'), (SELECT id FROM country WHERE code = 'ZA')),
-    ('Mandla', 'Van der Merwe', 'mandla.vdm@example.co.za', 'A12345678', (SELECT id FROM id_type WHERE code = 'PASS'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'PROF'), (SELECT id FROM country WHERE code = 'BN')),
-    ('Thandiwe', 'Ndlovu', 'thandiwe.ndlovu@example.co.za', '8811125005084', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'MRS'), (SELECT id FROM country WHERE code = 'ZA')),
-    ('Kagiso', 'Rabade', 'kagiso.rabade@example.co.za', '9505245003081', (SELECT id FROM id_type WHERE code = 'ID'), (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR'), (SELECT id FROM country WHERE code = 'ZA'));
+INSERT INTO person (first_name, last_name, email, gender_id, title_id) VALUES
+    ('Thabo', 'Pityana', 'thabo.pityana@example.co.za', (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR')),
+    ('Nkosazana', 'Olifant', 'nkosazana.olifant@example.co.za', (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'DR')),
+    ('Sipho', 'Nkuna', 'sipho.nkuna@example.co.za', (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR')),
+    ('Lerato', 'Mokoena', 'lerato.mokoena@example.co.za', (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'MS')),
+    ('Mandla', 'Van der Merwe', 'mandla.vdm@example.co.za', (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'PROF')),
+    ('Thandiwe', 'Ndlovu', 'thandiwe.ndlovu@example.co.za', (SELECT id FROM gender WHERE code = 'F'), (SELECT id FROM title WHERE code = 'MRS')),
+    ('Kagiso', 'Rabade', 'kagiso.rabade@example.co.za', (SELECT id FROM gender WHERE code = 'M'), (SELECT id FROM title WHERE code = 'MR'));

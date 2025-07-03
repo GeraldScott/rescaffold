@@ -30,14 +30,6 @@ public class Person {
     @Size(max = 255, message = "Person email must not exceed 255 characters")
     public String email;
 
-    @Column(name = "id_number")
-    @Size(max = 13, message = "Person ID number must not exceed 13 characters")
-    public String idNumber;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_type_id")
-    public IdType idType;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gender_id")
     public Gender gender;
@@ -45,10 +37,6 @@ public class Person {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "title_id")
     public Title title;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id")
-    public Country country;
 
     @Column(name = "created_by", nullable = false)
     public String createdBy = "system";
