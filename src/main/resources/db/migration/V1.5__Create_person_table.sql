@@ -7,13 +7,16 @@ create table person (
     id_type_id bigint,
     gender_id bigint,
     title_id bigint,
+    country_id bigint,
     created_by varchar not null default 'system',
     created_at timestamp not null default now(),
     updated_by varchar,
     updated_at timestamp,
     constraint fk_person_id_type foreign key (id_type_id) references id_type(id),
     constraint fk_person_gender foreign key (gender_id) references gender(id),
-    constraint fk_person_title foreign key (title_id) references title(id)
+    constraint fk_person_title foreign key (title_id) references title(id),
+    constraint fk_person_country foreign key (country_id) references country(id),
+    constraint uq_person_country_id_number unique (country_id, id_number)
 );
 
 create index idx_person_email on person(email);
@@ -21,6 +24,7 @@ create index idx_person_last_name on person(last_name);
 create index idx_person_id_type on person(id_type_id);
 create index idx_person_gender on person(gender_id);
 create index idx_person_title on person(title_id);
+create index idx_person_country on person(country_id);
 
 comment on table person is 'Personal details';
 comment on column person.id is 'Primary key';
@@ -31,6 +35,7 @@ comment on column person.id_number is 'Person identification number';
 comment on column person.id_type_id is 'Foreign key to id_type table';
 comment on column person.gender_id is 'Foreign key to gender table';
 comment on column person.title_id is 'Foreign key to title table';
+comment on column person.country_id is 'Foreign key to country table';
 comment on column person.created_by is 'User who created the record';
 comment on column person.created_at is 'Record creation timestamp';
 comment on column person.updated_by is 'User who last updated the record';
