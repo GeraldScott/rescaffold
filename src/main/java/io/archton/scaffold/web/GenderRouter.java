@@ -23,7 +23,7 @@ public class GenderRouter {
     GenderService genderService;
 
 
-    @CheckedTemplate
+    @CheckedTemplate(basePath = "gender")
     public static class Templates {
         public static native TemplateInstance gender(List<Gender> genders, Gender gender, String errorMessage);
     }
