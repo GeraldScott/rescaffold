@@ -31,7 +31,7 @@ public class Person {
     public String email;
 
     @Column(name = "id_number")
-    @Size(max = 50, message = "Person ID number must not exceed 50 characters")
+    @Size(max = 13, message = "Person ID number must not exceed 13 characters")
     public String idNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)

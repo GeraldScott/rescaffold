@@ -5,6 +5,7 @@ import io.archton.scaffold.repository.PersonRepository;
 import io.archton.scaffold.exception.DuplicateEntityException;
 import io.archton.scaffold.exception.EntityNotFoundException;
 import io.archton.scaffold.exception.ValidationException;
+import io.archton.scaffold.util.RSA_IDNumber;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -111,6 +112,14 @@ public class PersonService {
         // Check country + id_number constraint after updates
         checkDuplicateCountryIdNumberForUpdate(existing.country, existing.idNumber, id);
 
+        // Validate RSA ID number format when idType is "ID"
+        if (existing.idType != null && "ID".equals(existing.idType.code) && 
+            existing.idNumber != null && !existing.idNumber.trim().isEmpty()) {
+            if (!isValidRsaIdNumber(existing.idNumber)) {
+                throw new ValidationException("idNumber", "Invalid RSA ID number format or checksum");
+            }
+        }
+
         existing.updatedAt = LocalDateTime.now();
         personRepository.persist(existing);
         return existing;
@@ -141,13 +150,21 @@ public class PersonService {
         if (person.email != null && person.email.length() > 255) {
             throw new ValidationException("email", "Email must not exceed 255 characters");
         }
-        if (person.idNumber != null && person.idNumber.length() > 50) {
-            throw new ValidationException("idNumber", "ID number must not exceed 50 characters");
+        if (person.idNumber != null && person.idNumber.length() > 13) {
+            throw new ValidationException("idNumber", "ID number must not exceed 13 characters");
         }
 
         if (person.email != null && !person.email.trim().isEmpty()) {
             if (!isValidEmail(person.email)) {
                 throw new ValidationException("email", "Invalid email format");
+            }
+        }
+
+        // Validate RSA ID number format when idType is "ID"
+        if (person.idType != null && "ID".equals(person.idType.code) && 
+            person.idNumber != null && !person.idNumber.trim().isEmpty()) {
+            if (!isValidRsaIdNumber(person.idNumber)) {
+                throw new ValidationException("idNumber", "Invalid RSA ID number format or checksum");
             }
         }
     }
@@ -185,7 +202,7 @@ public class PersonService {
 
     private void normalizeIdNumber(Person person) {
         if (person.idNumber != null) {
-            person.idNumber = person.idNumber.trim();
+            person.idNumber = person.idNumber.replaceAll("\\s+", "");
             if (person.idNumber.isEmpty()) {
                 person.idNumber = null;
             }
@@ -232,5 +249,9 @@ public class PersonService {
     private boolean isValidEmail(String email) {
         // Basic email validation - more comprehensive validation is handled by Jakarta Bean Validation
         return email != null && email.contains("@") && email.contains(".");
+    }
+
+    private boolean isValidRsaIdNumber(String idNumber) {
+        return RSA_IDNumber.isValidIdNumber(idNumber);
     }
 }

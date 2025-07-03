@@ -3,7 +3,7 @@ create table person (
     first_name varchar,
     last_name varchar not null,
     email varchar unique,
-    id_number varchar,
+    id_number varchar(13),
     id_type_id bigint,
     gender_id bigint,
     title_id bigint,

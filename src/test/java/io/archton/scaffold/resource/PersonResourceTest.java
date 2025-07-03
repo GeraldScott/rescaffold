@@ -506,13 +506,13 @@ class PersonResourceTest {
 
     @Test
     @TestTransaction
-    @DisplayName("POST /api/persons - Should reject idNumber exceeding 50 characters")
+    @DisplayName("POST /api/persons - Should reject idNumber exceeding 13 characters")
     void testCreatePerson_IdNumberTooLong() {
         Person person = new Person();
         person.firstName = "John";
         person.lastName = "Doe";
         person.email = "john.longid@example.com";
-        person.idNumber = "1".repeat(51); // 51 characters
+        person.idNumber = "1".repeat(14); // 14 characters
 
         given()
                 .spec(requestSpec)
@@ -815,5 +815,125 @@ class PersonResourceTest {
                 .post()
                 .then()
                 .statusCode(201); // Should succeed because null country
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject invalid RSA ID number when id_type is ID")
+    void testCreatePerson_InvalidRsaIdNumber() {
+        // Setup ID type
+        IdType idType = idTypeRepository.findByCode("ID");
+        if (idType == null) {
+            idType = new IdType("ID", "Identity Document");
+            idTypeRepository.persist(idType);
+        }
+
+        Person person = new Person();
+        person.firstName = "John";
+        person.lastName = "Doe";
+        person.email = "john.invalid.rsa@example.com";
+        person.idNumber = "1234567890123"; // Invalid RSA ID number
+        person.idType = idType;
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should accept valid RSA ID number when id_type is ID")
+    void testCreatePerson_ValidRsaIdNumber() {
+        // Setup ID type
+        IdType idType = idTypeRepository.findByCode("ID");
+        if (idType == null) {
+            idType = new IdType("ID", "Identity Document");
+            idTypeRepository.persist(idType);
+        }
+
+        Person person = new Person();
+        person.firstName = "Jane";
+        person.lastName = "Smith";
+        person.email = "jane.valid.rsa@example.com";
+        person.idNumber = "8001015009087"; // Valid RSA ID number
+        person.idType = idType;
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .body("idNumber", equalTo("8001015009087"));
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should accept any id_number when id_type is not ID")
+    void testCreatePerson_NonIdTypeAnyNumber() {
+        // Setup non-ID type
+        IdType idType = idTypeRepository.findByCode("PASSPORT");
+        if (idType == null) {
+            idType = new IdType("PASSPORT", "Passport");
+            idTypeRepository.persist(idType);
+        }
+
+        Person person = new Person();
+        person.firstName = "Bob";
+        person.lastName = "Wilson";
+        person.email = "bob.passport@example.com";
+        person.idNumber = "ABC123456"; // Any format allowed for non-ID types
+        person.idType = idType;
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .body("idNumber", equalTo("ABC123456"));
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("PUT /api/persons/{id} - Should reject invalid RSA ID number on update")
+    void testUpdatePerson_InvalidRsaIdNumber() {
+        // Create person first
+        Person person = createValidPerson("Alice", "Update", "alice.update.rsa@example.com");
+        Integer createdId = given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        // Setup ID type for update
+        IdType idType = idTypeRepository.findByCode("ID");
+        if (idType == null) {
+            idType = new IdType("ID", "Identity Document");
+            idTypeRepository.persist(idType);
+        }
+
+        // Update with invalid RSA ID
+        Person updates = new Person();
+        updates.idNumber = "9999999999999"; // Invalid RSA ID number
+        updates.idType = idType;
+
+        given()
+                .spec(requestSpec)
+                .body(updates)
+                .when()
+                .put("/{id}", createdId)
+                .then()
+                .statusCode(400);
     }
 }
