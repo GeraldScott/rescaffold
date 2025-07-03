@@ -31,4 +31,41 @@ class GenderCrudTest extends BaseSelenideTest {
         // Verify table headers exist and contain expected text
         genderPage.getTableHeaders().shouldHave(texts("CODE", "DESCRIPTION", "CREATED BY", "CREATED AT", "UPDATED BY", "UPDATED AT", "ACTIONS"));
     }
+    
+    @Test
+    @DisplayName("Should display Create button")
+    void shouldDisplayCreateButton() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify Create button exists and is visible
+        genderPage.getCreateButton().should(exist);
+        genderPage.getCreateButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should display View, Edit, and Delete buttons for each table row")
+    void shouldDisplayActionButtonsForEachTableRow() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify table has at least one row (assuming there's test data)
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(0));
+        
+        // For each row, verify View, Edit, and Delete buttons exist
+        int rowCount = genderPage.getTableRows().size();
+        for (int i = 0; i < rowCount; i++) {
+            // Verify View button exists and is visible
+            genderPage.getViewButton(i).should(exist);
+            genderPage.getViewButton(i).should(be(visible));
+            
+            // Verify Edit button exists and is visible
+            genderPage.getEditButton(i).should(exist);
+            genderPage.getEditButton(i).should(be(visible));
+            
+            // Verify Delete button exists and is visible
+            genderPage.getDeleteButton(i).should(exist);
+            genderPage.getDeleteButton(i).should(be(visible));
+        }
+    }
 }
