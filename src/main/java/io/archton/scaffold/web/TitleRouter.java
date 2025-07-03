@@ -25,18 +25,7 @@ public class TitleRouter {
 
     @CheckedTemplate(basePath = "title")
     public static class Templates {
-        public static native TemplateInstance titles(List<Title> titles);
-
-        public static native TemplateInstance table(List<Title> titles);
-
-        public static native TemplateInstance view(Title title);
-
-        public static native TemplateInstance create(Title title, String errorMessage);
-
-        public static native TemplateInstance edit(Title title, String errorMessage);
-
-        public static native TemplateInstance delete(Title title);
-
+        public static native TemplateInstance title(List<Title> titles, Title title, String errorMessage);
     }
 
     @GET
@@ -44,7 +33,7 @@ public class TitleRouter {
     public String get() {
         log.debug("GET /titles-ui");
         List<Title> titleList = titleService.listSorted();
-        return Templates.titles(titleList).render();
+        return Templates.title(titleList, null, null).render();
     }
 
     @GET
@@ -53,7 +42,7 @@ public class TitleRouter {
     public Response getTitleTable() {
         log.debug("GET /titles-ui/table");
         List<Title> titleList = titleService.listSorted();
-        String html = Templates.table(titleList).render();
+        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
         return Response.ok(html).build();
     }
 
@@ -69,7 +58,7 @@ public class TitleRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.view(titleOpt.get()).render();
+            String html = Templates.title(null, titleOpt.get(), null).getFragment("view").data("title", titleOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving title for view", e);
@@ -83,7 +72,7 @@ public class TitleRouter {
     public Response getTitleCreate() {
         log.debug("GET /titles-ui/create");
 
-        String html = Templates.create(null, null).render();
+        String html = Templates.title(null, null, null).getFragment("create").data("title", new Title()).data("errorMessage", null).render();
         return Response.ok(html).build();
     }
 
@@ -102,7 +91,7 @@ public class TitleRouter {
             titleService.createTitle(title);
 
             List<Title> titleList = titleService.listSorted();
-            String html = Templates.table(titleList).render();
+            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error creating title", e);
@@ -112,7 +101,7 @@ public class TitleRouter {
             formData.code = code;
             formData.description = description;
             
-            String html = Templates.create(formData, errorMessage).render();
+            String html = Templates.title(null, formData, errorMessage).getFragment("create").data("title", formData).data("errorMessage", errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }
@@ -129,7 +118,7 @@ public class TitleRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.edit(titleOpt.get(), null).render();
+            String html = Templates.title(null, titleOpt.get(), null).getFragment("edit").data("title", titleOpt.get()).data("errorMessage", null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving title for edit", e);
@@ -154,7 +143,7 @@ public class TitleRouter {
             titleService.updateTitle(id, updateTitle);
 
             List<Title> titleList = titleService.listSorted();
-            String html = Templates.table(titleList).render();
+            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error updating title", e);
@@ -166,7 +155,7 @@ public class TitleRouter {
             formData.description = description;
             
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.edit(formData, errorMessage).render();
+            String html = Templates.title(null, formData, errorMessage).getFragment("edit").data("title", formData).data("errorMessage", errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }
@@ -183,7 +172,7 @@ public class TitleRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.delete(titleOpt.get()).render();
+            String html = Templates.title(null, titleOpt.get(), null).getFragment("delete").data("title", titleOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving title for delete", e);
@@ -201,7 +190,7 @@ public class TitleRouter {
             titleService.deleteTitle(id);
 
             List<Title> titleList = titleService.listSorted();
-            String html = Templates.table(titleList).render();
+            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error deleting title", e);
