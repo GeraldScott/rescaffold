@@ -153,4 +153,80 @@ class PersonCrudTest extends BaseSelenideTest {
         // This verifies the delete button triggered the expected action (showing confirmation)
         $("body").should(exist);
     }
+    
+    @Test
+    @DisplayName("Should reject invalid RSA ID number when creating person with ID type")
+    void shouldRejectInvalidRsaIdNumberOnCreate() {
+        personPage.openPage();
+        personPage.clickCreate();
+        
+        // Fill form with invalid RSA ID
+        personPage.getFirstNameInput().setValue("John");
+        personPage.getLastNameInput().setValue("Doe");
+        personPage.getEmailInput().setValue("john.invalid.rsa@example.com");
+        
+        // Select ID type from dropdown
+        personPage.getIdTypeSelect().selectOption("National identity document");
+        personPage.getIdNumberInput().setValue("1234567890123"); // Invalid RSA ID
+        
+        personPage.clickSave();
+        
+        // Should show validation error
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        $(".alert-danger").should(have(text("Invalid RSA ID number format or checksum")));
+    }
+    
+    @Test
+    @DisplayName("Should accept valid RSA ID number when creating person with ID type")
+    void shouldAcceptValidRsaIdNumberOnCreate() {
+        personPage.openPage();
+        personPage.clickCreate();
+        
+        // Fill form with valid RSA ID
+        personPage.getFirstNameInput().setValue("Jane");
+        personPage.getLastNameInput().setValue("Smith");
+        personPage.getEmailInput().setValue("jane.valid.rsa@example.com");
+        
+        // Select ID type from dropdown
+        personPage.getIdTypeSelect().selectOption("National identity document");
+        personPage.getIdNumberInput().setValue("8001015009087"); // Valid RSA ID
+        
+        personPage.clickSave();
+        
+        // Should successfully create and redirect to list
+        personPage.getPersonTable().should(appear, Duration.ofSeconds(3));
+        
+        // Verify new person appears in table
+        personPage.getPersonTable()
+                .shouldHave(text("Jane"))
+                .shouldHave(text("Smith"))
+                .shouldHave(text("8001015009087"));
+    }
+    
+    @Test
+    @DisplayName("Should accept any ID number format for non-ID types")
+    void shouldAcceptAnyIdNumberForNonIdTypes() {
+        personPage.openPage();
+        personPage.clickCreate();
+        
+        // Fill form with passport type
+        personPage.getFirstNameInput().setValue("Bob");
+        personPage.getLastNameInput().setValue("Wilson");
+        personPage.getEmailInput().setValue("bob.passport@example.com");
+        
+        // Select PASSPORT type from dropdown (assuming it exists)
+        personPage.getIdTypeSelect().selectOption("Passport");
+        personPage.getIdNumberInput().setValue("ABC123456"); // Any format allowed
+        
+        personPage.clickSave();
+        
+        // Should successfully create
+        personPage.getPersonTable().should(appear, Duration.ofSeconds(3));
+        
+        // Verify new person appears in table
+        personPage.getPersonTable()
+                .shouldHave(text("Bob"))
+                .shouldHave(text("Wilson"))
+                .shouldHave(text("ABC123456"));
+    }
 }

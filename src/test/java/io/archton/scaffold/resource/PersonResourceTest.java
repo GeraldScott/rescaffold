@@ -9,6 +9,7 @@ import io.archton.scaffold.repository.GenderRepository;
 import io.archton.scaffold.repository.TitleRepository;
 import io.archton.scaffold.repository.IdTypeRepository;
 import io.archton.scaffold.repository.CountryRepository;
+import io.archton.scaffold.repository.PersonRepository;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.builder.RequestSpecBuilder;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -39,6 +42,12 @@ class PersonResourceTest {
 
     @Inject
     CountryRepository countryRepository;
+
+    @Inject
+    EntityManager entityManager;
+
+    @Inject
+    PersonRepository personRepository;
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -73,18 +82,21 @@ class PersonResourceTest {
         if (gender == null) {
             gender = new Gender("F", "Female");
             genderRepository.persist(gender);
+            entityManager.flush();
         }
 
         Title title = titleRepository.findByCode("MS");
         if (title == null) {
             title = new Title("MS", "Ms.");
             titleRepository.persist(title);
+            entityManager.flush();
         }
 
         IdType idType = idTypeRepository.findByCode("ID");
         if (idType == null) {
             idType = new IdType("ID", "Identity Document");
             idTypeRepository.persist(idType);
+            entityManager.flush();
         }
 
         Person person = new Person();
@@ -96,6 +108,36 @@ class PersonResourceTest {
         person.title = title;
         person.idType = idType;
         return person;
+    }
+    
+    @Transactional
+    void setupIdType(String code, String description) {
+        IdType existing = idTypeRepository.findByCode(code);
+        if (existing == null) {
+            IdType idType = new IdType(code, description);
+            idTypeRepository.persist(idType);
+        }
+    }
+    
+    @Transactional
+    void cleanupTestData(Long personId, Long idTypeId) {
+        try {
+            if (personId != null) {
+                Person person = personRepository.findById(personId);
+                if (person != null) {
+                    personRepository.delete(person);
+                }
+            }
+            if (idTypeId != null) {
+                IdType idType = idTypeRepository.findById(idTypeId);
+                if (idType != null && ("ID".equals(idType.code) || "PASS".equals(idType.code))) {
+                    // Only delete if it's one of our test IdTypes
+                    idTypeRepository.delete(idType);
+                }
+            }
+        } catch (Exception e) {
+            // Ignore cleanup failures in tests
+        }
     }
 
     private Person createInvalidPersonWithBlankLastName() {
@@ -684,7 +726,7 @@ class PersonResourceTest {
                 .extract()
                 .path("id");
 
-        String sharedIdNumber = "SAME" + timestamp;
+        String sharedIdNumber = "SAME" + (timestamp % 100000000L);
         
         // Create first person in first country
         Person person1 = new Person();
@@ -826,6 +868,7 @@ class PersonResourceTest {
         if (idType == null) {
             idType = new IdType("ID", "Identity Document");
             idTypeRepository.persist(idType);
+            entityManager.flush();
         }
 
         Person person = new Person();
@@ -845,59 +888,85 @@ class PersonResourceTest {
     }
 
     @Test
-    @TestTransaction
     @DisplayName("POST /api/persons - Should accept valid RSA ID number when id_type is ID")
     void testCreatePerson_ValidRsaIdNumber() {
-        // Setup ID type
-        IdType idType = idTypeRepository.findByCode("ID");
-        if (idType == null) {
-            idType = new IdType("ID", "Identity Document");
-            idTypeRepository.persist(idType);
+        // Setup and cleanup will be manual since we removed @TestTransaction
+        Long createdPersonId = null;
+        Long createdIdTypeId = null;
+        
+        try {
+            // Setup ID type in a transaction that commits
+            setupIdType("ID", "Identity Document");
+            
+            Person person = new Person();
+            person.firstName = "Jane";
+            person.lastName = "Smith";
+            person.email = "jane.valid.rsa@example.com";
+            person.idNumber = "8001015009087"; // Valid RSA ID number
+            
+            // Find the IdType after it's been committed
+            IdType idType = idTypeRepository.findByCode("ID");
+            person.idType = idType;
+            createdIdTypeId = idType.id;
+
+            Integer responseId = given()
+                    .spec(requestSpec)
+                    .body(person)
+                    .when()
+                    .post()
+                    .then()
+                    .statusCode(201)
+                    .body("idNumber", equalTo("8001015009087"))
+                    .extract()
+                    .path("id");
+            
+            createdPersonId = responseId.longValue();
+            
+        } finally {
+            // Cleanup
+            cleanupTestData(createdPersonId, createdIdTypeId);
         }
-
-        Person person = new Person();
-        person.firstName = "Jane";
-        person.lastName = "Smith";
-        person.email = "jane.valid.rsa@example.com";
-        person.idNumber = "8001015009087"; // Valid RSA ID number
-        person.idType = idType;
-
-        given()
-                .spec(requestSpec)
-                .body(person)
-                .when()
-                .post()
-                .then()
-                .statusCode(201)
-                .body("idNumber", equalTo("8001015009087"));
     }
 
     @Test
-    @TestTransaction
     @DisplayName("POST /api/persons - Should accept any id_number when id_type is not ID")
     void testCreatePerson_NonIdTypeAnyNumber() {
-        // Setup non-ID type
-        IdType idType = idTypeRepository.findByCode("PASSPORT");
-        if (idType == null) {
-            idType = new IdType("PASSPORT", "Passport");
-            idTypeRepository.persist(idType);
+        // Setup and cleanup will be manual since we removed @TestTransaction
+        Long createdPersonId = null;
+        Long createdIdTypeId = null;
+        
+        try {
+            // Setup ID type in a transaction that commits
+            setupIdType("PASS", "Passport");
+            
+            Person person = new Person();
+            person.firstName = "Bob";
+            person.lastName = "Wilson";
+            person.email = "bob.passport@example.com";
+            person.idNumber = "ABC123456"; // Any format allowed for non-ID types
+            
+            // Find the IdType after it's been committed
+            IdType idType = idTypeRepository.findByCode("PASS");
+            person.idType = idType;
+            createdIdTypeId = idType.id;
+
+            Integer responseId = given()
+                    .spec(requestSpec)
+                    .body(person)
+                    .when()
+                    .post()
+                    .then()
+                    .statusCode(201)
+                    .body("idNumber", equalTo("ABC123456"))
+                    .extract()
+                    .path("id");
+            
+            createdPersonId = responseId.longValue();
+            
+        } finally {
+            // Cleanup
+            cleanupTestData(createdPersonId, createdIdTypeId);
         }
-
-        Person person = new Person();
-        person.firstName = "Bob";
-        person.lastName = "Wilson";
-        person.email = "bob.passport@example.com";
-        person.idNumber = "ABC123456"; // Any format allowed for non-ID types
-        person.idType = idType;
-
-        given()
-                .spec(requestSpec)
-                .body(person)
-                .when()
-                .post()
-                .then()
-                .statusCode(201)
-                .body("idNumber", equalTo("ABC123456"));
     }
 
     @Test
@@ -921,6 +990,7 @@ class PersonResourceTest {
         if (idType == null) {
             idType = new IdType("ID", "Identity Document");
             idTypeRepository.persist(idType);
+            entityManager.flush();
         }
 
         // Update with invalid RSA ID

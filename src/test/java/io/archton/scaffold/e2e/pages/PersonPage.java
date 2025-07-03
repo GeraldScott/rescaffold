@@ -23,10 +23,10 @@ public class PersonPage {
     private final SelenideElement lastNameInput = $("#lastName");
     private final SelenideElement emailInput = $("#email");
     private final SelenideElement idNumberInput = $("#idNumber");
-    private final SelenideElement idTypeSelect = $("#idType");
-    private final SelenideElement genderSelect = $("#gender");
-    private final SelenideElement titleSelect = $("#title");
-    private final SelenideElement countrySelect = $("#country");
+    private final SelenideElement idTypeSelect = $("#idTypeId");
+    private final SelenideElement genderSelect = $("#genderId");
+    private final SelenideElement titleSelect = $("#titleId");
+    private final SelenideElement countrySelect = $("#countryId");
     private final SelenideElement saveButton = $("button[type='submit']");
     private final SelenideElement cancelButton = $("button.btn-outline-secondary[hx-get='/persons-ui/table']");
     private final SelenideElement errorMessage = $(".alert-danger");

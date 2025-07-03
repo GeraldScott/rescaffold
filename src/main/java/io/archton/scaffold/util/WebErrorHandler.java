@@ -95,6 +95,15 @@ public class WebErrorHandler {
             }
         }
         
+        // Country-specific messages
+        if ("Country".equals(entityType)) {
+            if ("code".equals(fieldName)) {
+                return "A country with this code already exists. Please use a different code.";
+            } else if ("name".equals(fieldName)) {
+                return "A country with this name already exists. Please use a different name.";
+            }
+        }
+        
         // Generic fallback
         return String.format("A %s with %s '%s' already exists. Please use a different value.",
             entityType.toLowerCase(), fieldName, dup.getFieldValue());
