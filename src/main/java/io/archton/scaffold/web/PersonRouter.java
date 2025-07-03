@@ -42,17 +42,7 @@ public class PersonRouter {
 
     @CheckedTemplate(basePath = "person")
     public static class Templates {
-        public static native TemplateInstance persons(List<Person> persons, List<Title> titles, List<Gender> genders, List<IdType> idTypes);
-
-        public static native TemplateInstance table(List<Person> persons);
-
-        public static native TemplateInstance view(Person person);
-
-        public static native TemplateInstance create(List<Title> titles, List<Gender> genders, List<IdType> idTypes, String errorMessage, Person personData);
-
-        public static native TemplateInstance edit(Person person, List<Title> titles, List<Gender> genders, List<IdType> idTypes, String errorMessage);
-
-        public static native TemplateInstance delete(Person person);
+        public static native TemplateInstance person(List<Person> persons, Person person, String errorMessage, List<Title> titles, List<Gender> genders, List<IdType> idTypes);
     }
 
     @GET
@@ -63,7 +53,7 @@ public class PersonRouter {
         List<Title> titleList = titleService.listSorted();
         List<Gender> genderList = genderService.listSorted();
         List<IdType> idTypeList = idTypeService.listSorted();
-        return Templates.persons(personList, titleList, genderList, idTypeList).render();
+        return Templates.person(personList, null, null, titleList, genderList, idTypeList).render();
     }
 
     @GET
@@ -72,7 +62,7 @@ public class PersonRouter {
     public Response getPersonTable() {
         log.debug("GET /persons-ui/table");
         List<Person> personList = personService.listSorted();
-        String html = Templates.table(personList).render();
+        String html = Templates.person(personList, null, null, null, null, null).getFragment("table").data("persons", personList).render();
         return Response.ok(html).build();
     }
 
@@ -88,7 +78,7 @@ public class PersonRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.view(personOpt.get()).render();
+            String html = Templates.person(null, personOpt.get(), null, null, null, null).getFragment("view").data("person", personOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving person for view", e);
@@ -105,7 +95,7 @@ public class PersonRouter {
         List<Title> titleList = titleService.listSorted();
         List<Gender> genderList = genderService.listSorted();
         List<IdType> idTypeList = idTypeService.listSorted();
-        String html = Templates.create(titleList, genderList, idTypeList, null, null).render();
+        String html = Templates.person(null, null, null, titleList, genderList, idTypeList).getFragment("create").data("person", new Person()).data("errorMessage", null).data("titles", titleList).data("genders", genderList).data("idTypes", idTypeList).render();
         return Response.ok(html).build();
     }
 
@@ -144,7 +134,7 @@ public class PersonRouter {
 
             // Return the updated table directly instead of redirecting
             List<Person> personList = personService.listSorted();
-            String html = Templates.table(personList).render();
+            String html = Templates.person(personList, null, null, null, null, null).getFragment("table").data("persons", personList).render();
             return Response.ok(html).build();
 
         } catch (Exception e) {
@@ -185,7 +175,7 @@ public class PersonRouter {
             }
 
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.create(titleList, genderList, idTypeList, errorMessage, enteredData).render();
+            String html = Templates.person(null, enteredData, errorMessage, titleList, genderList, idTypeList).getFragment("create").data("person", enteredData).data("errorMessage", errorMessage).data("titles", titleList).data("genders", genderList).data("idTypes", idTypeList).render();
 
             return WebErrorHandler.createErrorResponse(html, e);
         }
@@ -206,7 +196,7 @@ public class PersonRouter {
             List<Title> titleList = titleService.listSorted();
             List<Gender> genderList = genderService.listSorted();
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.edit(personOpt.get(), titleList, genderList, idTypeList, null).render();
+            String html = Templates.person(null, personOpt.get(), null, titleList, genderList, idTypeList).getFragment("edit").data("person", personOpt.get()).data("errorMessage", null).data("titles", titleList).data("genders", genderList).data("idTypes", idTypeList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving person for edit", e);
@@ -251,7 +241,7 @@ public class PersonRouter {
 
             // Return the updated table directly instead of redirecting
             List<Person> personList = personService.listSorted();
-            String html = Templates.table(personList).render();
+            String html = Templates.person(personList, null, null, null, null, null).getFragment("table").data("persons", personList).render();
             return Response.ok(html).build();
 
         } catch (Exception e) {
@@ -306,7 +296,7 @@ public class PersonRouter {
             List<IdType> idTypeList = idTypeService.listSorted();
 
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.edit(person, titleList, genderList, idTypeList, errorMessage).render();
+            String html = Templates.person(null, person, errorMessage, titleList, genderList, idTypeList).getFragment("edit").data("person", person).data("errorMessage", errorMessage).data("titles", titleList).data("genders", genderList).data("idTypes", idTypeList).render();
 
             return WebErrorHandler.createErrorResponse(html, e);
         }
@@ -324,7 +314,7 @@ public class PersonRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.delete(personOpt.get()).render();
+            String html = Templates.person(null, personOpt.get(), null, null, null, null).getFragment("delete").data("person", personOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving person for delete", e);
@@ -345,7 +335,7 @@ public class PersonRouter {
 
             // Return the updated table directly instead of redirecting
             List<Person> personList = personService.listSorted();
-            String html = Templates.table(personList).render();
+            String html = Templates.person(personList, null, null, null, null, null).getFragment("table").data("persons", personList).render();
             return Response.ok(html).build();
 
         } catch (EntityNotFoundException e) {
