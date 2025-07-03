@@ -58,7 +58,7 @@ io.archton.scaffold/
 
 ## Domain Model
 
-The application implements a comprehensive domain model with 7 core entities that support user management, person records, and lookup data. All entities follow consistent patterns for audit trails, validation, and relationships.
+The application implements a comprehensive domain model with 5 core entities that support user management, person records, and lookup data. All entities follow consistent patterns for audit trails, validation, and relationships.
 
 ### Entity Overview
 
@@ -70,8 +70,6 @@ The application implements a comprehensive domain model with 7 core entities tha
 **Lookup Entities:**
 - **Gender**: Single character gender codes (M/F/X)
 - **Title**: Personal titles and honorifics (MR, MS, DR, etc.)
-- **IdType**: Identification document types (ID, PASSPORT, etc.)
-- **Country**: ISO 3166-1 alpha-2 country codes and metadata
 
 For detailed entity documentation including field specifications, validation rules, relationships, and database schema details, see [docs/DOMAIN_ENTITIES.md](DOMAIN_ENTITIES.md).
 

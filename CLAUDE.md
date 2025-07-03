@@ -83,9 +83,7 @@ For detailed architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITE
 - **Core Domain Entities**: Complete CRUD operations with REST API and HTML UI
   - **Gender Entity**: Single character code (M/F/X) with description
   - **Title Entity**: Personal titles (MR, MS, DR, etc.) with validation
-  - **IdType Entity**: Identification types (ID, PASSPORT, etc.) with validation
-  - **Country Entity**: ISO 2-letter country codes with name and metadata
-  - **Person Entity**: Complete person management with relationships to all lookup entities
+  - **Person Entity**: Complete person management with relationships to lookup entities
 - **User Management System**: Complete authentication and authorization infrastructure
   - **User Entity**: User accounts with username/password and person association
   - **Role Entity**: Role-based access control with uppercase naming convention

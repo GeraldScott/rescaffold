@@ -4,7 +4,7 @@ This document provides comprehensive documentation for all domain entities in th
 
 ## Overview
 
-The application implements a comprehensive domain model with 7 core entities that support user management, person records, and lookup data. All entities follow consistent patterns for audit trails, validation, and relationships.
+The application implements a comprehensive domain model with 5 core entities that support user management, person records, and lookup data. All entities follow consistent patterns for audit trails, validation, and relationships.
 
 ## Entity Categories
 
@@ -16,8 +16,6 @@ The application implements a comprehensive domain model with 7 core entities tha
 ### Lookup Entities
 - **Gender**: Single character gender codes
 - **Title**: Personal titles and honorifics
-- **IdType**: Identification document types
-- **Country**: ISO country codes and metadata
 
 ## Entity Relationship Diagram
 
@@ -43,38 +41,13 @@ erDiagram
         timestamp updated_at "NULL"
     }
     
-    IdType {
-        bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
-        varchar(5) code UK "NOT NULL"
-        text description UK "NOT NULL"
-        varchar created_by "NOT NULL DEFAULT 'system'"
-        timestamp created_at "NOT NULL DEFAULT now()"
-        varchar updated_by "NULL"
-        timestamp updated_at "NULL"
-    }
-    
-    Country {
-        bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
-        varchar(2) code UK "NOT NULL"
-        text name UK "NOT NULL"
-        text year "NULL"
-        text cctld "NULL"
-        varchar created_by "NOT NULL DEFAULT 'system'"
-        timestamp created_at "NOT NULL DEFAULT now()"
-        varchar updated_by "NULL"
-        timestamp updated_at "NULL"
-    }
-    
     Person {
         bigint id PK "UNIQUE GENERATED ALWAYS AS IDENTITY"
         varchar first_name "NULL"
         varchar last_name "NOT NULL"
         varchar email UK "NULL"
-        varchar id_number "NULL"
-        bigint id_type_id FK "NULL"
         bigint gender_id FK "NULL"
         bigint title_id FK "NULL"
-        bigint country_id FK "NULL"
         varchar created_by "NOT NULL DEFAULT 'system'"
         timestamp created_at "NOT NULL DEFAULT now()"
         varchar updated_by "NULL"
@@ -114,8 +87,6 @@ erDiagram
     
     Gender ||--o{ Person : "fk_person_gender"
     Title ||--o{ Person : "fk_person_title"
-    IdType ||--o{ Person : "fk_person_id_type"
-    Country ||--o{ Person : "fk_person_country"
     Person ||--o| User : "becomes"
     User ||--o{ UserRole : "has"
     Role ||--o{ UserRole : "assigned to"
@@ -178,8 +149,6 @@ All entities implement consistent audit fields:
 Database schema managed through Flyway migrations in `src/main/resources/db/migration/`:
 - `V1.1__Create_gender_table.sql`
 - `V1.2__Create_title_table.sql`
-- `V1.3__Create_id_type_table.sql`
-- `V1.4__Create_country_table.sql`
 - `V1.5__Create_person_table.sql`
 - `V1.6__Create_user_login_table.sql`
 - `V1.7__Create_role_table.sql`
@@ -189,8 +158,6 @@ Database schema managed through Flyway migrations in `src/main/resources/db/migr
 Initial reference data populated during migration for:
 - Standard gender codes (M, F, X)
 - Common titles (MR, MS, MRS, DR, PROF)
-- Standard ID types (ID, PASS, DL)
-- ISO country codes and names
 
 ## API Integration
 
@@ -228,4 +195,4 @@ Each entity provides web interface via Qute templates:
 
 **Last Updated**: July 2025  
 **Schema Version**: V1.8  
-**Entity Count**: 7 core entities + 1 join table
+**Entity Count**: 5 core entities + 1 join table
