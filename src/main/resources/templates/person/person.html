@@ -125,6 +125,7 @@
                                    id="firstName"
                                    name="firstName"
                                    maxlength="100"
+                                   title="Person first name must not exceed 100 characters"
                                    placeholder="e.g. John"
                                    value="{#if person && person.firstName}{person.firstName}{/if}">
                         </div>
@@ -136,8 +137,10 @@
                                    class="form-control {#if errorMessage && (!person || !person.lastName || person.lastName.empty)}is-invalid{/if}"
                                    id="lastName"
                                    name="lastName"
+                                   minlength="1"
                                    maxlength="100"
                                    required
+                                   title="Person last name is required"
                                    placeholder="e.g. Doe"
                                    value="{#if person && person.lastName}{person.lastName}{/if}">
                             {#if errorMessage && (!person || !person.lastName || person.lastName.empty)}
@@ -156,6 +159,7 @@
                                    id="email"
                                    name="email"
                                    maxlength="255"
+                                   title="Person email must be valid"
                                    placeholder="e.g. john.doe@example.com"
                                    value="{#if person && person.email}{person.email}{/if}">
                             {#if errorMessage && (errorMessage.contains('email') || errorMessage.contains('Email'))}
@@ -199,6 +203,7 @@
                                    id="idNumber"
                                    name="idNumber"
                                    maxlength="50"
+                                   title="Person ID number must not exceed 50 characters"
                                    placeholder="e.g. 1234567890"
                                    value="{#if person && person.idNumber}{person.idNumber}{/if}">
                         </div>
@@ -266,6 +271,7 @@
                                    name="firstName"
                                    value="{#if person.firstName}{person.firstName}{/if}"
                                    maxlength="100"
+                                   title="Person first name must not exceed 100 characters"
                                    placeholder="e.g. John">
                         </div>
                         <div class="col-sm-2">
@@ -277,8 +283,10 @@
                                    id="lastName"
                                    name="lastName"
                                    value="{person.lastName}"
+                                   minlength="1"
                                    maxlength="100"
                                    required
+                                   title="Person last name is required"
                                    placeholder="e.g. Doe">
                             {#if errorMessage && (!person.lastName || person.lastName.empty)}
                             <div class="invalid-feedback">Last name is required</div>
@@ -297,6 +305,7 @@
                                    name="email"
                                    value="{#if person.email}{person.email}{/if}"
                                    maxlength="255"
+                                   title="Person email must be valid"
                                    placeholder="e.g. john.doe@example.com">
                             {#if errorMessage && (errorMessage.contains('email') || errorMessage.contains('Email'))}
                             <div class="invalid-feedback">{errorMessage}</div>
@@ -340,6 +349,7 @@
                                    name="idNumber"
                                    value="{#if person.idNumber}{person.idNumber}{/if}"
                                    maxlength="50"
+                                   title="Person ID number must not exceed 50 characters"
                                    placeholder="e.g. 1234567890">
                         </div>
                     </div>
