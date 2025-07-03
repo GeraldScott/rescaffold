@@ -2,6 +2,8 @@ create table country (
     id bigint unique generated always as identity,
     code varchar(2) not null unique,
     name text not null unique,
+    year text,
+    cctld text,
     created_by varchar not null default 'system',
     created_at timestamp not null default now(),
     updated_by varchar,
