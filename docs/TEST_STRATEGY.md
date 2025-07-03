@@ -1,4 +1,4 @@
-# Resource Test Strategy
+# TEST_STRATEGY
 
 This document outlines the comprehensive testing approach for REST API endpoints in the Quarkus application, using the `GenderResourceTest` as the reference implementation.
 

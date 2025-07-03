@@ -4,9 +4,11 @@ import io.archton.scaffold.domain.Person;
 import io.archton.scaffold.domain.Gender;
 import io.archton.scaffold.domain.Title;
 import io.archton.scaffold.domain.IdType;
+import io.archton.scaffold.domain.Country;
 import io.archton.scaffold.repository.GenderRepository;
 import io.archton.scaffold.repository.TitleRepository;
 import io.archton.scaffold.repository.IdTypeRepository;
+import io.archton.scaffold.repository.CountryRepository;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.builder.RequestSpecBuilder;
@@ -34,6 +36,9 @@ class PersonResourceTest {
 
     @Inject
     IdTypeRepository idTypeRepository;
+
+    @Inject
+    CountryRepository countryRepository;
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -405,5 +410,410 @@ class PersonResourceTest {
                 .post()
                 .then()
                 .statusCode(409); // Conflict due to unique constraint
+    }
+
+    // Additional validation tests for field constraints
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject null last name")
+    void testCreatePerson_NullLastName() {
+        Person person = new Person();
+        person.firstName = "John";
+        person.lastName = null;
+        person.email = "john.null@example.com";
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject empty last name")
+    void testCreatePerson_EmptyLastName() {
+        Person person = new Person();
+        person.firstName = "John";
+        person.lastName = "";
+        person.email = "john.empty@example.com";
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject first name exceeding 100 characters")
+    void testCreatePerson_FirstNameTooLong() {
+        Person person = new Person();
+        person.firstName = "A".repeat(101); // 101 characters
+        person.lastName = "Doe";
+        person.email = "john.longname@example.com";
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject last name exceeding 100 characters")
+    void testCreatePerson_LastNameTooLong() {
+        Person person = new Person();
+        person.firstName = "John";
+        person.lastName = "B".repeat(101); // 101 characters
+        person.email = "john.longlast@example.com";
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject email exceeding 255 characters")
+    void testCreatePerson_EmailTooLong() {
+        Person person = new Person();
+        person.firstName = "John";
+        person.lastName = "Doe";
+        person.email = "a".repeat(250) + "@example.com"; // 261 characters
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject idNumber exceeding 50 characters")
+    void testCreatePerson_IdNumberTooLong() {
+        Person person = new Person();
+        person.firstName = "John";
+        person.lastName = "Doe";
+        person.email = "john.longid@example.com";
+        person.idNumber = "1".repeat(51); // 51 characters
+
+        given()
+                .spec(requestSpec)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject invalid email formats")
+    void testCreatePerson_InvalidEmailFormats() {
+        String[] invalidEmails = {
+            "plainaddress",
+            "@missinglocal.com",
+            "missing@domain",
+            "missing.domain@.com",
+            "spaces @domain.com",
+            "domain@spaces .com"
+        };
+
+        for (String invalidEmail : invalidEmails) {
+            Person person = new Person();
+            person.firstName = "John";
+            person.lastName = "Doe";
+            person.email = invalidEmail;
+
+            given()
+                    .spec(requestSpec)
+                    .body(person)
+                    .when()
+                    .post()
+                    .then()
+                    .statusCode(400);
+        }
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should accept valid email formats")
+    void testCreatePerson_ValidEmailFormats() {
+        String[] validEmails = {
+            "test@example.com",
+            "user.name@example.com",
+            "user+tag@example.org",
+            "user_name@example-domain.co.uk"
+        };
+
+        for (int i = 0; i < validEmails.length; i++) {
+            Person person = new Person();
+            person.firstName = "John";
+            person.lastName = "Doe" + i; // Unique last name for each
+            person.email = validEmails[i];
+
+            given()
+                    .spec(requestSpec)
+                    .body(person)
+                    .when()
+                    .post()
+                    .then()
+                    .statusCode(201);
+        }
+    }
+
+    // Foreign key constraint validation tests
+    // Note: Foreign keys are validated by the database and would result in 500 errors
+    // The person creation with relations test already covers this functionality
+    // Additional FK validation is tested implicitly in the other constraint tests
+
+    // Unique constraint testing for (country_id, id_number)
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should reject duplicate (country_id, id_number) combination")
+    void testCreatePerson_DuplicateCountryIdNumber() {
+        // Create a country with unique data for this test
+        long timestamp = System.currentTimeMillis();
+        String uniqueCountryCode = "Z" + (char)('A' + (timestamp % 26)); // ZA, ZB, ZC, etc.
+        Country country = createValidCountry(uniqueCountryCode, "Duplicate Test Country " + timestamp);
+        Integer countryId = given()
+                .spec(new RequestSpecBuilder().setBasePath("/api/countries").setContentType(ContentType.JSON).build())
+                .body(country)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        String uniqueIdNumber = "UNIQUE" + System.currentTimeMillis() % 10000;
+        String uniqueEmailBase = "test.duplicate." + System.currentTimeMillis() % 10000;
+
+        // Create first person via API with specific country and id_number
+        Person person1 = new Person();
+        person1.firstName = "First";
+        person1.lastName = "DuplicateTest";
+        person1.email = uniqueEmailBase + ".first@example.com";
+        person1.idNumber = uniqueIdNumber;
+        // Set country via ID
+        Country countryRef = new Country();
+        countryRef.id = countryId.longValue();
+        person1.country = countryRef;
+
+        given()
+                .spec(requestSpec)
+                .body(person1)
+                .when()
+                .post()
+                .then()
+                .statusCode(201);
+
+        // Try to create second person with same country and id_number
+        Person person2 = new Person();
+        person2.firstName = "Second";
+        person2.lastName = "DuplicateTest";
+        person2.email = uniqueEmailBase + ".second@example.com";
+        person2.idNumber = uniqueIdNumber; // Same as person1
+        person2.country = countryRef; // Same country
+
+        given()
+                .spec(requestSpec)
+                .body(person2)
+                .when()
+                .post()
+                .then()
+                .statusCode(409); // Conflict due to unique constraint on (country_id, id_number)
+    }
+
+    // Helper method for creating a valid country
+    private Country createValidCountry(String code, String name) {
+        Country country = new Country();
+        country.code = code;
+        country.name = name;
+        return country;
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should allow same id_number in different countries")
+    void testCreatePerson_SameIdNumberDifferentCountries() {
+        // Create countries via API with unique data
+        RequestSpecification countrySpec = new RequestSpecBuilder().setBasePath("/api/countries").setContentType(ContentType.JSON).build();
+        long timestamp = System.currentTimeMillis();
+        
+        String code1 = "Y" + (char)('A' + (timestamp % 26));
+        String code2 = "X" + (char)('A' + ((timestamp + 1) % 26));
+        
+        Country country1 = createValidCountry(code1, "Mexico Test " + timestamp + "A");
+        Integer countryId1 = given()
+                .spec(countrySpec)
+                .body(country1)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        Country country2 = createValidCountry(code2, "Brazil Test " + timestamp + "B");
+        Integer countryId2 = given()
+                .spec(countrySpec)
+                .body(country2)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        String sharedIdNumber = "SAME" + timestamp;
+        
+        // Create first person in first country
+        Person person1 = new Person();
+        person1.firstName = "First";
+        person1.lastName = "PersonMX" + timestamp;
+        person1.email = "first.personmx." + timestamp + "@example.com";
+        person1.idNumber = sharedIdNumber;
+        Country countryRef1 = new Country();
+        countryRef1.id = countryId1.longValue();
+        person1.country = countryRef1;
+
+        given()
+                .spec(requestSpec)
+                .body(person1)
+                .when()
+                .post()
+                .then()
+                .statusCode(201);
+
+        // Create second person in second country with same id_number (should be allowed)
+        Person person2 = new Person();
+        person2.firstName = "Second";
+        person2.lastName = "PersonBR" + timestamp;
+        person2.email = "second.personbr." + timestamp + "@example.com";
+        person2.idNumber = sharedIdNumber; // Same id_number but different country
+        Country countryRef2 = new Country();
+        countryRef2.id = countryId2.longValue();
+        person2.country = countryRef2;
+
+        given()
+                .spec(requestSpec)
+                .body(person2)
+                .when()
+                .post()
+                .then()
+                .statusCode(201); // Should succeed because different countries
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should allow null id_number with same country")
+    void testCreatePerson_NullIdNumberSameCountry() {
+        // Create a country via API
+        RequestSpecification countrySpec = new RequestSpecBuilder().setBasePath("/api/countries").setContentType(ContentType.JSON).build();
+        long timestamp = System.currentTimeMillis();
+        String countryCode = "W" + (char)('A' + (timestamp % 26));
+        Country country = createValidCountry(countryCode, "India Test " + timestamp);
+        Integer countryId = given()
+                .spec(countrySpec)
+                .body(country)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        Country countryRef = new Country();
+        countryRef.id = countryId.longValue();
+
+        // Create first person with null id_number
+        Person person1 = new Person();
+        person1.firstName = "First";
+        person1.lastName = "NullId1" + timestamp;
+        person1.email = "first.nullid." + timestamp + "@example.com";
+        person1.country = countryRef;
+        person1.idNumber = null;
+
+        given()
+                .spec(requestSpec)
+                .body(person1)
+                .when()
+                .post()
+                .then()
+                .statusCode(201);
+
+        // Create second person with null id_number in same country (should be allowed)
+        Person person2 = new Person();
+        person2.firstName = "Second";
+        person2.lastName = "NullId2" + timestamp;
+        person2.email = "second.nullid." + timestamp + "@example.com";
+        person2.country = countryRef;
+        person2.idNumber = null;
+
+        given()
+                .spec(requestSpec)
+                .body(person2)
+                .when()
+                .post()
+                .then()
+                .statusCode(201); // Should succeed because null values don't violate unique constraint
+    }
+
+    @Test
+    @TestTransaction
+    @DisplayName("POST /api/persons - Should accept person with null country and any id_number")
+    void testCreatePerson_NullCountryAnyIdNumber() {
+        // Create persons with null country but same id_number (should be allowed)
+        String timestamp = String.valueOf(System.currentTimeMillis() % 1000);
+        String sharedNumber = "ANY" + timestamp;
+        
+        Person person1 = new Person();
+        person1.firstName = "First";
+        person1.lastName = "NoCountry1" + timestamp;
+        person1.email = "first.nocountry." + timestamp + "@example.com";
+        person1.country = null;
+        person1.idNumber = sharedNumber;
+
+        given()
+                .spec(requestSpec)
+                .body(person1)
+                .when()
+                .post()
+                .then()
+                .statusCode(201);
+
+        Person person2 = new Person();
+        person2.firstName = "Second";
+        person2.lastName = "NoCountry2" + timestamp;
+        person2.email = "second.nocountry." + timestamp + "@example.com";
+        person2.country = null;
+        person2.idNumber = sharedNumber; // Same id_number but null country
+
+        given()
+                .spec(requestSpec)
+                .body(person2)
+                .when()
+                .post()
+                .then()
+                .statusCode(201); // Should succeed because null country
     }
 }
