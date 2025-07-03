@@ -16,15 +16,15 @@ public class IdType {
     public Long id;
 
     @Column(name = "code", nullable = false, unique = true, length = 5)
-    @NotNull
-    @NotBlank(message = "Code cannot be blank")
-    @Size(min = 1, max = 5, message = "Code must be between 1 and 5 characters")
-    @Pattern(regexp = "[A-Z]+", message = "Code must contain only uppercase letters")
+    @NotNull(message = "IdType code is required")
+    @NotBlank(message = "IdType code is required")
+    @Size(min = 1, max = 5, message = "IdType code must be between 1 and 5 characters")
+    @Pattern(regexp = "[A-Z]+", message = "IdType code must contain only uppercase letters")
     public String code;
 
     @Column(name = "description", columnDefinition = "text", nullable = false, unique = true)
-    @NotNull
-    @NotBlank(message = "Description cannot be blank")
+    @NotNull(message = "IdType description is required")
+    @NotBlank(message = "IdType description is required")
     public String description;
 
     @Column(name = "created_by", nullable = false)

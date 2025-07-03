@@ -16,15 +16,15 @@ public class Country {
     public Long id;
 
     @Column(name = "code", length = 2, nullable = false, unique = true)
-    @NotNull
-    @NotBlank(message = "Code cannot be blank")
-    @Size(min = 2, max = 2, message = "Code must be exactly 2 characters")
-    @Pattern(regexp = "[A-Z]{2}", message = "Code must be exactly 2 uppercase alphabetic characters")
+    @NotNull(message = "Country code is required")
+    @NotBlank(message = "Country code is required")
+    @Size(min = 2, max = 2, message = "Country code must be exactly 2 characters")
+    @Pattern(regexp = "[A-Z]{2}", message = "Country code must be exactly 2 uppercase alphabetic characters")
     public String code;
 
     @Column(name = "name", columnDefinition = "text", nullable = false, unique = true)
-    @NotNull
-    @NotBlank(message = "Name cannot be blank")
+    @NotNull(message = "Country name is required")
+    @NotBlank(message = "Country name is required")
     public String name;
 
     @Column(name = "year", columnDefinition = "text")

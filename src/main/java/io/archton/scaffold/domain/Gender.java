@@ -16,15 +16,15 @@ public class Gender {
     public Long id;
 
     @Column(name = "code", length = 1, nullable = false, unique = true)
-    @NotNull
-    @NotBlank(message = "Code cannot be blank")
-    @Size(min = 1, max = 1, message = "Code must be exactly 1 character")
-    @Pattern(regexp = "[A-Z]", message = "Code must be a single uppercase alphabetic character")
+    @NotNull(message = "Gender code is required")
+    @NotBlank(message = "Gender code is required")
+    @Size(min = 1, max = 1, message = "Gender code must be exactly 1 character")
+    @Pattern(regexp = "[A-Z]", message = "Gender code must be a single uppercase alphabetic character")
     public String code;
 
     @Column(name = "description", columnDefinition = "text", nullable = false, unique = true)
-    @NotNull
-    @NotBlank(message = "Description cannot be blank")
+    @NotNull(message = "Gender description is required")
+    @NotBlank(message = "Gender description is required")
     public String description;
 
     @Column(name = "created_by", nullable = false)

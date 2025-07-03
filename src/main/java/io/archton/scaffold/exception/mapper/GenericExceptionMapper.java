@@ -3,8 +3,6 @@ package io.archton.scaffold.exception.mapper;
 import io.archton.scaffold.exception.DuplicateEntityException;
 import io.archton.scaffold.exception.EntityNotFoundException;
 import io.archton.scaffold.exception.ValidationException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -13,7 +11,6 @@ import org.jboss.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Generic exception mapper for REST API endpoints.
@@ -34,8 +31,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
             return handleDuplicateEntityException((DuplicateEntityException) exception);
         } else if (exception instanceof ValidationException) {
             return handleValidationException((ValidationException) exception);
-        } else if (exception instanceof ConstraintViolationException) {
-            return handleConstraintViolationException((ConstraintViolationException) exception);
         } else if (exception instanceof IllegalArgumentException) {
             return handleIllegalArgumentException((IllegalArgumentException) exception);
         } else {
@@ -86,25 +81,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
             .build();
     }
     
-    private Response handleConstraintViolationException(ConstraintViolationException e) {
-        Map<String, String> violations = e.getConstraintViolations().stream()
-            .collect(Collectors.toMap(
-                violation -> violation.getPropertyPath().toString(),
-                ConstraintViolation::getMessage,
-                (existing, replacement) -> existing + "; " + replacement
-            ));
-        
-        Map<String, Object> errorResponse = createErrorResponse(
-            "CONSTRAINT_VIOLATION",
-            "Validation failed",
-            Response.Status.BAD_REQUEST
-        );
-        errorResponse.put("violations", violations);
-        
-        return Response.status(Response.Status.BAD_REQUEST)
-            .entity(errorResponse)
-            .build();
-    }
     
     private Response handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, Object> errorResponse = createErrorResponse(

@@ -16,22 +16,22 @@ public class Person {
     public Long id;
 
     @Column(name = "first_name")
-    @Size(max = 100, message = "First name must not exceed 100 characters")
+    @Size(max = 100, message = "Person first name must not exceed 100 characters")
     public String firstName;
 
     @Column(name = "last_name", nullable = false)
-    @NotNull
-    @NotBlank(message = "Last name cannot be blank")
-    @Size(min = 1, max = 100, message = "Last name must be between 1 and 100 characters")
+    @NotNull(message = "Person last name is required")
+    @NotBlank(message = "Person last name is required")
+    @Size(min = 1, max = 100, message = "Person last name must be between 1 and 100 characters")
     public String lastName;
 
     @Column(name = "email", unique = true)
-    @Email(message = "Email must be valid")
-    @Size(max = 255, message = "Email must not exceed 255 characters")
+    @Email(message = "Person email must be valid")
+    @Size(max = 255, message = "Person email must not exceed 255 characters")
     public String email;
 
     @Column(name = "id_number")
-    @Size(max = 50, message = "ID number must not exceed 50 characters")
+    @Size(max = 50, message = "Person ID number must not exceed 50 characters")
     public String idNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
