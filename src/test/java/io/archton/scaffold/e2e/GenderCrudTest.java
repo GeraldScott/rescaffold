@@ -16,6 +16,29 @@ class GenderCrudTest extends BaseSelenideTest {
     
     private final GenderPage genderPage = new GenderPage();
     
+    private String findUniqueGenderCode() {
+        // Collect existing gender codes from the table
+        var existingCodes = new java.util.HashSet<String>();
+        var rows = genderPage.getTableRows();
+        for (int i = 0; i < rows.size(); i++) {
+            var codeCell = rows.get(i).find("td:first-child");
+            if (codeCell.exists()) {
+                existingCodes.add(codeCell.text().toUpperCase());
+            }
+        }
+        
+        // Find a unique code that doesn't clash with existing ones
+        String[] candidateCodes = {"Z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Y"};
+        for (String code : candidateCodes) {
+            if (!existingCodes.contains(code)) {
+                return code;
+            }
+        }
+        
+        // If no unique code found, throw assertion error
+        throw new AssertionError("Could not find a unique gender code for testing");
+    }
+    
     @Test
     @DisplayName("Should display gender table when page loads")
     void shouldDisplayGenderTableWhenPageLoads() {
@@ -185,31 +208,9 @@ class GenderCrudTest extends BaseSelenideTest {
         // Read all existing gender codes to avoid conflicts
         genderPage.getTableRows().shouldHave(sizeGreaterThan(0));
         
-        // Collect existing gender codes from the table
-        var existingCodes = new java.util.HashSet<String>();
-        var rows = genderPage.getTableRows();
-        for (int i = 0; i < rows.size(); i++) {
-            var codeCell = rows.get(i).find("td:first-child");
-            if (codeCell.exists()) {
-                existingCodes.add(codeCell.text().toUpperCase());
-            }
-        }
-        
         // Find a unique code that doesn't clash with existing ones
-        String[] candidateCodes = {"Z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Y"};
-        String newCode = null;
-        String newDescription = null;
-        
-        for (String code : candidateCodes) {
-            if (!existingCodes.contains(code)) {
-                newCode = code;
-                newDescription = "Test " + code;
-                break;
-            }
-        }
-        
-        // Ensure we found a unique code
-        assert newCode != null : "Could not find a unique gender code for testing";
+        String newCode = findUniqueGenderCode();
+        String newDescription = "Test " + newCode;
         
         // Record initial row count
         int initialRowCount = genderPage.getTableRows().size();
@@ -326,33 +327,8 @@ class GenderCrudTest extends BaseSelenideTest {
         // First, create a test gender that we can safely delete
         genderPage.openPage();
         
-        // Collect existing codes to find a unique one
-        var existingCodes = new java.util.HashSet<String>();
-        var rows = genderPage.getTableRows();
-        for (int i = 0; i < rows.size(); i++) {
-            var codeCell = rows.get(i).find("td:first-child");
-            if (codeCell.exists()) {
-                existingCodes.add(codeCell.text().toUpperCase());
-            }
-        }
-        
         // Find a unique code for deletion test
-        String testCode = null;
-        String[] candidateCodes = {"DELETE1", "DELETE2", "DELETE3"};
-        for (String code : candidateCodes) {
-            if (!existingCodes.contains(code)) {
-                testCode = code.substring(0, 1); // Take only first character
-                break;
-            }
-        }
-        
-        // If no single char available, use a multi-step approach
-        if (testCode == null || existingCodes.contains(testCode)) {
-            testCode = "9"; // Use numeric which should be rejected, then try other chars
-            if (existingCodes.contains(testCode)) {
-                testCode = "!"; // Special char that should be rejected
-            }
-        }
+        String testCode = findUniqueGenderCode();
         
         // Create a test gender for deletion
         genderPage.clickCreate();
