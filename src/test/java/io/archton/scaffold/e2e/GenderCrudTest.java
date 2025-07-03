@@ -4,6 +4,7 @@ import io.archton.scaffold.e2e.base.BaseSelenideTest;
 import io.archton.scaffold.e2e.pages.GenderPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.CollectionCondition.*;
@@ -167,12 +168,8 @@ class GenderCrudTest extends BaseSelenideTest {
         // We'll just verify that some action occurred by checking if we're still on a valid page
         // This is a basic functionality test to ensure the delete button works
         
-        // Wait a moment for any navigation or HTMX updates to complete
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        // Wait for HTMX updates to complete
+        genderPage.getGenderTable().should(appear, Duration.ofSeconds(3));
         
         // Check if we're still on a page with content (could be gender page or redirect)
         // This verifies the delete button triggered some action
