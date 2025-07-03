@@ -27,7 +27,7 @@ class PersonCrudTest extends BaseSelenideTest {
         personPage.getPersonTable().should(exist);
         personPage.getPersonTable().should(be(visible));
         
-        personPage.getTableHeaders().shouldHave(texts("FIRST NAME", "LAST NAME", "EMAIL", "ID NUMBER", "ID TYPE", "GENDER", "TITLE", "COUNTRY", "CREATED BY", "CREATED AT", "UPDATED BY", "UPDATED AT", "ACTIONS"));
+        personPage.getTableHeaders().shouldHave(texts("TITLE", "LAST NAME", "FIRST NAME", "GENDER", "ID TYPE", "ID NUMBER", "EMAIL", "ACTIONS"));
     }
     
     @Test

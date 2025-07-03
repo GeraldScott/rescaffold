@@ -174,4 +174,68 @@ class GenderCrudTest extends BaseSelenideTest {
         // This verifies the delete button triggered the expected action (showing confirmation)
         $("body").should(exist);
     }
+    
+    @Test
+    @DisplayName("Should create a new Gender record that doesn't clash with existing ones")
+    void shouldCreateNewGenderRecordWithoutClash() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Read all existing gender codes to avoid conflicts
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(0));
+        
+        // Collect existing gender codes from the table
+        var existingCodes = new java.util.HashSet<String>();
+        var rows = genderPage.getTableRows();
+        for (int i = 0; i < rows.size(); i++) {
+            var codeCell = rows.get(i).find("td:first-child");
+            if (codeCell.exists()) {
+                existingCodes.add(codeCell.text().toUpperCase());
+            }
+        }
+        
+        // Find a unique code that doesn't clash with existing ones
+        String[] candidateCodes = {"Z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Y"};
+        String newCode = null;
+        String newDescription = null;
+        
+        for (String code : candidateCodes) {
+            if (!existingCodes.contains(code)) {
+                newCode = code;
+                newDescription = "Test " + code;
+                break;
+            }
+        }
+        
+        // Ensure we found a unique code
+        assert newCode != null : "Could not find a unique gender code for testing";
+        
+        // Record initial row count
+        int initialRowCount = genderPage.getTableRows().size();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with unique values
+        genderPage.fillGenderForm(newCode, newDescription);
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Wait for HTMX to update and verify the new record appears
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(initialRowCount));
+        
+        // Verify the new gender appears in the table
+        boolean foundNewGender = false;
+        var updatedRows = genderPage.getTableRows();
+        for (int i = 0; i < updatedRows.size(); i++) {
+            var codeCell = updatedRows.get(i).find("td:first-child");
+            if (codeCell.exists() && newCode.equals(codeCell.text())) {
+                foundNewGender = true;
+                break;
+            }
+        }
+        
+        assert foundNewGender : "New gender record was not found in the table";
+    }
 }

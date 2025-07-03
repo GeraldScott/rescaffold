@@ -3,8 +3,10 @@ package io.archton.scaffold.e2e.pages;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
+import static com.codeborne.selenide.Selenide.executeJavaScript;
 import static com.codeborne.selenide.Selenide.open;
 
 public class CountryPage {
@@ -12,7 +14,7 @@ public class CountryPage {
     private final SelenideElement pageTitle = $("h1");
     private final SelenideElement countryTable = $("table.table");
     private final ElementsCollection tableHeaders = $$("table.table th");
-    private final SelenideElement createButton = $("button[hx-get='/countries-ui/create']");
+    private final SelenideElement createButton = $("#create-new-btn");
     
     private final ElementsCollection tableRows = $$("table.table tbody tr");
     private final ElementsCollection viewButtons = $$("button[id^='view-btn-']");
@@ -80,7 +82,7 @@ public class CountryPage {
     }
     
     public CountryPage clickCreate() {
-        createButton.click();
+        executeJavaScript("arguments[0].click();", createButton);
         return this;
     }
     

@@ -12,7 +12,7 @@ public class PersonPage {
     private final SelenideElement pageTitle = $("h1");
     private final SelenideElement personTable = $("table.table");
     private final ElementsCollection tableHeaders = $$("table.table th");
-    private final SelenideElement createButton = $("button[hx-get='/persons-ui/create']");
+    private final SelenideElement createButton = $("#create-new-btn");
     
     private final ElementsCollection tableRows = $$("table.table tbody tr");
     private final ElementsCollection viewButtons = $$("button[id^='view-btn-']");
@@ -100,7 +100,7 @@ public class PersonPage {
     }
     
     public PersonPage clickCreate() {
-        createButton.click();
+        createButton.scrollTo().click();
         return this;
     }
     

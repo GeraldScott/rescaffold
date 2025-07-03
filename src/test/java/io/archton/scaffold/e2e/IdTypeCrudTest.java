@@ -22,7 +22,7 @@ class IdTypeCrudTest extends BaseSelenideTest {
         
         idTypePage.getPageTitle().should(exist);
         idTypePage.getPageTitle().should(be(visible));
-        idTypePage.getPageTitle().should(have(text("ID Types")));
+        idTypePage.getPageTitle().should(have(text("Types of identity documents")));
         
         idTypePage.getIdTypeTable().should(exist);
         idTypePage.getIdTypeTable().should(be(visible));
