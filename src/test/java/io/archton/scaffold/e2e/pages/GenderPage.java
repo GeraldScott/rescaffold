@@ -64,6 +64,22 @@ public class GenderPage {
         return createButton;
     }
     
+    public SelenideElement getCodeInput() {
+        return codeInput;
+    }
+    
+    public SelenideElement getDescriptionInput() {
+        return descriptionInput;
+    }
+    
+    public SelenideElement getSaveButton() {
+        return saveButton;
+    }
+    
+    public SelenideElement getCancelButton() {
+        return cancelButton;
+    }
+    
     /**
      * Clicks the create button to navigate to the create gender form
      * @return this page object for method chaining
