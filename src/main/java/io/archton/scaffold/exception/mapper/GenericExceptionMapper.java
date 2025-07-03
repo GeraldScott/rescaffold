@@ -16,7 +16,8 @@ import java.util.Map;
  * Generic exception mapper for REST API endpoints.
  * Provides consistent error responses across the application.
  */
-@Provider
+// Disabled in favor of UnifiedExceptionMapper
+// @Provider
 public class GenericExceptionMapper implements ExceptionMapper<Exception> {
     
     private static final Logger log = Logger.getLogger(GenericExceptionMapper.class);

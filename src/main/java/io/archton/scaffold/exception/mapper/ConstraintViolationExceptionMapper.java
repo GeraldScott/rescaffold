@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Exception mapper specifically for Bean Validation constraint violations.
  * Returns validation error messages in the format expected by tests.
  */
-@Provider
+@Provider  
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
     
     private static final Logger log = Logger.getLogger(ConstraintViolationExceptionMapper.class);

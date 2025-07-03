@@ -48,7 +48,6 @@ public class GenderService {
             throw new IllegalArgumentException("ID must not be included in POST request");
         }
         
-        validateGenderData(gender);
         normalizeGenderData(gender);
         checkDuplicateCode(gender.code);
         checkDuplicateDescription(gender.description);
@@ -68,12 +67,6 @@ public class GenderService {
 
         if (updates.code != null && !updates.code.trim().isEmpty()) {
             normalizeCode(updates);
-            if (updates.code.length() != 1) {
-                throw new IllegalArgumentException("Gender code must be exactly 1 character");
-            }
-            if (!updates.code.matches("[A-Z]")) {
-                throw new IllegalArgumentException("Gender code must be a single uppercase alphabetic character");
-            }
             checkDuplicateCodeForUpdate(updates.code, id);
             existing.code = updates.code;
         }
@@ -100,20 +93,6 @@ public class GenderService {
         genderRepository.delete(gender);
     }
 
-    private void validateGenderData(Gender gender) {
-        if (gender.code == null || gender.code.trim().isEmpty()) {
-            throw new IllegalArgumentException("Gender code is required");
-        }
-        if (gender.code.length() != 1) {
-            throw new IllegalArgumentException("Gender code must be exactly 1 character");
-        }
-        if (!gender.code.matches("[A-Z]")) {
-            throw new IllegalArgumentException("Gender code must be a single uppercase alphabetic character");
-        }
-        if (gender.description == null || gender.description.trim().isEmpty()) {
-            throw new IllegalArgumentException("Gender description is required");
-        }
-    }
 
     private void normalizeGenderData(Gender gender) {
         normalizeCode(gender);

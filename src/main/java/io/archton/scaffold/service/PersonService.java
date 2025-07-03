@@ -51,7 +51,6 @@ public class PersonService {
             throw new ValidationException("id", "ID must not be included in POST request");
         }
 
-        validatePersonData(person);
         normalizePersonData(person);
         checkDuplicateEmail(person.email);
 
@@ -70,25 +69,16 @@ public class PersonService {
 
         if (updates.firstName != null) {
             normalizeFirstName(updates);
-            if (updates.firstName != null && updates.firstName.length() > 100) {
-                throw new ValidationException("firstName", "First name must not exceed 100 characters");
-            }
             existing.firstName = updates.firstName;
         }
 
         if (updates.lastName != null && !updates.lastName.trim().isEmpty()) {
             normalizeLastName(updates);
-            if (updates.lastName.length() > 100) {
-                throw new ValidationException("lastName", "Last name must not exceed 100 characters");
-            }
             existing.lastName = updates.lastName;
         }
 
         if (updates.email != null) {
             normalizeEmail(updates);
-            if (updates.email != null && updates.email.length() > 255) {
-                throw new ValidationException("email", "Email must not exceed 255 characters");
-            }
             checkDuplicateEmailForUpdate(updates.email, id);
             existing.email = updates.email;
         }
@@ -116,27 +106,6 @@ public class PersonService {
         personRepository.delete(person);
     }
 
-    private void validatePersonData(Person person) {
-        if (person.lastName == null || person.lastName.trim().isEmpty()) {
-            throw new ValidationException("lastName", "Last name is required");
-        }
-        if (person.lastName != null && person.lastName.length() > 100) {
-            throw new ValidationException("lastName", "Last name must not exceed 100 characters");
-        }
-        if (person.firstName != null && person.firstName.length() > 100) {
-            throw new ValidationException("firstName", "First name must not exceed 100 characters");
-        }
-        if (person.email != null && person.email.length() > 255) {
-            throw new ValidationException("email", "Email must not exceed 255 characters");
-        }
-
-        if (person.email != null && !person.email.trim().isEmpty()) {
-            if (!isValidEmail(person.email)) {
-                throw new ValidationException("email", "Invalid email format");
-            }
-        }
-
-    }
 
     private void normalizePersonData(Person person) {
         normalizeFirstName(person);
@@ -188,9 +157,5 @@ public class PersonService {
 
 
 
-    private boolean isValidEmail(String email) {
-        // Basic email validation - more comprehensive validation is handled by Jakarta Bean Validation
-        return email != null && email.contains("@") && email.contains(".");
-    }
 
 }

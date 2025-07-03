@@ -1,8 +1,8 @@
 package io.archton.scaffold.web;
 
 import io.archton.scaffold.domain.Title;
+import io.archton.scaffold.exception.EntityNotFoundException;
 import io.archton.scaffold.service.TitleService;
-import io.archton.scaffold.util.WebErrorHandler;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.inject.Inject;
@@ -21,6 +21,7 @@ public class TitleRouter {
 
     @Inject
     TitleService titleService;
+
 
 
     @CheckedTemplate(basePath = "title")
@@ -52,18 +53,13 @@ public class TitleRouter {
     public Response getTitleView(@PathParam("id") Long id) {
         log.debugf("GET /titles-ui/%s/view", id);
 
-        try {
-            Optional<Title> titleOpt = titleService.findByIdOptional(id);
-            if (titleOpt.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            String html = Templates.title(null, titleOpt.get(), null).getFragment("view").data("title", titleOpt.get()).render();
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            WebErrorHandler.logError("Error retrieving title for view", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        Optional<Title> titleOpt = titleService.findByIdOptional(id);
+        if (titleOpt.isEmpty()) {
+            throw new EntityNotFoundException("Title", id);
         }
+
+        String html = Templates.title(null, titleOpt.get(), null).getFragment("view").data("title", titleOpt.get()).render();
+        return Response.ok(html).build();
     }
 
     @GET
@@ -83,27 +79,17 @@ public class TitleRouter {
                                        @FormParam("description") String description) {
         log.debugf("POST /titles-ui - create with code: %s", code);
 
-        try {
-            Title title = new Title();
-            title.code = code;
-            title.description = description;
+        // Note: Form data preservation will be handled by exception mapper
 
-            titleService.createTitle(title);
+        Title title = new Title();
+        title.code = code;
+        title.description = description;
 
-            List<Title> titleList = titleService.listSorted();
-            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            WebErrorHandler.logError("Error creating title", e);
-            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            // Create entity with submitted form data to preserve user input
-            Title formData = new Title();
-            formData.code = code;
-            formData.description = description;
-            
-            String html = Templates.title(null, formData, errorMessage).getFragment("create").data("title", formData).data("errorMessage", errorMessage).render();
-            return WebErrorHandler.createErrorResponse(html, e);
-        }
+        titleService.createTitle(title);
+
+        List<Title> titleList = titleService.listSorted();
+        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
+        return Response.ok(html).build();
     }
 
     @GET
@@ -112,18 +98,13 @@ public class TitleRouter {
     public Response getTitleEdit(@PathParam("id") Long id) {
         log.debugf("GET /titles-ui/%s/edit", id);
 
-        try {
-            Optional<Title> titleOpt = titleService.findByIdOptional(id);
-            if (titleOpt.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            String html = Templates.title(null, titleOpt.get(), null).getFragment("edit").data("title", titleOpt.get()).data("errorMessage", null).render();
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            WebErrorHandler.logError("Error retrieving title for edit", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        Optional<Title> titleOpt = titleService.findByIdOptional(id);
+        if (titleOpt.isEmpty()) {
+            throw new EntityNotFoundException("Title", id);
         }
+
+        String html = Templates.title(null, titleOpt.get(), null).getFragment("edit").data("title", titleOpt.get()).data("errorMessage", null).render();
+        return Response.ok(html).build();
     }
 
     @PUT
@@ -135,29 +116,17 @@ public class TitleRouter {
                                        @FormParam("description") String description) {
         log.debugf("PUT /titles-ui/%s - update with code: %s", id, code);
 
-        try {
-            Title updateTitle = new Title();
-            updateTitle.code = code;
-            updateTitle.description = description;
+        // Note: Form data preservation will be handled by exception mapper
 
-            titleService.updateTitle(id, updateTitle);
+        Title updateTitle = new Title();
+        updateTitle.code = code;
+        updateTitle.description = description;
 
-            List<Title> titleList = titleService.listSorted();
-            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            WebErrorHandler.logError("Error updating title", e);
-            
-            // Create entity with submitted form data to preserve user input
-            Title formData = new Title();
-            formData.id = id;
-            formData.code = code;
-            formData.description = description;
-            
-            String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.title(null, formData, errorMessage).getFragment("edit").data("title", formData).data("errorMessage", errorMessage).render();
-            return WebErrorHandler.createErrorResponse(html, e);
-        }
+        titleService.updateTitle(id, updateTitle);
+
+        List<Title> titleList = titleService.listSorted();
+        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
+        return Response.ok(html).build();
     }
 
     @GET
@@ -166,18 +135,13 @@ public class TitleRouter {
     public Response getTitleDelete(@PathParam("id") Long id) {
         log.debugf("GET /titles-ui/%s/delete", id);
 
-        try {
-            Optional<Title> titleOpt = titleService.findByIdOptional(id);
-            if (titleOpt.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            String html = Templates.title(null, titleOpt.get(), null).getFragment("delete").data("title", titleOpt.get()).render();
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            WebErrorHandler.logError("Error retrieving title for delete", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        Optional<Title> titleOpt = titleService.findByIdOptional(id);
+        if (titleOpt.isEmpty()) {
+            throw new EntityNotFoundException("Title", id);
         }
+
+        String html = Templates.title(null, titleOpt.get(), null).getFragment("delete").data("title", titleOpt.get()).render();
+        return Response.ok(html).build();
     }
 
     @DELETE
@@ -186,19 +150,11 @@ public class TitleRouter {
     public Response deleteTitleFromForm(@PathParam("id") Long id) {
         log.debugf("DELETE /titles-ui/%s", id);
 
-        try {
-            titleService.deleteTitle(id);
+        titleService.deleteTitle(id);
 
-            List<Title> titleList = titleService.listSorted();
-            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
-            return Response.ok(html).build();
-        } catch (Exception e) {
-            WebErrorHandler.logError("Error deleting title", e);
-            if (e instanceof IllegalArgumentException && e.getMessage().contains("not found")) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+        List<Title> titleList = titleService.listSorted();
+        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
+        return Response.ok(html).build();
     }
 
 }

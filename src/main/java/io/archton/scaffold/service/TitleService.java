@@ -48,7 +48,6 @@ public class TitleService {
             throw new IllegalArgumentException("ID must not be included in POST request");
         }
         
-        validateTitleData(title);
         normalizeTitleData(title);
         checkDuplicateCode(title.code);
         checkDuplicateDescription(title.description);
@@ -68,12 +67,6 @@ public class TitleService {
 
         if (updates.code != null && !updates.code.trim().isEmpty()) {
             normalizeCode(updates);
-            if (updates.code.length() < 1 || updates.code.length() > 5) {
-                throw new IllegalArgumentException("Title code must be between 1 and 5 characters");
-            }
-            if (!updates.code.matches("[A-Z]+")) {
-                throw new IllegalArgumentException("Title code must contain only uppercase letters");
-            }
             checkDuplicateCodeForUpdate(updates.code, id);
             existing.code = updates.code;
         }
@@ -100,20 +93,6 @@ public class TitleService {
         titleRepository.delete(title);
     }
 
-    private void validateTitleData(Title title) {
-        if (title.code == null || title.code.trim().isEmpty()) {
-            throw new IllegalArgumentException("Title code is required");
-        }
-        if (title.code.length() < 1 || title.code.length() > 5) {
-            throw new IllegalArgumentException("Title code must be between 1 and 5 characters");
-        }
-        if (!title.code.matches("[A-Z]+")) {
-            throw new IllegalArgumentException("Title code must contain only uppercase letters");
-        }
-        if (title.description == null || title.description.trim().isEmpty()) {
-            throw new IllegalArgumentException("Title description is required");
-        }
-    }
 
     private void normalizeTitleData(Title title) {
         normalizeCode(title);
