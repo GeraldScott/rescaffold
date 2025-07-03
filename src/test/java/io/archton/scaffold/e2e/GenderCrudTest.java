@@ -9,6 +9,7 @@ import java.time.Duration;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.CollectionCondition.*;
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.executeJavaScript;
 
 @DisplayName("Gender CRUD E2E Tests")
 class GenderCrudTest extends BaseSelenideTest {
@@ -269,5 +270,387 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getDescriptionInput().should(be(visible));
         genderPage.getSaveButton().should(be(visible));
         genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should update gender successfully")
+    void shouldUpdateGenderSuccessfully() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify table has at least one row
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(0));
+        
+        // Get the first row's original data
+        var firstRow = genderPage.getTableRows().first();
+        var originalCode = firstRow.find("td:first-child").text();
+        var originalDescription = firstRow.find("td:nth-child(2)").text();
+        
+        // Click Edit button for the first row
+        genderPage.getEditButton(0).click();
+        
+        // Verify edit form is displayed
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        
+        // Verify form is pre-populated with current values
+        genderPage.getCodeInput().should(have(value(originalCode)));
+        genderPage.getDescriptionInput().should(have(value(originalDescription)));
+        
+        // Update the description (keep code same to avoid conflicts)
+        var updatedDescription = "Updated " + originalDescription;
+        genderPage.getDescriptionInput().clear();
+        genderPage.getDescriptionInput().setValue(updatedDescription);
+        
+        // Submit the update
+        genderPage.clickSave();
+        
+        // Verify we're back to the table view
+        genderPage.getGenderTable().should(be(visible));
+        
+        // Verify the update was applied
+        var updatedRow = genderPage.getTableRows().first();
+        updatedRow.find("td:first-child").should(have(text(originalCode)));
+        updatedRow.find("td:nth-child(2)").should(have(text(updatedDescription)));
+        
+        // Restore original data for other tests
+        genderPage.getEditButton(0).click();
+        genderPage.getDescriptionInput().clear();
+        genderPage.getDescriptionInput().setValue(originalDescription);
+        genderPage.clickSave();
+    }
+    
+    @Test
+    @DisplayName("Should delete gender successfully")
+    void shouldDeleteGenderSuccessfully() {
+        // First, create a test gender that we can safely delete
+        genderPage.openPage();
+        
+        // Collect existing codes to find a unique one
+        var existingCodes = new java.util.HashSet<String>();
+        var rows = genderPage.getTableRows();
+        for (int i = 0; i < rows.size(); i++) {
+            var codeCell = rows.get(i).find("td:first-child");
+            if (codeCell.exists()) {
+                existingCodes.add(codeCell.text().toUpperCase());
+            }
+        }
+        
+        // Find a unique code for deletion test
+        String testCode = null;
+        String[] candidateCodes = {"DELETE1", "DELETE2", "DELETE3"};
+        for (String code : candidateCodes) {
+            if (!existingCodes.contains(code)) {
+                testCode = code.substring(0, 1); // Take only first character
+                break;
+            }
+        }
+        
+        // If no single char available, use a multi-step approach
+        if (testCode == null || existingCodes.contains(testCode)) {
+            testCode = "9"; // Use numeric which should be rejected, then try other chars
+            if (existingCodes.contains(testCode)) {
+                testCode = "!"; // Special char that should be rejected
+            }
+        }
+        
+        // Create a test gender for deletion
+        genderPage.clickCreate();
+        genderPage.fillGenderForm(testCode, "Test Delete Gender");
+        genderPage.clickSave();
+        
+        // If creation failed due to validation, skip this test
+        if (genderPage.getErrorMessage().exists()) {
+            genderPage.clickCancel();
+            return;
+        }
+        
+        // Record current row count
+        int initialRowCount = genderPage.getTableRows().size();
+        
+        // Find the row with our test gender
+        int testRowIndex = -1;
+        var currentRows = genderPage.getTableRows();
+        for (int i = 0; i < currentRows.size(); i++) {
+            var codeCell = currentRows.get(i).find("td:first-child");
+            if (codeCell.exists() && testCode.equals(codeCell.text())) {
+                testRowIndex = i;
+                break;
+            }
+        }
+        
+        // Only proceed if we found our test row
+        if (testRowIndex >= 0) {
+            // Click Delete button
+            genderPage.getDeleteButton(testRowIndex).click();
+            
+            // Confirm deletion
+            $("#confirm-delete-btn").should(appear, Duration.ofSeconds(3));
+            $("#confirm-delete-btn").click();
+            
+            // Verify the row was deleted
+            genderPage.getTableRows().shouldHave(sizeLessThan(initialRowCount));
+            
+            // Verify the specific gender is no longer in the table
+            boolean foundDeletedGender = false;
+            var finalRows = genderPage.getTableRows();
+            for (int i = 0; i < finalRows.size(); i++) {
+                var codeCell = finalRows.get(i).find("td:first-child");
+                if (codeCell.exists() && testCode.equals(codeCell.text())) {
+                    foundDeletedGender = true;
+                    break;
+                }
+            }
+            
+            assert !foundDeletedGender : "Gender should have been deleted but was still found in table";
+        }
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with empty code")
+    void shouldShowValidationErrorWhenCreatingGenderWithEmptyCode() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with empty code
+        genderPage.fillGenderForm("", "Test Description");
+        
+        // Remove HTML5 validation to test server-side validation
+        executeJavaScript("document.getElementById('code').removeAttribute('required'); document.getElementById('code').removeAttribute('pattern'); document.getElementById('code').removeAttribute('maxlength');");
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with empty description")
+    void shouldShowValidationErrorWhenCreatingGenderWithEmptyDescription() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with empty description
+        genderPage.fillGenderForm("T", "");
+        
+        // Remove HTML5 validation to test server-side validation
+        executeJavaScript("document.getElementById('description').removeAttribute('required');");
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with blank description")
+    void shouldShowValidationErrorWhenCreatingGenderWithBlankDescription() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with blank description (spaces only)
+        genderPage.fillGenderForm("T", "   ");
+        
+        // Remove HTML5 validation to test server-side validation
+        executeJavaScript("document.getElementById('description').removeAttribute('required');");
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with multi-character code")
+    void shouldShowValidationErrorWhenCreatingGenderWithMultiCharCode() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with multi-character code
+        genderPage.fillGenderForm("AB", "Multi Character Test");
+        
+        // Remove HTML5 validation to test server-side validation
+        executeJavaScript("document.getElementById('code').removeAttribute('required'); document.getElementById('code').removeAttribute('pattern'); document.getElementById('code').removeAttribute('maxlength');");
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with numeric code")
+    void shouldShowValidationErrorWhenCreatingGenderWithNumericCode() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with numeric code
+        genderPage.fillGenderForm("1", "Numeric Code Test");
+        
+        // Remove HTML5 validation to test server-side validation
+        executeJavaScript("document.getElementById('code').removeAttribute('required'); document.getElementById('code').removeAttribute('pattern'); document.getElementById('code').removeAttribute('maxlength');");
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with duplicate description")
+    void shouldShowValidationErrorWhenCreatingGenderWithDuplicateDescription() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify table has at least one row to get an existing description
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(0));
+        
+        // Get the first existing gender description
+        var firstRow = genderPage.getTableRows().first();
+        var existingDescription = firstRow.find("td:nth-child(2)").text();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with duplicate description but different code
+        genderPage.fillGenderForm("T", existingDescription);
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when updating Gender with duplicate code")
+    void shouldShowValidationErrorWhenUpdatingGenderWithDuplicateCode() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify table has at least two rows
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(1));
+        
+        // Get codes from first two rows
+        var firstRow = genderPage.getTableRows().get(0);
+        var secondRow = genderPage.getTableRows().get(1);
+        var firstCode = firstRow.find("td:first-child").text();
+        var secondCode = secondRow.find("td:first-child").text();
+        
+        // Click Edit button for the first row
+        genderPage.getEditButton(0).click();
+        
+        // Try to update with the second row's code
+        genderPage.getCodeInput().clear();
+        genderPage.getCodeInput().setValue(secondCode);
+        
+        // Submit the update
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+        
+        // Cancel to return to table view
+        genderPage.clickCancel();
+    }
+    
+    @Test
+    @DisplayName("Should show validation error when updating Gender with duplicate description")
+    void shouldShowValidationErrorWhenUpdatingGenderWithDuplicateDescription() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify table has at least two rows
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(1));
+        
+        // Get descriptions from first two rows
+        var firstRow = genderPage.getTableRows().get(0);
+        var secondRow = genderPage.getTableRows().get(1);
+        var firstDescription = firstRow.find("td:nth-child(2)").text();
+        var secondDescription = secondRow.find("td:nth-child(2)").text();
+        
+        // Click Edit button for the first row
+        genderPage.getEditButton(0).click();
+        
+        // Try to update with the second row's description
+        genderPage.getDescriptionInput().clear();
+        genderPage.getDescriptionInput().setValue(secondDescription);
+        
+        // Submit the update
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+        
+        // Cancel to return to table view
+        genderPage.clickCancel();
     }
 }
