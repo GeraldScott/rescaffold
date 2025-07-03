@@ -16,6 +16,7 @@ public class HomePage {
     private final SelenideElement gendersDropdownLink = $("a.dropdown-item[href='/genders-ui']");
     private final SelenideElement titlesDropdownLink = $("a.dropdown-item[href='/titles-ui']");
     private final SelenideElement idTypesDropdownLink = $("a.dropdown-item[href='/id-types-ui']");
+    private final SelenideElement countriesDropdownLink = $("a.dropdown-item[href='/countries-ui']");
     
     public HomePage openPage() {
         open("/");
@@ -86,6 +87,10 @@ public class HomePage {
         return idTypesDropdownLink;
     }
 
+    public SelenideElement getCountriesDropdownLink() {
+        return countriesDropdownLink;
+    }
+
     public HomePage clickPeopleNavLink() {
         peopleNavLink.click();
         return this;
@@ -111,6 +116,11 @@ public class HomePage {
         return this;
     }
 
+    public HomePage clickCountriesLink() {
+        countriesDropdownLink.click();
+        return this;
+    }
+
     public boolean isGendersDropdownLinkVisible() {
         return gendersDropdownLink.isDisplayed();
     }
@@ -121,5 +131,9 @@ public class HomePage {
 
     public boolean isIdTypesDropdownLinkVisible() {
         return idTypesDropdownLink.isDisplayed();
+    }
+
+    public boolean isCountriesDropdownLinkVisible() {
+        return countriesDropdownLink.isDisplayed();
     }
 }
