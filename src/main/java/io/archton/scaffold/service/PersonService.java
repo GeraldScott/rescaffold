@@ -54,6 +54,7 @@ public class PersonService {
         validatePersonData(person);
         normalizePersonData(person);
         checkDuplicateEmail(person.email);
+        checkDuplicateCountryIdNumber(person.country, person.idNumber);
 
         personRepository.persist(person);
         return person;
@@ -105,6 +106,10 @@ public class PersonService {
         existing.title = updates.title;
         existing.gender = updates.gender;
         existing.idType = updates.idType;
+        existing.country = updates.country;
+
+        // Check country + id_number constraint after updates
+        checkDuplicateCountryIdNumberForUpdate(existing.country, existing.idNumber, id);
 
         existing.updatedAt = LocalDateTime.now();
         personRepository.persist(existing);
@@ -200,6 +205,26 @@ public class PersonService {
             Person existing = personRepository.findByEmailExcludingId(email, excludeId);
             if (existing != null) {
                 throw new DuplicateEntityException("Person", "email", email, "update");
+            }
+        }
+    }
+
+    private void checkDuplicateCountryIdNumber(io.archton.scaffold.domain.Country country, String idNumber) {
+        if (country != null && idNumber != null && !idNumber.trim().isEmpty()) {
+            Person existing = personRepository.findByCountryAndIdNumber(country, idNumber);
+            if (existing != null) {
+                throw new DuplicateEntityException("Person", "country and ID number combination", 
+                    country.name + " + " + idNumber);
+            }
+        }
+    }
+
+    private void checkDuplicateCountryIdNumberForUpdate(io.archton.scaffold.domain.Country country, String idNumber, Long excludeId) {
+        if (country != null && idNumber != null && !idNumber.trim().isEmpty()) {
+            Person existing = personRepository.findByCountryAndIdNumberExcludingId(country, idNumber, excludeId);
+            if (existing != null) {
+                throw new DuplicateEntityException("Person", "country and ID number combination", 
+                    country.name + " + " + idNumber, "update");
             }
         }
     }

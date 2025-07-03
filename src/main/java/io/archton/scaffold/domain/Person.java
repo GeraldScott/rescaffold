@@ -46,6 +46,10 @@ public class Person {
     @JoinColumn(name = "title_id")
     public Title title;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    public Country country;
+
     @Column(name = "created_by", nullable = false)
     public String createdBy = "system";
 
