@@ -141,8 +141,16 @@ class PersonCrudTest extends BaseSelenideTest {
         personPage.getDeleteButton(0).should(be(visible));
         personPage.getDeleteButton(0).click();
         
-        personPage.getPersonTable().should(appear, Duration.ofSeconds(3));
+        // After clicking delete, we should see the delete confirmation screen
+        // Wait for HTMX updates to complete and verify the delete confirmation elements appear
+        $("#confirm-delete-btn").should(appear, Duration.ofSeconds(3));
+        $("#cancel-delete-btn").should(appear, Duration.ofSeconds(3));
         
+        // Verify warning message appears (Person uses alert-danger instead of alert-warning)
+        $(".alert-danger").should(appear);
+        
+        // Check if we're still on a page with content
+        // This verifies the delete button triggered the expected action (showing confirmation)
         $("body").should(exist);
     }
 }

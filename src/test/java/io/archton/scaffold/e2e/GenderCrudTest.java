@@ -162,17 +162,16 @@ class GenderCrudTest extends BaseSelenideTest {
         genderPage.getDeleteButton(0).should(be(visible));
         genderPage.getDeleteButton(0).click();
         
-        // After delete action, the page should either:
-        // 1. Show the table with one less row, or
-        // 2. Navigate away (which is also valid behavior)
-        // We'll just verify that some action occurred by checking if we're still on a valid page
-        // This is a basic functionality test to ensure the delete button works
+        // After clicking delete, we should see the delete confirmation screen
+        // Wait for HTMX updates to complete and verify the delete confirmation elements appear
+        $("#confirm-delete-btn").should(appear, Duration.ofSeconds(3));
+        $("#cancel-delete-btn").should(appear, Duration.ofSeconds(3));
         
-        // Wait for HTMX updates to complete
-        genderPage.getGenderTable().should(appear, Duration.ofSeconds(3));
+        // Verify warning message appears
+        $(".alert-warning").should(appear);
         
-        // Check if we're still on a page with content (could be gender page or redirect)
-        // This verifies the delete button triggered some action
+        // Check if we're still on a page with content
+        // This verifies the delete button triggered the expected action (showing confirmation)
         $("body").should(exist);
     }
 }
