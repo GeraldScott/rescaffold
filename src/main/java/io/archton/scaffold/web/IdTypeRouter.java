@@ -25,18 +25,7 @@ public class IdTypeRouter {
 
     @CheckedTemplate(basePath = "idtype")
     public static class Templates {
-        public static native TemplateInstance idtypes(List<IdType> idTypes);
-
-        public static native TemplateInstance table(List<IdType> idTypes);
-
-        public static native TemplateInstance view(IdType idType);
-
-        public static native TemplateInstance create(IdType idType, String errorMessage);
-
-        public static native TemplateInstance edit(IdType idType, String errorMessage);
-
-        public static native TemplateInstance delete(IdType idType);
-
+        public static native TemplateInstance idtype(List<IdType> idTypes, IdType idType, String errorMessage);
     }
 
     @GET
@@ -44,7 +33,7 @@ public class IdTypeRouter {
     public String get() {
         log.debug("GET /id-types-ui");
         List<IdType> idTypeList = idTypeService.listSorted();
-        return Templates.idtypes(idTypeList).render();
+        return Templates.idtype(idTypeList, null, null).render();
     }
 
     @GET
@@ -53,7 +42,7 @@ public class IdTypeRouter {
     public Response getIdTypeTable() {
         log.debug("GET /id-types-ui/table");
         List<IdType> idTypeList = idTypeService.listSorted();
-        String html = Templates.table(idTypeList).render();
+        String html = Templates.idtype(idTypeList, null, null).getFragment("table").data("idTypes", idTypeList).render();
         return Response.ok(html).build();
     }
 
@@ -69,7 +58,7 @@ public class IdTypeRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.view(idTypeOpt.get()).render();
+            String html = Templates.idtype(null, idTypeOpt.get(), null).getFragment("view").data("idType", idTypeOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving id type for view", e);
@@ -83,7 +72,7 @@ public class IdTypeRouter {
     public Response getIdTypeCreate() {
         log.debug("GET /id-types-ui/create");
 
-        String html = Templates.create(null, null).render();
+        String html = Templates.idtype(null, null, null).getFragment("create").data("idType", new IdType()).data("errorMessage", null).render();
         return Response.ok(html).build();
     }
 
@@ -102,7 +91,7 @@ public class IdTypeRouter {
             idTypeService.createIdType(idType);
 
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.table(idTypeList).render();
+            String html = Templates.idtype(idTypeList, null, null).getFragment("table").data("idTypes", idTypeList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error creating id type", e);
@@ -112,7 +101,7 @@ public class IdTypeRouter {
             formData.code = code;
             formData.description = description;
             
-            String html = Templates.create(formData, errorMessage).render();
+            String html = Templates.idtype(null, formData, errorMessage).getFragment("create").data("idType", formData).data("errorMessage", errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }
@@ -129,7 +118,7 @@ public class IdTypeRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.edit(idTypeOpt.get(), null).render();
+            String html = Templates.idtype(null, idTypeOpt.get(), null).getFragment("edit").data("idType", idTypeOpt.get()).data("errorMessage", null).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving id type for edit", e);
@@ -154,7 +143,7 @@ public class IdTypeRouter {
             idTypeService.updateIdType(id, updateIdType);
 
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.table(idTypeList).render();
+            String html = Templates.idtype(idTypeList, null, null).getFragment("table").data("idTypes", idTypeList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error updating id type", e);
@@ -166,7 +155,7 @@ public class IdTypeRouter {
             formData.description = description;
             
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.edit(formData, errorMessage).render();
+            String html = Templates.idtype(null, formData, errorMessage).getFragment("edit").data("idType", formData).data("errorMessage", errorMessage).render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }
@@ -183,7 +172,7 @@ public class IdTypeRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.delete(idTypeOpt.get()).render();
+            String html = Templates.idtype(null, idTypeOpt.get(), null).getFragment("delete").data("idType", idTypeOpt.get()).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving id type for delete", e);
@@ -201,7 +190,7 @@ public class IdTypeRouter {
             idTypeService.deleteIdType(id);
 
             List<IdType> idTypeList = idTypeService.listSorted();
-            String html = Templates.table(idTypeList).render();
+            String html = Templates.idtype(idTypeList, null, null).getFragment("table").data("idTypes", idTypeList).render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error deleting id type", e);
