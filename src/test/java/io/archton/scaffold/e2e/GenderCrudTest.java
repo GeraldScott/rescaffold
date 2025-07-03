@@ -238,4 +238,36 @@ class GenderCrudTest extends BaseSelenideTest {
         
         assert foundNewGender : "New gender record was not found in the table";
     }
+    
+    @Test
+    @DisplayName("Should show validation error when creating Gender with duplicate code")
+    void shouldShowValidationErrorWhenCreatingGenderWithDuplicateCode() {
+        // Open the gender page
+        genderPage.openPage();
+        
+        // Verify table has at least one row to get an existing code
+        genderPage.getTableRows().shouldHave(sizeGreaterThan(0));
+        
+        // Get the first existing gender code
+        var firstRow = genderPage.getTableRows().first();
+        var existingCode = firstRow.find("td:first-child").text();
+        
+        // Click Create button
+        genderPage.clickCreate();
+        
+        // Fill the form with duplicate code
+        genderPage.fillGenderForm(existingCode, "Duplicate Test Description");
+        
+        // Submit the form
+        genderPage.clickSave();
+        
+        // Verify validation error appears
+        $(".alert-danger").should(appear, Duration.ofSeconds(3));
+        
+        // Verify the form is still visible (not redirected)
+        genderPage.getCodeInput().should(be(visible));
+        genderPage.getDescriptionInput().should(be(visible));
+        genderPage.getSaveButton().should(be(visible));
+        genderPage.getCancelButton().should(be(visible));
+    }
 }
