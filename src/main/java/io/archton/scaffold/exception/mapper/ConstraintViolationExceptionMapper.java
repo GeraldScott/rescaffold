@@ -21,7 +21,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
     
     @Override
     public Response toResponse(ConstraintViolationException exception) {
-        log.error("Constraint violation exception caught", exception);
+        log.errorf("Constraint violation exception caught: %s", exception.getClass().getName());
         
         // Get the first violation message for simple error response
         String errorMessage = exception.getConstraintViolations().stream()
@@ -29,6 +29,8 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
             .collect(Collectors.joining("; "));
         
         Map<String, String> errorResponse = Map.of("error", errorMessage);
+        
+        log.errorf("Returning 400 BAD_REQUEST with error: %s", errorMessage);
         
         return Response.status(Response.Status.BAD_REQUEST)
             .entity(errorResponse)

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Path("/genders-ui")
-public class GenderRouter {
+public class GenderRouter extends BaseEntityRouter<Gender> {
 
     private static final Logger log = Logger.getLogger(GenderRouter.class);
 
@@ -79,17 +79,21 @@ public class GenderRouter {
                                          @FormParam("description") String description) {
         log.debugf("POST /genders-ui - create with code: %s", code);
 
-        // Note: Form data preservation will be handled by exception mapper
-
         Gender gender = new Gender();
         gender.code = code;
         gender.description = description;
 
-        genderService.createGender(gender);
-
-        List<Gender> genderList = genderService.listSorted();
-        String html = Templates.gender(genderList, null, null).getFragment("table").data("genders", genderList).render();
-        return Response.ok(html).build();
+        try {
+            genderService.createGender(gender);
+            
+            // Success - return to table view
+            List<Gender> genderList = genderService.listSorted();
+            String html = Templates.gender(genderList, null, null).getFragment("table").data("genders", genderList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            // Error - re-render form with preserved data and error message
+            return handleEntityFormException(e, gender, "creating gender", "create");
+        }
     }
 
     @GET
@@ -116,17 +120,22 @@ public class GenderRouter {
                                          @FormParam("description") String description) {
         log.debugf("PUT /genders-ui/%s - update with code: %s", id, code);
 
-        // Note: Form data preservation will be handled by exception mapper
-
         Gender updateGender = new Gender();
+        updateGender.id = id; // Set ID for template rendering
         updateGender.code = code;
         updateGender.description = description;
 
-        genderService.updateGender(id, updateGender);
-
-        List<Gender> genderList = genderService.listSorted();
-        String html = Templates.gender(genderList, null, null).getFragment("table").data("genders", genderList).render();
-        return Response.ok(html).build();
+        try {
+            genderService.updateGender(id, updateGender);
+            
+            // Success - return to table view
+            List<Gender> genderList = genderService.listSorted();
+            String html = Templates.gender(genderList, null, null).getFragment("table").data("genders", genderList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            // Error - re-render form with preserved data and error message
+            return handleEntityFormException(e, updateGender, "updating gender " + id, "edit");
+        }
     }
 
     @GET
@@ -150,11 +159,34 @@ public class GenderRouter {
     public Response deleteGenderFromForm(@PathParam("id") Long id) {
         log.debugf("DELETE /genders-ui/%s", id);
 
-        genderService.deleteGender(id);
+        try {
+            genderService.deleteGender(id);
+            List<Gender> genderList = genderService.listSorted();
+            String html = Templates.gender(genderList, null, null).getFragment("table").data("genders", genderList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            return handleEntityDeleteException(e, "deleting gender " + id);
+        }
+    }
 
+    @Override
+    protected String renderFragment(String fragmentName, Gender entity, String errorMessage) {
         List<Gender> genderList = genderService.listSorted();
-        String html = Templates.gender(genderList, null, null).getFragment("table").data("genders", genderList).render();
-        return Response.ok(html).build();
+        return Templates.gender(genderList, entity, errorMessage)
+            .getFragment(fragmentName)
+            .data("gender", entity)
+            .data("errorMessage", errorMessage)
+            .render();
+    }
+
+    @Override
+    protected String renderTableWithError(String errorMessage) {
+        List<Gender> genderList = genderService.listSorted();
+        return Templates.gender(genderList, null, errorMessage)
+            .getFragment("table")
+            .data("genders", genderList)
+            .data("errorMessage", errorMessage)
+            .render();
     }
 
 }

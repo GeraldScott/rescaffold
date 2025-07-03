@@ -6,8 +6,8 @@ import io.archton.scaffold.exception.ValidationException;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.Location;
 import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -21,14 +21,17 @@ import java.util.stream.Collectors;
 
 /**
  * Unified exception mapper that handles both JSON and HTML responses
- * based on the request's Accept header. Replaces both GenericExceptionMapper
- * and WebErrorHandler functionality.
+ * based on the request's Accept header. This mapper should primarily handle
+ * API requests and navigation errors, as form submissions are handled by
+ * the BaseEntityRouter in each web controller.
  */
 @Provider
 public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
     
     private static final Logger log = Logger.getLogger(UnifiedExceptionMapper.class);
     
+    @Context
+    HttpHeaders headers;
     
     @Inject
     @Location("components/error-alert")
@@ -36,6 +39,9 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
     
     @Override
     public Response toResponse(Exception exception) {
+        // Log for debugging purposes
+        log.debugf("UnifiedExceptionMapper handling exception: %s", exception.getClass().getSimpleName());
+        
         // Determine if this is an HTML request
         if (acceptsHtml()) {
             return handleHtmlError(exception);
@@ -45,16 +51,30 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
     }
     
     private boolean acceptsHtml() {
-        // For now, assume HTML requests based on exception context
-        // In production, you could check thread-local request context
-        return true; // Simplified for this refactoring
+        if (headers == null) {
+            // Fallback to JSON if headers not available
+            return false;
+        }
+        
+        // Check Accept header to determine response type
+        String acceptHeader = headers.getHeaderString(HttpHeaders.ACCEPT);
+        if (acceptHeader == null) {
+            return false;
+        }
+        
+        // Check if client accepts HTML more than JSON
+        return acceptHeader.contains(MediaType.TEXT_HTML) && 
+               (!acceptHeader.contains(MediaType.APPLICATION_JSON) || 
+                acceptHeader.indexOf(MediaType.TEXT_HTML) < acceptHeader.indexOf(MediaType.APPLICATION_JSON));
     }
     
     /**
-     * Handle errors for HTML/HTMX requests
+     * Handle errors for HTML/HTMX requests.
+     * Note: Form submissions should be handled by BaseEntityRouter in the web controllers.
+     * This method primarily handles navigation errors and other non-form exceptions.
      */
     private Response handleHtmlError(Exception exception) {
-        logError("HTML error", exception);
+        logError("HTML error (non-form)", exception);
         
         String userMessage = getUserFriendlyMessage(exception);
         String html = errorAlertTemplate.data("errorMessage", userMessage).render();
@@ -63,7 +83,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
         
         // For validation errors, return 200 for better HTMX handling
         if (exception instanceof ValidationException || 
-            exception instanceof ConstraintViolationException ||
             exception instanceof DuplicateEntityException ||
             exception instanceof IllegalArgumentException) {
             return Response.ok(html).build();
@@ -84,8 +103,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
             return handleDuplicateEntityException((DuplicateEntityException) exception);
         } else if (exception instanceof ValidationException) {
             return handleValidationException((ValidationException) exception);
-        } else if (exception instanceof ConstraintViolationException) {
-            return handleConstraintViolationException((ConstraintViolationException) exception);
         } else if (exception instanceof IllegalArgumentException) {
             return handleIllegalArgumentException((IllegalArgumentException) exception);
         } else {
@@ -107,13 +124,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
             ValidationException val = (ValidationException) e;
             if (val.getErrors().size() == 1) {
                 return val.getErrors().values().iterator().next();
-            }
-            return "Please correct the validation errors and try again.";
-        } else if (e instanceof ConstraintViolationException) {
-            ConstraintViolationException cve = (ConstraintViolationException) e;
-            Map<String, String> errors = getValidationErrors(cve);
-            if (errors.size() == 1) {
-                return errors.values().iterator().next();
             }
             return "Please correct the validation errors and try again.";
         } else if (e instanceof IllegalArgumentException) {
@@ -142,17 +152,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
         }
     }
     
-    /**
-     * Extract validation errors from ConstraintViolationException
-     */
-    private Map<String, String> getValidationErrors(ConstraintViolationException e) {
-        return e.getConstraintViolations().stream()
-            .collect(Collectors.toMap(
-                violation -> violation.getPropertyPath().toString(),
-                ConstraintViolation::getMessage,
-                (existing, replacement) -> existing + "; " + replacement
-            ));
-    }
     
     /**
      * Get appropriate HTTP status for exception type
@@ -163,7 +162,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
         } else if (exception instanceof DuplicateEntityException) {
             return Response.Status.CONFLICT;
         } else if (exception instanceof ValidationException || 
-                   exception instanceof ConstraintViolationException ||
                    exception instanceof IllegalArgumentException) {
             return Response.Status.BAD_REQUEST;
         } else {
@@ -178,7 +176,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
         if (e instanceof EntityNotFoundException || 
             e instanceof DuplicateEntityException ||
             e instanceof ValidationException ||
-            e instanceof ConstraintViolationException ||
             e instanceof IllegalArgumentException) {
             log.warn(context + ": " + e.getMessage());
         } else {
@@ -231,18 +228,6 @@ public class UnifiedExceptionMapper implements ExceptionMapper<Exception> {
             .build();
     }
     
-    private Response handleConstraintViolationException(ConstraintViolationException e) {
-        // Get the first violation message for simple error response (for test compatibility)
-        String errorMessage = e.getConstraintViolations().stream()
-            .map(ConstraintViolation::getMessage)
-            .collect(Collectors.joining("; "));
-        
-        Map<String, String> errorResponse = Map.of("error", errorMessage);
-        
-        return Response.status(Response.Status.BAD_REQUEST)
-            .entity(errorResponse)
-            .build();
-    }
     
     private Response handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, Object> errorResponse = createErrorResponse(

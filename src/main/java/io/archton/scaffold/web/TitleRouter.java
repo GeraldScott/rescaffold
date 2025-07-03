@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Path("/titles-ui")
-public class TitleRouter {
+public class TitleRouter extends BaseEntityRouter<Title> {
 
     private static final Logger log = Logger.getLogger(TitleRouter.class);
 
@@ -79,17 +79,21 @@ public class TitleRouter {
                                        @FormParam("description") String description) {
         log.debugf("POST /titles-ui - create with code: %s", code);
 
-        // Note: Form data preservation will be handled by exception mapper
-
         Title title = new Title();
         title.code = code;
         title.description = description;
 
-        titleService.createTitle(title);
-
-        List<Title> titleList = titleService.listSorted();
-        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
-        return Response.ok(html).build();
+        try {
+            titleService.createTitle(title);
+            
+            // Success - return to table view
+            List<Title> titleList = titleService.listSorted();
+            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            // Error - re-render form with preserved data and error message
+            return handleEntityFormException(e, title, "creating title", "create");
+        }
     }
 
     @GET
@@ -116,17 +120,22 @@ public class TitleRouter {
                                        @FormParam("description") String description) {
         log.debugf("PUT /titles-ui/%s - update with code: %s", id, code);
 
-        // Note: Form data preservation will be handled by exception mapper
-
         Title updateTitle = new Title();
+        updateTitle.id = id; // Set ID for template rendering
         updateTitle.code = code;
         updateTitle.description = description;
 
-        titleService.updateTitle(id, updateTitle);
-
-        List<Title> titleList = titleService.listSorted();
-        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
-        return Response.ok(html).build();
+        try {
+            titleService.updateTitle(id, updateTitle);
+            
+            // Success - return to table view
+            List<Title> titleList = titleService.listSorted();
+            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            // Error - re-render form with preserved data and error message
+            return handleEntityFormException(e, updateTitle, "updating title " + id, "edit");
+        }
     }
 
     @GET
@@ -150,11 +159,34 @@ public class TitleRouter {
     public Response deleteTitleFromForm(@PathParam("id") Long id) {
         log.debugf("DELETE /titles-ui/%s", id);
 
-        titleService.deleteTitle(id);
+        try {
+            titleService.deleteTitle(id);
+            List<Title> titleList = titleService.listSorted();
+            String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
+            return Response.ok(html).build();
+        } catch (Exception e) {
+            return handleEntityDeleteException(e, "deleting title " + id);
+        }
+    }
 
+    @Override
+    protected String renderFragment(String fragmentName, Title entity, String errorMessage) {
         List<Title> titleList = titleService.listSorted();
-        String html = Templates.title(titleList, null, null).getFragment("table").data("titles", titleList).render();
-        return Response.ok(html).build();
+        return Templates.title(titleList, entity, errorMessage)
+            .getFragment(fragmentName)
+            .data("title", entity)
+            .data("errorMessage", errorMessage)
+            .render();
+    }
+
+    @Override
+    protected String renderTableWithError(String errorMessage) {
+        List<Title> titleList = titleService.listSorted();
+        return Templates.title(titleList, null, errorMessage)
+            .getFragment("table")
+            .data("titles", titleList)
+            .data("errorMessage", errorMessage)
+            .render();
     }
 
 }
