@@ -23,20 +23,9 @@ public class GenderRouter {
     GenderService genderService;
 
 
-    @CheckedTemplate(basePath = "gender")
+    @CheckedTemplate
     public static class Templates {
-        public static native TemplateInstance genders(List<Gender> genders);
-
-        public static native TemplateInstance table(List<Gender> genders);
-
-        public static native TemplateInstance view(Gender gender);
-
-        public static native TemplateInstance create(Gender gender, String errorMessage);
-
-        public static native TemplateInstance edit(Gender gender, String errorMessage);
-
-        public static native TemplateInstance delete(Gender gender);
-
+        public static native TemplateInstance gender(List<Gender> genders, Gender gender, String errorMessage);
     }
 
     @GET
@@ -44,7 +33,7 @@ public class GenderRouter {
     public String get() {
         log.debug("GET /genders-ui");
         List<Gender> genderList = genderService.listSorted();
-        return Templates.genders(genderList).render();
+        return Templates.gender(genderList, null, null).render();
     }
 
     @GET
@@ -53,7 +42,7 @@ public class GenderRouter {
     public Response getGenderTable() {
         log.debug("GET /genders-ui/table");
         List<Gender> genderList = genderService.listSorted();
-        String html = Templates.table(genderList).render();
+        String html = Templates.gender(genderList, null, null).getFragment("table").render();
         return Response.ok(html).build();
     }
 
@@ -69,7 +58,7 @@ public class GenderRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.view(genderOpt.get()).render();
+            String html = Templates.gender(null, genderOpt.get(), null).getFragment("view").render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving gender for view", e);
@@ -83,7 +72,7 @@ public class GenderRouter {
     public Response getGenderCreate() {
         log.debug("GET /genders-ui/create");
 
-        String html = Templates.create(null, null).render();
+        String html = Templates.gender(null, null, null).getFragment("create").render();
         return Response.ok(html).build();
     }
 
@@ -102,7 +91,7 @@ public class GenderRouter {
             genderService.createGender(gender);
 
             List<Gender> genderList = genderService.listSorted();
-            String html = Templates.table(genderList).render();
+            String html = Templates.gender(genderList, null, null).getFragment("table").render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error creating gender", e);
@@ -112,7 +101,7 @@ public class GenderRouter {
             formData.code = code;
             formData.description = description;
             
-            String html = Templates.create(formData, errorMessage).render();
+            String html = Templates.gender(null, formData, errorMessage).getFragment("create").render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }
@@ -129,7 +118,7 @@ public class GenderRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.edit(genderOpt.get(), null).render();
+            String html = Templates.gender(null, genderOpt.get(), null).getFragment("edit").render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving gender for edit", e);
@@ -154,7 +143,7 @@ public class GenderRouter {
             genderService.updateGender(id, updateGender);
 
             List<Gender> genderList = genderService.listSorted();
-            String html = Templates.table(genderList).render();
+            String html = Templates.gender(genderList, null, null).getFragment("table").render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error updating gender", e);
@@ -166,7 +155,7 @@ public class GenderRouter {
             formData.description = description;
             
             String errorMessage = WebErrorHandler.getUserFriendlyMessage(e);
-            String html = Templates.edit(formData, errorMessage).render();
+            String html = Templates.gender(null, formData, errorMessage).getFragment("edit").render();
             return WebErrorHandler.createErrorResponse(html, e);
         }
     }
@@ -183,7 +172,7 @@ public class GenderRouter {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String html = Templates.delete(genderOpt.get()).render();
+            String html = Templates.gender(null, genderOpt.get(), null).getFragment("delete").render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error retrieving gender for delete", e);
@@ -201,7 +190,7 @@ public class GenderRouter {
             genderService.deleteGender(id);
 
             List<Gender> genderList = genderService.listSorted();
-            String html = Templates.table(genderList).render();
+            String html = Templates.gender(genderList, null, null).getFragment("table").render();
             return Response.ok(html).build();
         } catch (Exception e) {
             WebErrorHandler.logError("Error deleting gender", e);
