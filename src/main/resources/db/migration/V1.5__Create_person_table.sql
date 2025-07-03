@@ -2,7 +2,7 @@ create table person (
     id bigint unique generated always as identity,
     first_name varchar,
     last_name varchar not null,
-    email varchar unique,
+    email varchar not null unique,
     gender_id bigint,
     title_id bigint,
     created_by varchar not null default 'system',

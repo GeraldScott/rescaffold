@@ -26,6 +26,7 @@ public class Person {
     public String lastName;
 
     @Column(name = "email", unique = true)
+    @NotNull(message = "Person email is required")
     @Email(message = "Person email must be valid")
     @Size(max = 255, message = "Person email must not exceed 255 characters")
     public String email;
