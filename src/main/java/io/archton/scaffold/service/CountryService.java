@@ -1,6 +1,7 @@
 package io.archton.scaffold.service;
 
 import io.archton.scaffold.domain.Country;
+import io.archton.scaffold.exception.DuplicateEntityException;
 import io.archton.scaffold.repository.CountryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -148,28 +149,28 @@ public class CountryService {
 
     private void checkDuplicateCode(String code) {
         if (countryRepository.findByCode(code) != null) {
-            throw new IllegalArgumentException("Country with code '" + code + "' already exists");
+            throw new DuplicateEntityException("Country", "code", code);
         }
     }
 
     private void checkDuplicateName(String name) {
         Country existing = countryRepository.findByName(name);
         if (existing != null) {
-            throw new IllegalArgumentException("Country with name '" + name + "' already exists");
+            throw new DuplicateEntityException("Country", "name", name);
         }
     }
 
     private void checkDuplicateCodeForUpdate(String code, Long excludeId) {
         Country existing = countryRepository.findByCodeExcludingId(code, excludeId);
         if (existing != null) {
-            throw new IllegalArgumentException("Another country with code '" + code + "' already exists");
+            throw new DuplicateEntityException("Country", "code", code, "update");
         }
     }
 
     private void checkDuplicateNameForUpdate(String name, Long excludeId) {
         Country existing = countryRepository.findByNameExcludingId(name, excludeId);
         if (existing != null) {
-            throw new IllegalArgumentException("Another country with name '" + name + "' already exists");
+            throw new DuplicateEntityException("Country", "name", name, "update");
         }
     }
 }
