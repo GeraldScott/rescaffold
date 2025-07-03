@@ -139,7 +139,7 @@ class GenderResourceTest {
         gender.code = null;
         gender.description = "No Code";
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender code is required"));
     }
 
     @Test
@@ -150,7 +150,7 @@ class GenderResourceTest {
         gender.code = "";
         gender.description = "Empty Code";
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender code is required"));
     }
 
     @Test
@@ -159,7 +159,7 @@ class GenderResourceTest {
     void testCreateGender_MultiCharCode() {
         Gender gender = createInvalidGenderWithMultiCharCode();
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender code must be exactly 1 character"));
     }
 
     @Test
@@ -168,7 +168,7 @@ class GenderResourceTest {
     void testCreateGender_NumericCode() {
         Gender gender = createInvalidGenderWithNumericCode();
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender code must be a single uppercase alphabetic character"));
     }
 
     @Test
@@ -179,7 +179,7 @@ class GenderResourceTest {
         gender.code = "T";
         gender.description = null;
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender description is required"));
     }
 
     @Test
@@ -190,7 +190,7 @@ class GenderResourceTest {
         gender.code = "T";
         gender.description = "";
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender description is required"));
     }
 
     @Test
@@ -201,7 +201,7 @@ class GenderResourceTest {
         gender.code = "T";
         gender.description = "   ";
 
-        given().spec(requestSpec).body(gender).when().post().then().statusCode(400);
+        given().spec(requestSpec).body(gender).when().post().then().statusCode(400).body("error", containsString("Gender description is required"));
     }
 
     @Test
